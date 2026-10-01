@@ -4,13 +4,15 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   label: string
   hint?: string
   error?: string
+  /** Short values (a count, a time) get a short input; the hint under it keeps the full width. */
+  narrow?: boolean
 }
 
 const INPUT =
   'h-11 w-full rounded-md border bg-white px-3 text-base text-ink placeholder:text-ink-soft/70 ' +
   'focus-visible:border-lapis focus-visible:outline-2 focus-visible:outline-lapis/30 focus-visible:outline-offset-0'
 
-export function Field({ label, hint, error, type, className = '', ...input }: FieldProps) {
+export function Field({ label, hint, error, narrow, type, className = '', ...input }: FieldProps) {
   const id = useId()
   const [shown, setShown] = useState(false)
   const isPassword = type === 'password'
@@ -21,7 +23,7 @@ export function Field({ label, hint, error, type, className = '', ...input }: Fi
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
         {label}
       </label>
-      <div className="relative">
+      <div className={`relative ${narrow ? 'w-40' : ''}`}>
         <input
           {...input}
           id={id}

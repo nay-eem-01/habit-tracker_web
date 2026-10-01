@@ -1,0 +1,187 @@
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { archiveHabit, listHabits, unarchiveHabit, type Habit } from '../api/habits'
+import { habitErrorMessage } from '../api/messages'
+import { describeSchedule } from './form'
+
+const BUTTON = 'rounded-md border border-mist px-3 py-1.5 text-sm font-medium hover:border-ink-soft disabled:opacity-60'
+
+type Notice = { kind: 'archived' | 'restored'; habit: Habit }
+
+export default function HabitsPage() {
+  const queryClient = useQueryClient()
+  const [archived, setArchived] = useState(false)
+  const [page, setPage] = useState(0)
+  const [notice, setNotice] = useState<Notice | null>(null)
+
+  const habits = useQuery({
+    queryKey: ['habits', { archived, page }],
+    queryFn: () => listHabits({ archived, page }),
+    placeholderData: keepPreviousData,
+  })
+
+  // taking the only habit off a later page would leave that page empty: step back first
+  const refresh = () => {
+    if (page > 0 && habits.data?.content.length === 1) setPage(page - 1)
+    return queryClient.invalidateQueries({ queryKey: ['habits'] })
+  }
+  const archive = useMutation({
+    mutationFn: archiveHabit,
+    onSuccess: (habit) => {
+      setNotice({ kind: 'archived', habit })
+      return refresh()
+    },
+  })
+  const restore = useMutation({
+    mutationFn: unarchiveHabit,
+    onSuccess: (habit) => {
+      setNotice({ kind: 'restored', habit })
+      return refresh()
+    },
+  })
+
+  const showTab = (next: boolean) => {
+    setArchived(next)
+    setPage(0)
+    setNotice(null)
+  }
+
+  const failure = archive.error ?? restore.error
+
+  return (
+    <main className="mx-auto max-w-4xl px-6 py-10">
+      <div className="flex items-end justify-between gap-4">
+        <h1 className="font-display text-4xl font-semibold tracking-tight">Habits</h1>
+        <Link
+          to="/habits/new"
+          className="inline-flex h-11 items-center rounded-md bg-lapis px-5 font-medium text-white hover:bg-lapis-deep"
+        >
+          New habit
+        </Link>
+      </div>
+
+      <div className="mt-6 flex gap-6 border-b border-mist">
+        {[
+          { label: 'Active', value: false },
+          { label: 'Archived', value: true },
+        ].map((tab) => (
+          <button
+            key={tab.label}
+            type="button"
+            onClick={() => showTab(tab.value)}
+            aria-current={archived === tab.value ? 'true' : undefined}
+            className={`-mb-px border-b-2 pb-2 font-medium ${
+              archived === tab.value ? 'border-lapis text-ink' : 'border-transparent text-ink-soft hover:text-ink'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {notice && (
+        <p role="status" className="mt-4 flex items-center gap-3 text-sm">
+          <span>
+            {notice.kind === 'archived' ? 'Archived' : 'Restored'} “{notice.habit.name}”.
+          </span>
+          {notice.kind === 'archived' && (
+            <button
+              type="button"
+              onClick={() => restore.mutate(notice.habit.id)}
+              className="font-medium text-lapis underline underline-offset-2"
+            >
+              Undo
+            </button>
+          )}
+        </p>
+      )}
+      {failure && (
+        <p role="alert" className="mt-4 text-sm text-alert">
+          {habitErrorMessage(failure)}
+        </p>
+      )}
+
+      {habits.isPending ? (
+        <p role="status" className="mt-8 text-ink-soft">
+          Loading habits…
+        </p>
+      ) : habits.isError ? (
+        <div className="mt-8">
+          <p role="alert" className="text-alert">
+            {habitErrorMessage(habits.error)}
+          </p>
+          <button type="button" onClick={() => habits.refetch()} className={`${BUTTON} mt-3`}>
+            Try again
+          </button>
+        </div>
+      ) : habits.data.content.length === 0 ? (
+        <p className="mt-8 text-ink-soft">
+          {archived ? 'No archived habits.' : 'Nothing here yet. Add the first habit you want to keep.'}
+        </p>
+      ) : (
+        <>
+          <ul className="mt-2">
+            {habits.data.content.map((habit) => (
+              <li key={habit.id} className="flex items-start justify-between gap-4 border-b border-mist py-4">
+                <div className="min-w-0">
+                  <h2 className="font-display text-xl font-semibold tracking-tight">{habit.name}</h2>
+                  <p className="mt-1 flex flex-wrap gap-x-4 text-sm text-ink-soft">
+                    {habit.category && <span>{habit.category}</span>}
+                    <span>{describeSchedule(habit)}</span>
+                    {habit.targetCount > 1 && <span>{habit.targetCount} times a day</span>}
+                    {habit.reminderTime && <span>Reminder at {habit.reminderTime}</span>}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Link to={`/habits/${habit.id}/edit`} aria-label={`Edit ${habit.name}`} className={BUTTON}>
+                    Edit
+                  </Link>
+                  {habit.archived ? (
+                    <button
+                      type="button"
+                      aria-label={`Restore ${habit.name}`}
+                      disabled={restore.isPending}
+                      onClick={() => restore.mutate(habit.id)}
+                      className={BUTTON}
+                    >
+                      Restore
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label={`Archive ${habit.name}`}
+                      disabled={archive.isPending}
+                      onClick={() => archive.mutate(habit.id)}
+                      className={BUTTON}
+                    >
+                      Archive
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          {habits.data.totalPages > 1 && (
+            <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-sm">
+              <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className={BUTTON}>
+                Previous
+              </button>
+              <span className="text-ink-soft">
+                Page {habits.data.number + 1} of {habits.data.totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page + 1 >= habits.data.totalPages}
+                onClick={() => setPage(page + 1)}
+                className={BUTTON}
+              >
+                Next
+              </button>
+            </nav>
+          )}
+        </>
+      )}
+    </main>
+  )
+}

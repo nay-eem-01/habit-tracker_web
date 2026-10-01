@@ -11,6 +11,7 @@ import { queryClient } from './queryClient'
 const user = { id: 1, email: 'nayeem@example.com', name: 'Nayeem Ahmed', authProvider: 'LOCAL', timezone: 'Asia/Dhaka' }
 const session = { accessToken: 'token-1', tokenType: 'Bearer', expiresIn: 900, user }
 
+const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 20 }
 const ok = (payload: unknown, status = 200) =>
   Response.json({ status: 'OK', success: true, message: 'ok', payload }, { status })
 const fail = (status: number, errorCode: string, fields: Record<string, string> | null = null) =>
@@ -21,7 +22,7 @@ let fetchMock: ReturnType<typeof vi.fn>
 /** Answers each call by URL, so the order the app makes them in doesn't matter. */
 function routes(handlers: Record<string, () => Response>) {
   fetchMock.mockImplementation(async (url: string) => {
-    const handler = handlers[url]
+    const handler = handlers[url.split('?')[0]]
     if (!handler) throw new Error(`unexpected request: ${url}`)
     return handler()
   })
@@ -57,9 +58,9 @@ describe('protected pages', () => {
   })
 
   it('open straight away when the refresh cookie is still good', async () => {
-    routes({ '/api/auth/refresh': () => ok(session) })
+    routes({ '/api/auth/refresh': () => ok(session), '/api/habits': () => ok(emptyPage) })
     renderApp('/')
-    expect(await screen.findByRole('heading', { name: 'Hi, Nayeem' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
   })
 
   it('show the sign-in page, not a blank screen, when the server is down', async () => {
@@ -74,6 +75,7 @@ describe('signing in', () => {
     routes({
       '/api/auth/refresh': () => fail(401, 'AUTH_INVALID_REFRESH_TOKEN'),
       '/api/auth/login': () => ok(session),
+      '/api/habits': () => ok(emptyPage),
     })
     renderApp('/signin')
     const input = userEvent.setup()
@@ -82,7 +84,7 @@ describe('signing in', () => {
     await input.type(screen.getByLabelText('Password'), 'correct horse')
     await input.click(screen.getByRole('button', { name: 'Sign in' }))
 
-    expect(await screen.findByRole('heading', { name: 'Hi, Nayeem' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
     expect(getAccessToken()).toBe('token-1')
     const login = fetchMock.mock.calls.find(([url]) => url === '/api/auth/login')!
     expect(JSON.parse(login[1].body)).toEqual({ email: 'nayeem@example.com', password: 'correct horse' })
@@ -109,6 +111,7 @@ describe('registering', () => {
     routes({
       '/api/auth/refresh': () => fail(401, 'AUTH_INVALID_REFRESH_TOKEN'),
       '/api/auth/register': () => ok(session, 201),
+      '/api/habits': () => ok(emptyPage),
     })
     renderApp('/register')
     const input = userEvent.setup()
@@ -118,7 +121,7 @@ describe('registering', () => {
     await input.type(screen.getByLabelText('Password'), 'long enough')
     await input.click(screen.getByRole('button', { name: 'Create account' }))
 
-    expect(await screen.findByRole('heading', { name: 'Hi, Nayeem' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
     const call = fetchMock.mock.calls.find(([url]) => url === '/api/auth/register')!
     expect(JSON.parse(call[1].body)).toMatchObject({
       name: 'Nayeem Ahmed',
@@ -166,6 +169,7 @@ describe('signing out', () => {
     routes({
       '/api/auth/refresh': () => ok(session),
       '/api/auth/logout': () => new Response(null, { status: 204 }),
+      '/api/habits': () => ok(emptyPage),
     })
     renderApp('/')
     const input = userEvent.setup()

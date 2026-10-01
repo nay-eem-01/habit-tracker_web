@@ -11,8 +11,10 @@ npm run dev        # http://localhost:5173
 ```
 
 The backend must be running on `localhost:8080`. In development Vite proxies `/api` to it, so the
-browser sees one origin: no CORS, and the refresh cookie (`SameSite=Strict`, `Path=/api/auth`) works
-as it will in production. For a split deploy set `VITE_API_BASE_URL`; otherwise serve the app and
+browser sees one origin and the refresh cookie (`SameSite=Strict`, `Path=/api/auth`) works as it will
+in production. The proxy also drops the `Origin` header — the backend only allows its configured CORS
+origins (default `http://localhost:3000`) and would answer 403 "Invalid CORS request" on any other dev
+port. For a split deploy set `VITE_API_BASE_URL`; otherwise serve the app and
 the API under one domain.
 
 ## Scripts
