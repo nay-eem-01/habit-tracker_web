@@ -60,7 +60,7 @@ describe('protected pages', () => {
   it('open straight away when the refresh cookie is still good', async () => {
     routes({ '/api/auth/refresh': () => ok(session), '/api/habits': () => ok(emptyPage) })
     renderApp('/')
-    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeTruthy()
   })
 
   it('show the sign-in page, not a blank screen, when the server is down', async () => {
@@ -84,7 +84,7 @@ describe('signing in', () => {
     await input.type(screen.getByLabelText('Password'), 'correct horse')
     await input.click(screen.getByRole('button', { name: 'Sign in' }))
 
-    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeTruthy()
     expect(getAccessToken()).toBe('token-1')
     const login = fetchMock.mock.calls.find(([url]) => url === '/api/auth/login')!
     expect(JSON.parse(login[1].body)).toEqual({ email: 'nayeem@example.com', password: 'correct horse' })
@@ -121,7 +121,7 @@ describe('registering', () => {
     await input.type(screen.getByLabelText('Password'), 'long enough')
     await input.click(screen.getByRole('button', { name: 'Create account' }))
 
-    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeTruthy()
     const call = fetchMock.mock.calls.find(([url]) => url === '/api/auth/register')!
     expect(JSON.parse(call[1].body)).toMatchObject({
       name: 'Nayeem Ahmed',

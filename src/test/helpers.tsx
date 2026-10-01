@@ -60,6 +60,8 @@ export function stubApi(handlers: Record<string, Handler>): Call[] {
 export function resetApp() {
   setAccessToken(null)
   queryClient.clear()
+  // no waiting through retries in tests: a failed request should show its error at once
+  queryClient.setDefaultOptions({ queries: { retry: false, staleTime: 0, refetchOnWindowFocus: false } })
 }
 
 export function renderApp(path = '/') {

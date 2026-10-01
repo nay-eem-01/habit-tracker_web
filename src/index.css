@@ -11,6 +11,8 @@
   --color-lapis: #2f4bd8;
   --color-lapis-deep: #22328f;
   --color-ember: #e8892b;
+  /* ember as text: the plain one is too light on chalk */
+  --color-ember-deep: #a24f08;
   --color-alert: #b3261e;
 }
 

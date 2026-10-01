@@ -34,6 +34,10 @@ export function habitErrorMessage(error: unknown): string {
         return "That schedule doesn't work. Pick at least one day, or between 1 and 6 times a week."
       case 'HABIT_NOT_FOUND':
         return "This habit doesn't exist, or it isn't yours."
+      case 'HABIT_ARCHIVED':
+        return 'This habit is archived. Restore it to check in.'
+      case 'LOG_DATE_OUT_OF_RANGE':
+        return "That day can't be checked in."
     }
     if (error.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
   }

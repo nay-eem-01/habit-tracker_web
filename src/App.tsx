@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthProvider'
 import { GuestOnly, RequireAuth } from './auth/guards'
 import HabitFormPage from './habits/HabitFormPage'
 import HabitsPage from './habits/HabitsPage'
+import TodayPage from './today/TodayPage'
 import AppLayout from './pages/AppLayout'
 import RegisterPage from './pages/RegisterPage'
 import SignInPage from './pages/SignInPage'
@@ -17,7 +18,7 @@ export default function App() {
         </Route>
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
-            <Route index element={<Navigate to="/habits" replace />} />
+            <Route index element={<TodayPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/new" element={<HabitFormPage />} />
             <Route path="/habits/:id/edit" element={<HabitFormPage />} />
