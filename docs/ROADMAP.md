@@ -37,8 +37,8 @@ there is no dashboard. Two separate reasons the app feels thin:
 | # | Step | Status |
 |---|---|---|
 | G.0 | **Test pass** against the live backend: register → habits → check-ins → detail → bell, at phone and desktop width. Fix what it finds. | ✅ |
-| G.1 | **Design pass**: a real visual system — type scale, spacing, cards instead of bare lists, habit colour/icon, progress ring on Today, proper empty/loading/error states, nav that works on a phone, motion with `prefers-reduced-motion`. Tokens already exist in `src/index.css` (chalk, ink, lapis, ember). Decide dark mode here. | ⬜ |
-| G.2 | **Dashboard v1** (`/dashboard`, becomes the home page): today's progress, longest current streaks, 7/30-day completion across habits, a 12-week activity grid. Built from existing endpoints (habits list + per-habit `/streak`, `/stats`, `/logs`). | ⬜ |
+| G.1 | **Design pass**: soft surfaces, tactile check-ins, progress banner, empty/loading states, phone nav, dark mode that follows the system (PRs #10–#14). | ✅ |
+| G.2 | **Dashboard v1** (`/dashboard`, the home page; Today moved to `/today`): today's progress, longest current streaks, 7/30-day completion across habits, a 12-week activity grid. Built from existing endpoints (habits list + per-habit `/streak`, `/stats`, `/logs`). | 🔄 |
 | G.3 | **Habit detail, visual**: calendar heatmap of the history, streak and completion shown as charts, not just numbers. | ⬜ |
 
 Notes on G.2: per-habit calls are N+1 and fine for a handful of habits, not for dozens. If it feels

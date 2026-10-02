@@ -74,7 +74,7 @@ const posts = (calls: { method: string; body: unknown }[]) => calls.filter((c) =
 describe('the Today page', () => {
   it("shows the user's date, what is due, and leaves out habits not scheduled today", async () => {
     usualDay()
-    renderApp('/')
+    renderApp('/today')
 
     expect(await screen.findByText('Friday 2 October')).toBeTruthy()
     const todo = (await screen.findByRole('heading', { name: 'To do' })).closest('section')!
@@ -87,7 +87,7 @@ describe('the Today page', () => {
 
   it('shows each streak in its own unit', async () => {
     usualDay()
-    renderApp('/')
+    renderApp('/today')
 
     expect(await screen.findByLabelText('12 day streak')).toBeTruthy()
     expect(await screen.findByLabelText('2 week streak')).toBeTruthy()
@@ -96,7 +96,7 @@ describe('the Today page', () => {
 
   it('reads this week’s logs, from Monday', async () => {
     const calls = usualDay()
-    renderApp('/')
+    renderApp('/today')
     await screen.findByRole('heading', { name: 'To do' })
 
     const request = calls.find((c) => c.path === '/api/habits/1/logs')!
@@ -105,7 +105,7 @@ describe('the Today page', () => {
 
   it('checks a habit in with one tap and moves it to Done at once', async () => {
     const calls = usualDay()
-    renderApp('/')
+    renderApp('/today')
 
     await userEvent.click(await screen.findByRole('button', { name: 'Mark Read done' }))
 
@@ -117,7 +117,7 @@ describe('the Today page', () => {
 
   it('undoes a finished habit by setting its count to 0', async () => {
     const calls = usualDay()
-    renderApp('/')
+    renderApp('/today')
     const input = userEvent.setup()
 
     await input.click(await screen.findByRole('button', { name: 'Mark Read done' }))
@@ -130,7 +130,7 @@ describe('the Today page', () => {
 
   it('adds one at a time for a habit with a daily target, and takes one away', async () => {
     const calls = usualDay()
-    renderApp('/')
+    renderApp('/today')
     const input = userEvent.setup()
 
     await input.click(await screen.findByRole('button', { name: 'Add one for Drink water' }))
@@ -142,7 +142,7 @@ describe('the Today page', () => {
 
   it('puts the tap back and says so when the check-in cannot be saved', async () => {
     usualDay({ 'POST /api/habits/1/checkin': () => fail(409, 'HABIT_ARCHIVED') })
-    renderApp('/')
+    renderApp('/today')
 
     await userEvent.click(await screen.findByRole('button', { name: 'Mark Read done' }))
 
@@ -158,7 +158,7 @@ describe('the Today page', () => {
       'GET /api/habits/1/logs': () => ok(page([log('2026-10-02', 1, true)])),
       'GET /api/habits/1/streak': () => streak(1),
     })
-    renderApp('/')
+    renderApp('/today')
 
     expect(await screen.findByRole('heading', { name: 'All done for today' })).toBeTruthy()
     expect(screen.getByText('1 of 1 done')).toBeTruthy()
@@ -168,20 +168,20 @@ describe('the Today page', () => {
 describe('when there is nothing to check in', () => {
   it('invites the first habit when there are none', async () => {
     stubApi({ ...signedIn, 'GET /api/habits': () => ok(page([])) })
-    renderApp('/')
+    renderApp('/today')
     expect(await screen.findByRole('link', { name: /Add the first one/ })).toBeTruthy()
   })
 
   it('points to all habits when none is scheduled today', async () => {
     stubApi({ ...signedIn, 'GET /api/habits': () => ok(page([gym])), 'GET /api/habits/3/logs': () => ok(page([])) })
-    renderApp('/')
+    renderApp('/today')
     expect(await screen.findByText(/Nothing is scheduled for today/)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'See all habits' })).toBeTruthy()
   })
 
   it('offers a retry when the habits cannot be loaded', async () => {
     stubApi({ ...signedIn, 'GET /api/habits': () => fail(500, 'INTERNAL_ERROR') })
-    renderApp('/')
+    renderApp('/today')
     expect((await screen.findByRole('alert')).textContent).toContain('went wrong on our side')
     expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy()
   })

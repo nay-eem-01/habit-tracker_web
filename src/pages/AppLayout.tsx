@@ -44,7 +44,8 @@ export default function AppLayout() {
             className="order-last flex w-full gap-1 rounded-full bg-mist/45 p-1 font-medium sm:order-none sm:w-auto"
           >
             {[
-              { to: '/', label: 'Today', end: true },
+              { to: '/', label: 'Dashboard', end: true },
+              { to: '/today', label: 'Today', end: false },
               { to: '/habits', label: 'Habits', end: false },
             ].map((item) => (
               <NavLink
