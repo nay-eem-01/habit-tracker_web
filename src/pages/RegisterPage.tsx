@@ -33,7 +33,7 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout title="Create your account" intro="Track habits, keep streaks, get reminded.">
-      <form onSubmit={submit} className="flex flex-col gap-5">
+      <form onSubmit={submit} className="stagger flex flex-col gap-5">
         <Field
           label="Name"
           autoComplete="name"
@@ -75,7 +75,7 @@ export default function RegisterPage() {
             )}
           </p>
         )}
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" busy={mutation.isPending}>
           {mutation.isPending ? 'Creating account…' : 'Create account'}
         </Button>
       </form>

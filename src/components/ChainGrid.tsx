@@ -15,15 +15,15 @@ function cellAt(index: number): Cell {
 }
 
 const STYLES: Record<Cell, string> = {
-  done: 'bg-white/90',
-  missed: 'bg-white/15',
-  today: 'bg-ember ring-2 ring-ember/40 ring-offset-2 ring-offset-lapis-deep',
+  done: 'bg-white/85',
+  missed: 'bg-white/12',
+  today: 'chain-today bg-ember',
   future: 'invisible',
 }
 
 /**
  * The streak chain: one square per day, weeks as columns, the current run unbroken up to today.
- * Decorative only — it says nothing a screen reader needs.
+ * Decorative only, it says nothing a screen reader needs.
  */
 export function ChainGrid() {
   return (
@@ -35,7 +35,7 @@ export function ChainGrid() {
       {Array.from({ length: WEEKS * DAYS }, (_, index) => (
         <span
           key={index}
-          className={`chain-cell aspect-square rounded-[3px] ${STYLES[cellAt(index)]}`}
+          className={`chain-cell aspect-square rounded-[4px] ${STYLES[cellAt(index)]}`}
           style={{ animationDelay: `${Math.floor(index / DAYS) * 45}ms` }}
         />
       ))}

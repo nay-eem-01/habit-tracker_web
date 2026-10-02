@@ -21,7 +21,7 @@ export default function SignInPage() {
 
   return (
     <AuthLayout title="Sign in" intro="Your streaks are where you left them.">
-      <form onSubmit={submit} className="flex flex-col gap-5">
+      <form onSubmit={submit} className="stagger flex flex-col gap-5">
         <Field
           label="Email"
           type="email"
@@ -45,7 +45,7 @@ export default function SignInPage() {
             {authErrorMessage(mutation.error)}
           </p>
         )}
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" busy={mutation.isPending}>
           {mutation.isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
