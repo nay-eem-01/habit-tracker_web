@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { GuestOnly, RequireAuth } from './auth/guards'
 import DashboardPage from './dashboard/DashboardPage'
+import GoalFormPage from './goals/GoalFormPage'
+import GoalsPage from './goals/GoalsPage'
 import HabitDetailPage from './habits/HabitDetailPage'
 import HabitFormPage from './habits/HabitFormPage'
 import HabitsPage from './habits/HabitsPage'
@@ -26,6 +28,9 @@ export default function App() {
             <Route path="/habits/new" element={<HabitFormPage />} />
             <Route path="/habits/:id" element={<HabitDetailPage />} />
             <Route path="/habits/:id/edit" element={<HabitFormPage />} />
+            <Route path="/goals" element={<GoalsPage />} />
+            <Route path="/goals/new" element={<GoalFormPage />} />
+            <Route path="/goals/:id/edit" element={<GoalFormPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
