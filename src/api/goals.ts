@@ -39,3 +39,38 @@ export function createGoal(request: GoalRequest): Promise<Goal> {
 export function updateGoal(id: number, request: GoalRequest): Promise<Goal> {
   return api(`/api/goals/${id}`, { method: 'PUT', body: request })
 }
+
+/** Marks it achieved; repeating is fine, but an abandoned goal can't be (GOAL_ALREADY_CLOSED). */
+export function achieveGoal(id: number): Promise<Goal> {
+  return api(`/api/goals/${id}/achieve`, { method: 'POST' })
+}
+
+/** Gives it up; its habits stay linked. An achieved goal can't be (GOAL_ALREADY_CLOSED). */
+export function abandonGoal(id: number): Promise<Goal> {
+  return api(`/api/goals/${id}/abandon`, { method: 'POST' })
+}
+
+/** One linked habit's share of its goal. */
+export interface HabitGoalProgress {
+  habitId: number
+  name: string
+  /** Archived habits are listed but don't count toward the goal's percent. */
+  archived: boolean
+  /** The day it was linked; done days count from then on. */
+  linkedOn: string
+  doneDays: number
+  goalTargetDays: number
+  /** 0–100, capped at 100. */
+  percent: number
+}
+
+export interface GoalProgress {
+  goalId: number
+  /** 0–100: the average over the linked habits that aren't archived; 0 with none. */
+  percent: number
+  habits: HabitGoalProgress[]
+}
+
+export function getGoalProgress(id: number): Promise<GoalProgress> {
+  return api(`/api/goals/${id}/progress`)
+}

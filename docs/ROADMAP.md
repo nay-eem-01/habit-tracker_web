@@ -12,7 +12,8 @@ needed from the API. Update this file in the same PR that finishes a step.
 ## Where we are (2026-10-03)
 
 **Phase G is done** (G.0–G.3): tested, redesigned with dark mode, a dashboard home page and visual habit
-detail. **M2 goals is under way** now that the backend's goals API is on `staging` (Phase M2 below).
+detail. **M2 goals is done** (M2.1–M2.2) on the backend's goals API. Next frontend work waits on the
+backend again (M3 resources, M4 levels).
 The text below is how it stood before Phase G.
 
 F.1–F.6 are merged: sign in / register, habits (create, edit, archive), Today with one-tap
@@ -54,13 +55,13 @@ adding client-side cleverness. Record the ask in the backend dev log when it is 
 | # | Step | Status |
 |---|---|---|
 | M2.1 | **Goals list and form**: `/goals` with Active / Achieved / Abandoned tabs, deadline in words ("89 days left", "2 days overdue"), create and edit (title, why it matters, optional target date). Goals in the main nav. | ✅ |
-| M2.2 | **Goal detail and progress**: `/goals/:id` with overall progress, per-habit done days against their targets, link / change target / unlink habits, mark achieved or abandon. Progress on each list card; the goal shown on habit detail. | ⬜ |
+| M2.2 | **Goal detail and progress**: `/goals/:id` with overall progress, per-habit done days against their targets, link / change target / unlink habits, mark achieved or abandon. Progress on each list card; the goal shown on habit detail. | ✅ |
 
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |
 |---|---|---|
-| M2 Goals | goals list and detail, link habits to goals, progress | 🔄 Phase M2 above |
+| M2 Goals | goals list and detail, link habits to goals, progress | ✅ Phase M2 above |
 | M3 Resources | resource library per habit/goal | ⏸ |
 | M4 Levels | level, XP bar, level-up moment | ⏸ |
 | M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ⏸ |
