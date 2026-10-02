@@ -126,3 +126,44 @@
     animation-duration: 1.6s;
   }
 }
+
+/* Popovers grow out of their trigger, never from nothing: scale(0.96) + fade, from the corner they hang off. */
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+.pop {
+  transform-origin: top right;
+  animation: pop 160ms var(--ease-out);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drift {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.farewell {
+  animation: fade 220ms ease-out;
+}
+
+.farewell > * {
+  animation: drift 420ms var(--ease-out) 120ms backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop,
+  .farewell > * {
+    animation: none;
+  }
+}

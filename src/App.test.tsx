@@ -174,9 +174,10 @@ describe('signing out', () => {
     renderApp('/')
     const input = userEvent.setup()
 
-    await input.click(await screen.findByRole('button', { name: 'Sign out' }))
+    await input.click(await screen.findByRole('button', { name: /Account/ }))
+    await input.click(screen.getByRole('button', { name: 'Sign out' }))
 
-    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Sign in' }, { timeout: 3000 })).toBeTruthy()
     expect(getAccessToken()).toBeNull()
     expect(fetchMock.mock.calls.some(([url]) => url === '/api/auth/logout')).toBe(true)
   })
