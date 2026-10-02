@@ -26,9 +26,31 @@ export function checkIn(habitId: number, request: CheckInRequest): Promise<Habit
   return api(`/api/habits/${habitId}/checkin`, { method: 'POST', body: request })
 }
 
+/** Completion over the last `days` days. `rate` is 0–1, or null when nothing was expected yet. */
+export interface WindowStats {
+  days: number
+  done: number
+  expected: number
+  rate: number | null
+}
+
+export interface HabitStats {
+  last7Days: WindowStats
+  last30Days: WindowStats
+}
+
 /** Logs from `from` up to today (the server's idea of today, in the user's timezone), newest first. */
-export function listLogs(habitId: number, options: { from: string; size?: number }): Promise<Page<HabitLog>> {
-  return api(`/api/habits/${habitId}/logs`, { params: { from: options.from, size: options.size ?? 10 } })
+export function listLogs(
+  habitId: number,
+  options: { from: string; page?: number; size?: number },
+): Promise<Page<HabitLog>> {
+  return api(`/api/habits/${habitId}/logs`, {
+    params: { from: options.from, page: options.page, size: options.size ?? 10 },
+  })
+}
+
+export function getStats(habitId: number): Promise<HabitStats> {
+  return api(`/api/habits/${habitId}/stats`)
 }
 
 export function getStreak(habitId: number): Promise<Streak> {

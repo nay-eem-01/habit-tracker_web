@@ -19,6 +19,20 @@ function parse(date: string): Date {
   return new Date(`${date}T00:00:00Z`)
 }
 
+/** A day moved by whole days (negative goes back). */
+export function shiftDays(date: string, days: number): string {
+  const d = parse(date)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+/** "Fri 2 Oct", for a row in a history list. */
+export function formatDay(date: string): string {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
+    .format(parse(date))
+    .replace(',', '')
+}
+
 export function weekdayOf(date: string): DayOfWeek {
   return DAYS[parse(date).getUTCDay()]
 }

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { GuestOnly, RequireAuth } from './auth/guards'
+import HabitDetailPage from './habits/HabitDetailPage'
 import HabitFormPage from './habits/HabitFormPage'
 import HabitsPage from './habits/HabitsPage'
 import TodayPage from './today/TodayPage'
@@ -21,6 +22,7 @@ export default function App() {
             <Route index element={<TodayPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/new" element={<HabitFormPage />} />
+            <Route path="/habits/:id" element={<HabitDetailPage />} />
             <Route path="/habits/:id/edit" element={<HabitFormPage />} />
           </Route>
         </Route>
