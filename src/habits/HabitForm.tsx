@@ -102,7 +102,7 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
                     aria-label={long}
                     onClick={() => toggleDay(day)}
                     className={`h-10 min-w-12 rounded-xl border px-3 transition-[transform,background-color,border-color] duration-150 ease-out active:scale-95 text-sm font-medium ${
-                      on ? 'border-lapis bg-lapis text-white' : 'border-mist bg-white hover:border-ink-soft'
+                      on ? 'border-lapis bg-lapis text-white' : 'border-mist bg-surface hover:border-ink-soft'
                     }`}
                   >
                     {short}
@@ -183,7 +183,7 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
         <Button type="submit" busy={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>
-        <Link to="/habits" className="font-medium text-lapis underline underline-offset-2">
+        <Link to="/habits" className="font-medium text-link underline underline-offset-2">
           Cancel
         </Link>
       </div>

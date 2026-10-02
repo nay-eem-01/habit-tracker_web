@@ -1,6 +1,13 @@
-import { SignOut } from '@phosphor-icons/react'
+import { Desktop, Moon, SignOut, Sun } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import type { AuthUser } from '../api/client'
+import { getTheme, setTheme, type Theme } from '../theme'
+
+const THEMES = [
+  { value: 'light', label: 'Light', Icon: Sun },
+  { value: 'system', label: 'System', Icon: Desktop },
+  { value: 'dark', label: 'Dark', Icon: Moon },
+] as const
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -12,6 +19,7 @@ function initials(name: string): string {
 export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () => void }) {
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
+  const [theme, setThemeState] = useState<Theme>(getTheme)
 
   useEffect(() => {
     if (!open) return
@@ -43,11 +51,31 @@ export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () =>
         <section
           id="user-menu"
           aria-label="Account"
-          className="pop absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-mist bg-white p-2 shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)]"
+          className="pop absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-mist bg-surface p-2 shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)]"
         >
           <div className="px-3 pt-2 pb-3">
             <p className="truncate font-display text-lg font-semibold tracking-tight">{user.name}</p>
             <p className="truncate text-sm text-ink-soft">{user.email}</p>
+          </div>
+          <div role="group" aria-label="Theme" className="mx-1 mb-2 flex gap-1 rounded-full bg-mist/45 p-1">
+            {THEMES.map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={theme === value}
+                aria-label={label}
+                title={label}
+                onClick={() => {
+                  setTheme(value)
+                  setThemeState(value)
+                }}
+                className={`grid h-8 flex-1 place-items-center rounded-full transition-[background-color,color,transform] duration-200 ease-out active:scale-95 ${
+                  theme === value ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(0_0_0/0.18)]' : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                <Icon size={18} weight="bold" aria-hidden="true" />
+              </button>
+            ))}
           </div>
           <button
             type="button"

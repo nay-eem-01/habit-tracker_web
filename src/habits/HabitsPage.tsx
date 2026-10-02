@@ -74,7 +74,7 @@ export default function HabitsPage() {
             onClick={() => showTab(tab.value)}
             aria-current={archived === tab.value ? 'true' : undefined}
             className={`rounded-full px-5 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out ${
-              archived === tab.value ? 'bg-white text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+              archived === tab.value ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
             }`}
           >
             {tab.label}
@@ -91,7 +91,7 @@ export default function HabitsPage() {
             <button
               type="button"
               onClick={() => restore.mutate(notice.habit.id)}
-              className="font-medium text-lapis underline underline-offset-2"
+              className="font-medium text-link underline underline-offset-2"
             >
               Undo
             </button>
@@ -122,9 +122,9 @@ export default function HabitsPage() {
       ) : habits.data.content.length === 0 ? (
         <div className="mt-6 flex flex-col items-center rounded-3xl border border-dashed border-mist px-6 py-14 text-center text-ink-soft">
           {archived ? (
-            <Archive size={40} weight="duotone" className="text-lapis" aria-hidden="true" />
+            <Archive size={40} weight="duotone" className="text-link" aria-hidden="true" />
           ) : (
-            <Plant size={40} weight="duotone" className="text-lapis" aria-hidden="true" />
+            <Plant size={40} weight="duotone" className="text-link" aria-hidden="true" />
           )}
           <p className="mt-3">
             {archived ? 'No archived habits.' : 'Nothing here yet. Add the first habit you want to keep.'}
@@ -137,7 +137,7 @@ export default function HabitsPage() {
               <li key={habit.id} className={`${SURFACE} flex items-start justify-between gap-4 p-4 sm:p-5`}>
                 <div className="min-w-0">
                   <h2 className="font-display text-xl font-semibold tracking-tight">
-                    <Link to={`/habits/${habit.id}`} className="hover:text-lapis hover:underline underline-offset-2">
+                    <Link to={`/habits/${habit.id}`} className="hover:text-link hover:underline underline-offset-2">
                       {habit.name}
                     </Link>
                   </h2>

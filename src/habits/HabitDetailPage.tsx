@@ -25,7 +25,7 @@ function Window({ label, stats }: { label: string; stats: WindowStats }) {
   return (
     <div className={`${SURFACE} p-4`}>
       <dt className="text-sm text-ink-soft">{label}</dt>
-      <dd className="mt-1 font-display text-3xl font-semibold text-lapis">{percent(stats.rate)}</dd>
+      <dd className="mt-1 font-display text-3xl font-semibold text-link">{percent(stats.rate)}</dd>
       <dd className="text-sm text-ink-soft">
         {stats.rate === null ? 'Nothing was due yet' : `${stats.done} of ${Math.round(stats.expected)} done`}
       </dd>
@@ -66,7 +66,7 @@ export default function HabitDetailPage() {
         <p role="alert" className="text-alert">
           {habit.error ? habitErrorMessage(habit.error) : NOT_FOUND}
         </p>
-        <Link to="/habits" className="mt-3 inline-block font-medium text-lapis underline underline-offset-2">
+        <Link to="/habits" className="mt-3 inline-block font-medium text-link underline underline-offset-2">
           Back to habits
         </Link>
       </main>
@@ -79,7 +79,7 @@ export default function HabitDetailPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <Link to="/habits" className="text-sm font-medium text-lapis underline underline-offset-2">
+      <Link to="/habits" className="text-sm font-medium text-link underline underline-offset-2">
         All habits
       </Link>
       <div className="mt-3 flex items-start justify-between gap-4">
@@ -153,7 +153,7 @@ export default function HabitDetailPage() {
               {logs.data.content.map((log) => (
                 <li key={log.date} className="flex items-baseline justify-between gap-4 py-3">
                   <span className="font-medium">{formatDay(log.date)}</span>
-                  <span className={log.done ? 'font-medium text-lapis' : 'text-ink-soft'}>
+                  <span className={log.done ? 'font-medium text-link' : 'text-ink-soft'}>
                     {targetCount > 1 ? `${log.completedCount} of ${targetCount}` : log.done ? 'Done' : 'Not done'}
                   </span>
                   {log.note && <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{log.note}</span>}

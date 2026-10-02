@@ -53,7 +53,7 @@ export default function AppLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   `flex-1 rounded-full px-5 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out sm:flex-none ${
-                    isActive ? 'bg-white text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+                    isActive ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
                   }`
                 }
               >

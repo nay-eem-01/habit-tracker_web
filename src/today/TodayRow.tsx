@@ -43,7 +43,7 @@ export function TodayRow({ habit, status, onSetCount }: TodayRowProps) {
     : `${count} of ${target} today${week ? `, ${week.done} of ${week.goal} days this week` : ''}`
 
   return (
-    <li className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgb(29_36_51/0.06),0_8px_20px_-14px_rgb(29_36_51/0.25)]">
+    <li className="flex items-center gap-4 rounded-2xl bg-surface p-4 shadow-[0_1px_2px_rgb(29_36_51/0.06),0_8px_20px_-14px_rgb(29_36_51/0.25)]">
       {single || done ? (
         <button
           type="button"
@@ -53,7 +53,7 @@ export function TodayRow({ habit, status, onSetCount }: TodayRowProps) {
           className={`${PRESS} grid size-12 shrink-0 place-items-center rounded-xl border-2 ${
             done
               ? 'border-lapis bg-lapis text-white'
-              : 'border-mist bg-white text-transparent [@media(hover:hover)]:hover:border-lapis'
+              : 'border-mist bg-surface text-transparent [@media(hover:hover)]:hover:border-lapis'
           }`}
         >
           <Check
@@ -68,14 +68,14 @@ export function TodayRow({ habit, status, onSetCount }: TodayRowProps) {
           type="button"
           aria-label={`Add one for ${habit.name}`}
           onClick={() => onSetCount(count + 1)}
-          className={`${PRESS} size-12 shrink-0 rounded-xl border-2 border-mist bg-white text-sm font-semibold text-lapis [@media(hover:hover)]:hover:border-lapis`}
+          className={`${PRESS} size-12 shrink-0 rounded-xl border-2 border-mist bg-surface text-sm font-semibold text-link [@media(hover:hover)]:hover:border-lapis`}
         >
           +1
         </button>
       )}
       <div className="min-w-0 flex-1">
         <h3 className={`font-display text-xl font-semibold tracking-tight transition-colors duration-200 ${done ? 'text-ink-soft' : ''}`}>
-          <Link to={`/habits/${habit.id}`} className="hover:text-lapis hover:underline underline-offset-2">
+          <Link to={`/habits/${habit.id}`} className="hover:text-link hover:underline underline-offset-2">
             {habit.name}
           </Link>
         </h3>
@@ -85,7 +85,7 @@ export function TodayRow({ habit, status, onSetCount }: TodayRowProps) {
             type="button"
             aria-label={`Take one away from ${habit.name}`}
             onClick={() => onSetCount(count - 1)}
-            className="mt-1 text-sm font-medium text-lapis underline underline-offset-2"
+            className="mt-1 text-sm font-medium text-link underline underline-offset-2"
           >
             Undo
           </button>

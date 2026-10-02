@@ -14,10 +14,48 @@
   /* ember as text: the plain one is too light on chalk */
   --color-ember-deep: #a24f08;
   --color-alert: #b3261e;
+  /* surfaces and links get their own names so dark mode can move them independently of the brand blue */
+  --color-surface: #ffffff;
+  --color-pill: #ffffff;
+  --color-link: #2f4bd8;
+}
+
+/* Dark palette: same hues, lifted for a night-time page. Chosen by the OS, or by the switch in the account menu. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-chalk: #0e1117;
+  --color-ink: #e9edf5;
+  --color-ink-soft: #99a3b6;
+  --color-mist: #38425a;
+  --color-lapis: #3d57e0;
+  --color-lapis-deep: #1b2670;
+  --color-ember-deep: #f0a24f;
+  --color-alert: #ff8f86;
+  --color-surface: #171c26;
+  --color-pill: #2c3548;
+  --color-link: #93a5ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-chalk: #0e1117;
+    --color-ink: #e9edf5;
+    --color-ink-soft: #99a3b6;
+    --color-mist: #38425a;
+    --color-lapis: #3d57e0;
+    --color-lapis-deep: #1b2670;
+    --color-ember-deep: #f0a24f;
+    --color-alert: #ff8f86;
+    --color-surface: #171c26;
+    --color-pill: #2c3548;
+    --color-link: #93a5ff;
+  }
 }
 
 @layer base {
   html {
+    color-scheme: light;
     background: var(--color-chalk);
     color: var(--color-ink);
     font-family: var(--font-sans);
