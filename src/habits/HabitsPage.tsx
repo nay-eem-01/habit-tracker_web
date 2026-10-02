@@ -125,7 +125,11 @@ export default function HabitsPage() {
             {habits.data.content.map((habit) => (
               <li key={habit.id} className="flex items-start justify-between gap-4 border-b border-mist py-4">
                 <div className="min-w-0">
-                  <h2 className="font-display text-xl font-semibold tracking-tight">{habit.name}</h2>
+                  <h2 className="font-display text-xl font-semibold tracking-tight">
+                    <Link to={`/habits/${habit.id}`} className="hover:text-lapis hover:underline underline-offset-2">
+                      {habit.name}
+                    </Link>
+                  </h2>
                   <p className="mt-1 flex flex-wrap gap-x-4 text-sm text-ink-soft">
                     {habit.category && <span>{habit.category}</span>}
                     <span>{describeSchedule(habit)}</span>

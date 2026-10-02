@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { getStreak } from '../api/checkins'
 import type { Habit } from '../api/habits'
 import type { TodayStatus } from './today'
@@ -72,7 +73,11 @@ export function TodayRow({ habit, status, onSetCount }: TodayRowProps) {
         </button>
       )}
       <div className="min-w-0 flex-1">
-        <h3 className="font-display text-xl font-semibold tracking-tight">{habit.name}</h3>
+        <h3 className="font-display text-xl font-semibold tracking-tight">
+          <Link to={`/habits/${habit.id}`} className="hover:text-lapis hover:underline underline-offset-2">
+            {habit.name}
+          </Link>
+        </h3>
         {progress && <p className="mt-0.5 text-sm text-ink-soft">{progress}</p>}
         {!single && count > 0 && !done && (
           <button
