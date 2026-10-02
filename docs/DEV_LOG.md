@@ -5,6 +5,23 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-02 (G.2 — dashboard v1)
+
+**Done** (`feat/dashboard`)
+- `/` is now the dashboard; Today moved to `/today` and the nav has both. Cards: today's progress
+  (links to Today), 7/30-day completion across all habits, top three current streaks, 12-week
+  activity grid. No backend changes: it uses habits list + per-habit `/streak`, `/stats`, `/logs`.
+- Maths lives in `src/dashboard/dashboard.ts` (tested): completion adds days done over days
+  expected across habits instead of averaging rates; day streaks rank ahead of week streaks.
+
+**Known limit:** 3 requests per habit (N+1). Fine for a handful; if it drags, ask the backend for the
+M5 summary endpoint and note the ask in the backend dev log. The activity grid reads up to 100 logs
+per habit, so a habit with more than 100 logs in 12 weeks is impossible (one per day at most).
+
+**Next:** G.3 habit detail visuals.
+
+---
+
 ## 2026-10-02 (design tooling for G.1)
 
 **Done**
