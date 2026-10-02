@@ -162,29 +162,29 @@ export default function TodayPage() {
               void habits.refetch()
               logs.forEach((result) => void result.refetch())
             }}
-            className="mt-3 h-10 rounded-xl border border-mist bg-white px-4 text-sm font-medium transition-transform duration-150 ease-out active:scale-[0.97]"
+            className="mt-3 h-10 rounded-xl border border-mist bg-surface px-4 text-sm font-medium transition-transform duration-150 ease-out active:scale-[0.97]"
           >
             Try again
           </button>
         </div>
       ) : list.length === 0 ? (
         <Empty>
-          <Plant size={40} weight="duotone" className="text-lapis" aria-hidden="true" />
+          <Plant size={40} weight="duotone" className="text-link" aria-hidden="true" />
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">Nothing growing yet</p>
           <p className="mt-1">
             No habits yet.{' '}
-            <Link to="/habits/new" className="font-medium text-lapis underline underline-offset-2">
+            <Link to="/habits/new" className="font-medium text-link underline underline-offset-2">
               Add the first one you want to keep.
             </Link>
           </p>
         </Empty>
       ) : items.length === 0 ? (
         <Empty>
-          <CalendarBlank size={40} weight="duotone" className="text-lapis" aria-hidden="true" />
+          <CalendarBlank size={40} weight="duotone" className="text-link" aria-hidden="true" />
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">A day off</p>
           <p className="mt-1">
             Nothing is scheduled for today.{' '}
-            <Link to="/habits" className="font-medium text-lapis underline underline-offset-2">
+            <Link to="/habits" className="font-medium text-link underline underline-offset-2">
               See all habits
             </Link>
           </p>

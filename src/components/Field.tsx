@@ -9,7 +9,7 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
 }
 
 const INPUT =
-  'h-12 w-full rounded-xl border bg-white px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
+  'h-12 w-full rounded-xl border bg-surface px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
   'shadow-[0_1px_2px_rgb(29_36_51/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
   'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(47_75_216/0.16)] focus-visible:outline-none'
 
@@ -38,7 +38,7 @@ export function Field({ label, hint, error, narrow, type, className = '', ...inp
             type="button"
             onClick={() => setShown((value) => !value)}
             aria-pressed={shown}
-            className="absolute inset-y-0 right-0 rounded-r-xl px-4 text-sm font-medium text-lapis transition-colors duration-150 hover:text-lapis-deep"
+            className="absolute inset-y-0 right-0 rounded-r-xl px-4 text-sm font-medium text-link transition-colors duration-150 hover:text-ink"
           >
             {shown ? 'Hide' : 'Show'}
           </button>

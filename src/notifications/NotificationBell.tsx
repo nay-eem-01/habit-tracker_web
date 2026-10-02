@@ -58,7 +58,7 @@ export function NotificationBell() {
         aria-controls="notifications-panel"
         aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
         onClick={() => setOpen(!open)}
-        className="relative grid size-10 place-items-center rounded-full bg-white shadow-[0_1px_2px_rgb(29_36_51/0.12)] transition-transform duration-150 ease-out active:scale-95"
+        className="relative grid size-10 place-items-center rounded-full bg-surface shadow-[0_1px_2px_rgb(29_36_51/0.12)] transition-transform duration-150 ease-out active:scale-95"
       >
         <Bell size={20} weight="bold" aria-hidden="true" />
         {count > 0 && (
@@ -77,7 +77,7 @@ export function NotificationBell() {
         <section
           id="notifications-panel"
           aria-label="Notifications"
-          className="fixed inset-x-4 top-28 z-10 pop rounded-2xl border border-mist bg-white shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)] sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
+          className="fixed inset-x-4 top-28 z-10 pop rounded-2xl border border-mist bg-surface shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)] sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
         >
           <div className="flex items-center justify-between gap-3 border-b border-mist px-4 py-3">
             <h2 className="font-display text-lg font-semibold tracking-tight">Notifications</h2>
@@ -85,7 +85,7 @@ export function NotificationBell() {
               type="button"
               disabled={count === 0 || readAll.isPending}
               onClick={() => readAll.mutate()}
-              className="text-sm font-medium text-lapis underline underline-offset-2 disabled:text-ink-soft disabled:no-underline"
+              className="text-sm font-medium text-link underline underline-offset-2 disabled:text-ink-soft disabled:no-underline"
             >
               Mark all read
             </button>
@@ -99,7 +99,7 @@ export function NotificationBell() {
               <p role="alert" className="text-alert">
                 Couldn’t load your notifications.
               </p>
-              <button type="button" onClick={() => list.refetch()} className="mt-2 font-medium text-lapis underline">
+              <button type="button" onClick={() => list.refetch()} className="mt-2 font-medium text-link underline">
                 Try again
               </button>
             </div>

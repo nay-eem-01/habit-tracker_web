@@ -44,7 +44,7 @@ export default function HabitFormPage() {
             <p role="alert" className="text-alert">
               {habitErrorMessage(existing.error)}
             </p>
-            <Link to="/habits" className="mt-3 inline-block font-medium text-lapis underline underline-offset-2">
+            <Link to="/habits" className="mt-3 inline-block font-medium text-link underline underline-offset-2">
               Back to habits
             </Link>
           </div>

@@ -51,7 +51,7 @@ export default function SignInPage() {
       </form>
       <p className="mt-6 text-sm text-ink-soft">
         New here?{' '}
-        <Link to="/register" className="font-medium text-lapis underline underline-offset-2">
+        <Link to="/register" className="font-medium text-link underline underline-offset-2">
           Create an account
         </Link>
       </p>
