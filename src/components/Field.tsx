@@ -9,8 +9,9 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
 }
 
 const INPUT =
-  'h-11 w-full rounded-md border bg-white px-3 text-base text-ink placeholder:text-ink-soft/70 ' +
-  'focus-visible:border-lapis focus-visible:outline-2 focus-visible:outline-lapis/30 focus-visible:outline-offset-0'
+  'h-12 w-full rounded-xl border bg-white px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
+  'shadow-[0_1px_2px_rgb(29_36_51/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
+  'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(47_75_216/0.16)] focus-visible:outline-none'
 
 export function Field({ label, hint, error, narrow, type, className = '', ...input }: FieldProps) {
   const id = useId()
@@ -30,14 +31,14 @@ export function Field({ label, hint, error, narrow, type, className = '', ...inp
           type={isPassword && shown ? 'text' : type}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${INPUT} ${error ? 'border-alert' : 'border-mist'} ${isPassword ? 'pr-16' : ''}`}
+          className={`${INPUT} ${error ? 'border-alert' : 'border-mist'} ${isPassword ? 'pr-20' : ''}`}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShown((value) => !value)}
             aria-pressed={shown}
-            className="absolute inset-y-0 right-0 rounded-r-md px-3 text-sm font-medium text-lapis hover:text-lapis-deep"
+            className="absolute inset-y-0 right-0 rounded-r-xl px-4 text-sm font-medium text-lapis transition-colors duration-150 hover:text-lapis-deep"
           >
             {shown ? 'Hide' : 'Show'}
           </button>
