@@ -21,7 +21,8 @@ export interface Goal {
 
 export const GOALS_PAGE_SIZE = 20
 
-export function listGoals(options: { status: GoalStatus; page: number; size?: number }): Promise<Page<Goal>> {
+/** One status, or every goal when `status` is left out. */
+export function listGoals(options: { status?: GoalStatus; page: number; size?: number }): Promise<Page<Goal>> {
   return api('/api/goals', {
     params: { status: options.status, page: options.page, size: options.size ?? GOALS_PAGE_SIZE },
   })

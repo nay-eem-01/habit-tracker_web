@@ -12,17 +12,88 @@ import {
   type HabitGoalProgress,
 } from '../api/goals'
 import { linkGoal, listHabits, unlinkGoal, type Habit } from '../api/habits'
-import { goalErrorMessage } from '../api/messages'
+import { goalErrorMessage, resourceErrorMessage } from '../api/messages'
+import { listGoalResources } from '../api/resources'
 import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field, INPUT } from '../components/Field'
 import { ProgressBar } from '../components/ProgressBar'
 import { Ring } from '../components/Ring'
 import { SECONDARY, SURFACE } from '../components/styles'
+import { ResourceCard } from '../resources/ResourceCard'
+import { useResourceActions } from '../resources/useResourceActions'
 import { useToday } from '../today/useToday'
 import { deadline, formatDate, formatInstant } from './goals'
 
 const BUTTON = SECONDARY
+
+/** The goal page shows the first few; the library has the rest. */
+const GOAL_RESOURCES_SHOWN = 5
+
+/** The goal's notes and links, pinned first, with a way to add one and to see them all. */
+function GoalResources({ goalId }: { goalId: number }) {
+  const resources = useQuery({
+    queryKey: ['goal-resources', goalId],
+    queryFn: () => listGoalResources(goalId, { page: 0, size: GOAL_RESOURCES_SHOWN }),
+  })
+  const actions = useResourceActions()
+  const back = `/goals/${goalId}`
+
+  return (
+    <section aria-labelledby="resources" className="mt-10">
+      <div className="flex items-end justify-between gap-4">
+        <h2 id="resources" className="font-display text-2xl font-semibold tracking-tight">
+          Notes and links
+        </h2>
+        <Link to={`/resources/new?goalId=${goalId}&back=${encodeURIComponent(back)}`} className={`${BUTTON} shrink-0`}>
+          Add
+        </Link>
+      </div>
+      {actions.error && (
+        <p role="alert" className="mt-3 text-sm text-alert">
+          {resourceErrorMessage(actions.error)}
+        </p>
+      )}
+      {resources.isError ? (
+        <div className="mt-3">
+          <p role="alert" className="text-alert">
+            {resourceErrorMessage(resources.error)}
+          </p>
+          <button type="button" onClick={() => resources.refetch()} className={`${BUTTON} mt-3`}>
+            Try again
+          </button>
+        </div>
+      ) : !resources.data ? (
+        <div role="status" aria-label="Loading notes and links" className="mt-3 h-24 animate-pulse rounded-2xl bg-mist/45" />
+      ) : resources.data.content.length === 0 ? (
+        <p className="mt-3 text-ink-soft">Keep the plan, a note to self, or a useful link here, next to the goal.</p>
+      ) : (
+        <>
+          <ul className="mt-3 flex flex-col gap-3">
+            {resources.data.content.map((resource) => (
+              <ResourceCard
+                key={resource.id}
+                resource={resource}
+                back={back}
+                busy={actions.busy}
+                onPin={(pinned) => actions.pin.mutate({ id: resource.id, pinned })}
+                onDelete={() => actions.remove.mutate(resource.id)}
+              />
+            ))}
+          </ul>
+          {resources.data.totalElements > resources.data.content.length && (
+            <Link
+              to={`/resources?goalId=${goalId}`}
+              className="mt-3 inline-block font-medium text-link underline underline-offset-2"
+            >
+              See all {resources.data.totalElements} in the library
+            </Link>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
 
 /** A sensible first target: about two months of done days. */
 const DEFAULT_TARGET = '60'
@@ -410,41 +481,43 @@ export default function GoalDetailPage() {
       </section>
 
       {active && (
-        <>
-          <section aria-labelledby="link" className="mt-10">
-            <h2 id="link" className="font-display text-2xl font-semibold tracking-tight">
-              Link a habit
-            </h2>
-            <div className={`${SURFACE} mt-3 p-4 sm:p-6`}>
-              {habits.isError ? (
-                <p role="alert" className="text-alert">
-                  {goalErrorMessage(habits.error)}
-                </p>
-              ) : !habits.data ? (
-                <p role="status" className="text-ink-soft">
-                  Loading habits…
-                </p>
-              ) : (
-                <LinkHabitForm
-                  habits={habits.data.content}
-                  goalId={id}
-                  busy={link.isPending}
-                  onLink={(habitId, days) => link.mutateAsync({ habitId, days })}
-                />
-              )}
-            </div>
-          </section>
+        <section aria-labelledby="link" className="mt-10">
+          <h2 id="link" className="font-display text-2xl font-semibold tracking-tight">
+            Link a habit
+          </h2>
+          <div className={`${SURFACE} mt-3 p-4 sm:p-6`}>
+            {habits.isError ? (
+              <p role="alert" className="text-alert">
+                {goalErrorMessage(habits.error)}
+              </p>
+            ) : !habits.data ? (
+              <p role="status" className="text-ink-soft">
+                Loading habits…
+              </p>
+            ) : (
+              <LinkHabitForm
+                habits={habits.data.content}
+                goalId={id}
+                busy={link.isPending}
+                onLink={(habitId, days) => link.mutateAsync({ habitId, days })}
+              />
+            )}
+          </div>
+        </section>
+      )}
 
-          <section aria-labelledby="finish" className="mt-10">
-            <h2 id="finish" className="font-display text-2xl font-semibold tracking-tight">
-              Finish
-            </h2>
-            <p className="mt-1 text-ink-soft">You decide when it’s done. Reaching 100% doesn’t close it for you.</p>
-            <div className="mt-3">
-              <CloseGoal busy={close.isPending} onClose={(outcome) => close.mutate(outcome)} />
-            </div>
-          </section>
-        </>
+      <GoalResources goalId={id} />
+
+      {active && (
+        <section aria-labelledby="finish" className="mt-10">
+          <h2 id="finish" className="font-display text-2xl font-semibold tracking-tight">
+            Finish
+          </h2>
+          <p className="mt-1 text-ink-soft">You decide when it’s done. Reaching 100% doesn’t close it for you.</p>
+          <div className="mt-3">
+            <CloseGoal busy={close.isPending} onClose={(outcome) => close.mutate(outcome)} />
+          </div>
+        </section>
       )}
     </main>
   )

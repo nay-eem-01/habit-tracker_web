@@ -47,7 +47,11 @@ const linked = (habitId: number, name: string, doneDays: number, goalTargetDays:
 })
 const progress = (percent: number, habits: HabitGoalProgress[]): GoalProgress => ({ goalId: 1, percent, habits })
 
-const signedIn = { 'POST /api/auth/refresh': () => ok(session) }
+const signedIn = {
+  'POST /api/auth/refresh': () => ok(session),
+  // the goal page also lists the goal's notes and links (tested in the resources tests)
+  'GET /api/goals/1/resources': () => ok(page([])),
+}
 
 beforeEach(() => {
   resetApp()
