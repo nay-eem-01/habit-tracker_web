@@ -9,11 +9,11 @@ needed from the API. Update this file in the same PR that finishes a step.
 **Branch flow:** one step per branch, taken from `staging` (or the previous step's branch), PR into
 `staging`. Claude commits and pushes and gives PR links; Nayeem opens and merges.
 
-## Where we are (2026-10-02)
+## Where we are (2026-10-03)
 
 **Phase G is done** (G.0–G.3): tested, redesigned with dark mode, a dashboard home page and visual habit
-detail. Everything left on the frontend now waits on the backend (M2–M6). The text below is how it
-stood before Phase G.
+detail. **M2 goals is under way** now that the backend's goals API is on `staging` (Phase M2 below).
+The text below is how it stood before Phase G.
 
 F.1–F.6 are merged: sign in / register, habits (create, edit, archive), Today with one-tap
 check-in, habit detail (streaks, 7/30-day stats, history), notification bell. It works, but it
@@ -49,11 +49,18 @@ Notes on G.2: per-habit calls are N+1 and fine for a handful of habits, not for 
 slow, ask the backend for one summary endpoint (that is the backend's M5 dashboard) instead of
 adding client-side cleverness. Record the ask in the backend dev log when it is made.
 
+## Now — Phase M2: goals (backend M2 is done)
+
+| # | Step | Status |
+|---|---|---|
+| M2.1 | **Goals list and form**: `/goals` with Active / Achieved / Abandoned tabs, deadline in words ("89 days left", "2 days overdue"), create and edit (title, why it matters, optional target date). Goals in the main nav. | ✅ |
+| M2.2 | **Goal detail and progress**: `/goals/:id` with overall progress, per-habit done days against their targets, link / change target / unlink habits, mark achieved or abandon. Progress on each list card; the goal shown on habit detail. | ⬜ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |
 |---|---|---|
-| M2 Goals | goals list and detail, link habits to goals, progress | ⏸ |
+| M2 Goals | goals list and detail, link habits to goals, progress | 🔄 Phase M2 above |
 | M3 Resources | resource library per habit/goal | ⏸ |
 | M4 Levels | level, XP bar, level-up moment | ⏸ |
 | M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ⏸ |

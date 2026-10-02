@@ -5,6 +5,23 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-03 (M2.1 — goals list and form)
+
+**Done** (`feat/goals`)
+- Regenerated `src/api/schema.d.ts` from the backend's `staging` (goals, habit–goal link).
+- `src/api/goals.ts`: list (by status), get, create, update. `goalErrorMessage` for goal error codes.
+- `/goals`: Active / Achieved / Abandoned tabs, paged; each card shows the deadline counted from the
+  user's today ("By 31 Dec 2026 · 89 days left", overdue in red), or when it was achieved.
+- `/goals/new` and `/goals/:id/edit`: title, "why it matters" (new `TextAreaField`), optional date.
+  The PUT is a full replace, so an emptied description or date is left out and cleared.
+- Goals joined the main nav. Four links didn't fit: at 320px they scrolled sideways and at 640px
+  the bell dropped to a second row, so the nav now sits inline from `md` up and uses smaller text
+  on phones. Checked in the browser at 320px, 640px and desktop.
+
+**Next:** M2.2 — goal detail, progress, linking habits, achieve / abandon.
+
+---
+
 ## 2026-10-02 (G.3 — habit detail, visual)
 
 **Done** (`feat/habit-detail-visual`)

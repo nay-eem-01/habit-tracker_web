@@ -24,6 +24,19 @@ export function fieldError(error: unknown, field: string, label: string): string
   return message ? `${label} ${message}` : undefined
 }
 
+/** Plain-language text for a failed goal save, load or change. */
+export function goalErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.errorCode) {
+      case 'VALIDATION_FAILED':
+        return 'Some details need fixing. Check the highlighted fields.'
+      case 'GOAL_NOT_FOUND':
+        return "This goal doesn't exist, or it isn't yours."
+    }
+  }
+  return habitErrorMessage(error)
+}
+
 /** Plain-language text for a failed habit save, load or archive. */
 export function habitErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {

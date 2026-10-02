@@ -1,4 +1,4 @@
-import { useId, useState, type InputHTMLAttributes } from 'react'
+import { useId, useState, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
 interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   label: string
@@ -9,7 +9,7 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
 }
 
 const INPUT =
-  'h-12 w-full rounded-xl border bg-surface px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
+  'w-full rounded-xl border bg-surface px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
   'shadow-[0_1px_2px_rgb(29_36_51/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
   'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(47_75_216/0.16)] focus-visible:outline-none'
 
@@ -31,7 +31,7 @@ export function Field({ label, hint, error, narrow, type, className = '', ...inp
           type={isPassword && shown ? 'text' : type}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${INPUT} ${error ? 'border-alert' : 'border-mist'} ${isPassword ? 'pr-20' : ''}`}
+          className={`${INPUT} h-12 ${error ? 'border-alert' : 'border-mist'} ${isPassword ? 'pr-20' : ''}`}
         />
         {isPassword && (
           <button
@@ -44,6 +44,41 @@ export function Field({ label, hint, error, narrow, type, className = '', ...inp
           </button>
         )}
       </div>
+      {error ? (
+        <p id={`${id}-error`} className="mt-1.5 text-sm text-alert">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={`${id}-hint`} className="mt-1.5 text-sm text-ink-soft">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+interface TextAreaFieldProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> {
+  label: string
+  hint?: string
+  error?: string
+}
+
+/** A longer, free-text answer, with the same label, hint and error as `Field`. */
+export function TextAreaField({ label, hint, error, className = '', ...textarea }: TextAreaFieldProps) {
+  const id = useId()
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+        {label}
+      </label>
+      <textarea
+        rows={4}
+        {...textarea}
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+        className={`${INPUT} resize-y py-3 ${error ? 'border-alert' : 'border-mist'}`}
+      />
       {error ? (
         <p id={`${id}-error`} className="mt-1.5 text-sm text-alert">
           {error}

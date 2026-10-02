@@ -28,7 +28,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-10 border-b border-mist/70 bg-chalk/85 backdrop-blur-md">
-        {/* On a phone the links drop to their own row, so the bell and avatar always fit, even at 320px. */}
+        {/* Below md the links drop to their own row, so the bell and avatar always fit, even at 320px. */}
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight">
             <span aria-hidden="true" className="grid grid-cols-2 gap-[2px]">
@@ -41,19 +41,20 @@ export default function AppLayout() {
           </Link>
           <nav
             aria-label="Main"
-            className="order-last flex w-full gap-1 rounded-full bg-mist/45 p-1 font-medium sm:order-none sm:w-auto"
+            className="order-last flex w-full gap-1 rounded-full bg-mist/45 p-1 text-sm font-medium sm:text-base md:order-none md:w-auto"
           >
             {[
               { to: '/', label: 'Dashboard', end: true },
               { to: '/today', label: 'Today', end: false },
               { to: '/habits', label: 'Habits', end: false },
+              { to: '/goals', label: 'Goals', end: false },
             ].map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `flex-1 rounded-full px-5 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out sm:flex-none ${
+                  `flex-1 rounded-full px-2 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out md:flex-none md:px-4 ${
                     isActive ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
                   }`
                 }
