@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { HabitLog } from '../api/checkins'
 import type { Habit } from '../api/habits'
-import { fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
+import { fail, ok, page, renderApp, resetApp, session, stubApi, type Call } from '../test/helpers'
 
 // Friday 2 October 2026, 10:00 in Dhaka
 const NOW = new Date('2026-10-02T04:00:00Z')
@@ -30,6 +30,9 @@ const log = (date: string, completedCount: number, done: boolean, note?: string)
   note,
 })
 const window = (days: number, done: number, expected: number, rate: number | null) => ({ days, done, expected, rate })
+
+/** The history list's requests, told apart from the charts' (which ask for full pages of 100). */
+const historyCalls = (id: number) => (c: Call) => c.path === `/api/habits/${id}/logs` && c.params.get('size') !== '100'
 
 const signedIn = { 'POST /api/auth/refresh': () => ok(session) }
 const progress = (id: number) => ({
@@ -97,7 +100,7 @@ describe('habit detail', () => {
     expect(within(history).getByText('3 of 8')).toBeTruthy()
     expect(within(history).getByText('8 of 8')).toBeTruthy()
     expect(within(history).getByText('easy day')).toBeTruthy()
-    expect(calls.find((c) => c.path === '/api/habits/2/logs')!.params.get('from')).toBe('2026-07-04')
+    expect(calls.find(historyCalls(2))!.params.get('from')).toBe('2026-07-04')
   })
 
   it('pages through a long history', async () => {
@@ -117,7 +120,7 @@ describe('habit detail', () => {
 
     expect(await screen.findByText(/^Sun 20 Sept?$/)).toBeTruthy()
     expect(screen.getByText('Page 2 of 2')).toBeTruthy()
-    expect(calls.filter((c) => c.path === '/api/habits/1/logs').map((c) => c.params.get('page'))).toEqual(['0', '1'])
+    expect(calls.filter(historyCalls(1)).map((c) => c.params.get('page'))).toEqual(['0', '1'])
   })
 
   it('says when the habit is not there or not yours', async () => {
@@ -141,5 +144,42 @@ describe('habit detail', () => {
     await userEvent.click(await screen.findByRole('link', { name: 'Read 20 pages' }))
 
     expect(await screen.findByText('Current streak')).toBeTruthy()
+  })
+
+  it('draws the streak against the best, the last 26 weeks as a heatmap and the weekly trend', async () => {
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/habits/1': () => ok(read),
+      ...progress(1),
+      'GET /api/habits/1/logs': (call) =>
+        call.params.get('size') !== '100'
+          ? ok(page([]))
+          : call.params.get('page') === '1'
+            ? ok(page([log('2026-09-21', 1, true)], 2, 1))
+            : ok(page([log('2026-10-02', 1, true), log('2026-10-01', 1, true), log('2026-09-30', 0, false)], 2, 0)),
+    })
+    renderApp('/habits/1')
+
+    expect(await screen.findByText('18 days to beat your best.')).toBeTruthy()
+    // the habit was made on 1 September, so the heatmap counts days from then to today
+    expect(await screen.findByRole('img', { name: 'Done on 3 of the last 32 days' })).toBeTruthy()
+    expect(screen.getByRole('img', { name: /^Days done per week, oldest first: (0, ){10}1, 2\. Goal 7 a week\.$/ })).toBeTruthy()
+    const charts = calls.filter((c) => c.path === '/api/habits/1/logs' && c.params.get('size') === '100')
+    expect(charts.map((c) => [c.params.get('from'), c.params.get('page')])).toEqual([
+      ['2026-04-06', '0'],
+      ['2026-04-06', '1'],
+    ])
+  })
+
+  it('celebrates a streak that is the best yet', async () => {
+    stubApi({
+      ...signedIn,
+      'GET /api/habits/1': () => ok(read),
+      'GET /api/habits/1/streak': () => ok({ current: 9, longest: 9, unit: 'DAYS' }),
+      'GET /api/habits/1/stats': () => ok({ last7Days: window(7, 7, 7, 1), last30Days: window(30, 9, 30, 0.3) }),
+      'GET /api/habits/1/logs': () => ok(page([])),
+    })
+    renderApp('/habits/1')
+    expect(await screen.findByText('This is your best run yet.')).toBeTruthy()
   })
 })

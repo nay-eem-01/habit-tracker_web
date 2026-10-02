@@ -1,13 +1,16 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getStats, getStreak, listLogs, type WindowStats } from '../api/checkins'
-import { getHabit } from '../api/habits'
+import { getStats, getStreak, listLogs, type HabitLog, type Streak, type WindowStats } from '../api/checkins'
+import { getHabit, type Habit } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
+import { DayGrid, DayGridLegend } from '../components/DayGrid'
+import { Ring } from '../components/Ring'
 import { SECONDARY, SURFACE } from '../components/styles'
 import { useAuth } from '../auth/context'
 import { formatDay, shiftDays } from '../today/today'
 import { useToday } from '../today/useToday'
+import { doneOf, HEATMAP_WEEKS, habitHeatmap, heatmapStart, weeklyGoal, weeklyTotals, type WeekTotal } from './detail'
 import { describeSchedule } from './form'
 
 const BUTTON = SECONDARY
@@ -21,14 +24,137 @@ function percent(rate: number | null): string {
   return rate === null ? '–' : `${Math.round(rate * 100)}%`
 }
 
+/** The API's page cap; a half-year heatmap needs two pages at most. */
+const LOGS_PAGE = 100
+
+/** Every log from `from` to today, following the pages. */
+async function allLogs(habitId: number, from: string): Promise<HabitLog[]> {
+  const logs: HabitLog[] = []
+  for (let page = 0; ; page++) {
+    const result = await listLogs(habitId, { from, page, size: LOGS_PAGE })
+    logs.push(...result.content)
+    if (page + 1 >= result.totalPages) return logs
+  }
+}
+
 function Window({ label, stats }: { label: string; stats: WindowStats }) {
   return (
-    <div className={`${SURFACE} p-4`}>
-      <dt className="text-sm text-ink-soft">{label}</dt>
-      <dd className="mt-1 font-display text-3xl font-semibold text-link">{percent(stats.rate)}</dd>
-      <dd className="text-sm text-ink-soft">
-        {stats.rate === null ? 'Nothing was due yet' : `${stats.done} of ${Math.round(stats.expected)} done`}
+    <div className={`${SURFACE} flex items-center gap-4 p-4`}>
+      <Ring rate={stats.rate}>
+        <span className="font-display text-xl font-semibold text-link">{percent(stats.rate)}</span>
+      </Ring>
+      <div>
+        <dt className="text-sm text-ink-soft">{label}</dt>
+        <dd className="mt-1 font-medium">
+          {stats.rate === null ? 'Nothing was due yet' : doneOf(stats.done, stats.expected)}
+        </dd>
+      </div>
+    </div>
+  )
+}
+
+/** The current run against the best one, as a bar: how close this streak is to a new record. */
+function StreakBar({ streak, plural }: { streak: Streak; plural: (n: number) => string }) {
+  const record = streak.current > 0 && streak.current >= streak.longest
+  const share = streak.longest > 0 ? Math.min(streak.current / streak.longest, 1) : 0
+  return (
+    <div className="rounded-2xl bg-ember/15 p-4 sm:col-span-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <div>
+          <dt className="text-sm text-ink-soft">Current streak</dt>
+          <dd className="mt-1 font-display text-3xl font-semibold text-ember-deep">{plural(streak.current)}</dd>
+        </div>
+        <div className="text-right">
+          <dt className="text-sm text-ink-soft">Longest streak</dt>
+          <dd className="mt-1 font-display text-3xl font-semibold">{plural(streak.longest)}</dd>
+        </div>
+      </div>
+      <div aria-hidden="true" className="mt-4 h-2.5 overflow-hidden rounded-full bg-ember/20">
+        <div
+          className="h-full rounded-full bg-ember transition-[width] duration-500 ease-out motion-reduce:transition-none"
+          style={{ width: `${share * 100}%` }}
+        />
+      </div>
+      <dd className="mt-2 text-sm text-ink-soft">
+        {record
+          ? 'This is your best run yet.'
+          : streak.longest === 0
+            ? 'Finish it once to start a streak.'
+            : `${plural(streak.longest - streak.current)} to beat your best.`}
       </dd>
+    </div>
+  )
+}
+
+const shortDate = (date: string) =>
+  new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short' }).format(new Date(`${date}T00:00:00Z`))
+
+/** Days done per week as bars, with the weekly goal as a dashed line. */
+function WeeklyBars({ totals, goal }: { totals: WeekTotal[]; goal: number }) {
+  const top = Math.max(goal, ...totals.map((week) => week.done), 1)
+  const met = totals.slice(0, -1).filter((week) => goal > 0 && week.done >= goal).length
+  return (
+    <div>
+      <div
+        role="img"
+        aria-label={`Days done per week, oldest first: ${totals.map((week) => week.done).join(', ')}. Goal ${goal} a week.`}
+        className="relative flex h-32 items-end gap-1.5 sm:gap-2"
+      >
+        {goal > 0 && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 border-t border-dashed border-ink-soft/60"
+            style={{ bottom: `${(goal / top) * 100}%` }}
+          />
+        )}
+        {totals.map((week, index) => (
+          <div
+            key={week.start}
+            title={`Week of ${shortDate(week.start)}: ${week.done} done`}
+            className={`flex-1 rounded-t-md transition-[height] duration-500 ease-out motion-reduce:transition-none ${
+              index === totals.length - 1 ? 'bg-lapis/45' : goal > 0 && week.done >= goal ? 'bg-lapis' : 'bg-lapis/70'
+            }`}
+            style={{ height: week.done === 0 ? '3px' : `${(week.done / top) * 100}%` }}
+          />
+        ))}
+      </div>
+      <div aria-hidden="true" className="mt-2 flex justify-between text-xs text-ink-soft">
+        <span>{shortDate(totals[0].start)}</span>
+        <span>This week</span>
+      </div>
+      <p className="mt-3 text-sm text-ink-soft">
+        {goal > 0
+          ? `Goal met in ${met} of the last ${totals.length - 1} full weeks. The dashed line is the goal: ${goal} a week.`
+          : 'Days done each week.'}
+      </p>
+    </div>
+  )
+}
+
+function Charts({ habit, logs, today }: { habit: Habit; logs: HabitLog[]; today: string }) {
+  const weeks = habitHeatmap(habit, logs, today)
+  const days = weeks.flat().filter((day) => !day.blank)
+  const done = days.filter((day) => day.level === 4).length
+  return (
+    <div className="mt-3 grid gap-3 lg:grid-cols-[3fr_2fr]">
+      <div className={`${SURFACE} p-4 sm:p-5`}>
+        <h3 className="font-medium">Last {HEATMAP_WEEKS} weeks</h3>
+        <div className="mt-3">
+          <DayGrid weeks={weeks} label={`Done on ${done} of the last ${days.length} days`} />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-ink-soft">
+            Done on {done} of {days.length} days
+          </p>
+          <DayGridLegend />
+        </div>
+      </div>
+      <div className={`${SURFACE} p-4 sm:p-5`}>
+        <h3 className="font-medium">Week by week</h3>
+        <div className="mt-3">
+          <WeeklyBars totals={weeklyTotals(logs, today)} goal={weeklyGoal(habit)} />
+        </div>
+      </div>
     </div>
   )
 }
@@ -43,6 +169,12 @@ export default function HabitDetailPage() {
   const habit = useQuery({ queryKey: ['habit', id], queryFn: () => getHabit(id), enabled: Number.isInteger(id) })
   const streak = useQuery({ queryKey: ['streak', id], queryFn: () => getStreak(id), enabled: habit.isSuccess })
   const stats = useQuery({ queryKey: ['stats', id], queryFn: () => getStats(id), enabled: habit.isSuccess })
+  const heatmapFrom = heatmapStart(today)
+  const heatmap = useQuery({
+    queryKey: ['logs', id, 'heatmap', heatmapFrom],
+    queryFn: () => allLogs(id, heatmapFrom),
+    enabled: habit.isSuccess,
+  })
   const since = shiftDays(today, -HISTORY_DAYS)
   const logs = useQuery({
     queryKey: ['logs', id, 'history', since, page],
@@ -111,20 +243,25 @@ export default function HabitDetailPage() {
             Loading progress…
           </p>
         ) : (
-          <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-2xl bg-ember/15 p-4">
-              <dt className="text-sm text-ink-soft">Current streak</dt>
-              <dd className="mt-1 font-display text-3xl font-semibold text-ember-deep">
-                {plural(streak.data.current)}
-              </dd>
-            </div>
-            <div className={`${SURFACE} p-4`}>
-              <dt className="text-sm text-ink-soft">Longest streak</dt>
-              <dd className="mt-1 font-display text-3xl font-semibold">{plural(streak.data.longest)}</dd>
-            </div>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            <StreakBar streak={streak.data} plural={plural} />
             <Window label="Last 7 days" stats={stats.data.last7Days} />
             <Window label="Last 30 days" stats={stats.data.last30Days} />
           </dl>
+        )}
+        {heatmap.isError ? (
+          <div className="mt-3">
+            <p role="alert" className="text-alert">
+              {habitErrorMessage(heatmap.error)}
+            </p>
+            <button type="button" onClick={() => heatmap.refetch()} className={`${BUTTON} mt-3`}>
+              Try again
+            </button>
+          </div>
+        ) : !heatmap.data ? (
+          <div role="status" aria-label="Loading charts" className="mt-3 h-56 animate-pulse rounded-2xl bg-mist/45" />
+        ) : (
+          <Charts habit={habit.data} logs={heatmap.data} today={today} />
         )}
       </section>
 

@@ -5,6 +5,30 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-02 (G.3 — habit detail, visual)
+
+**Done** (`feat/habit-detail-visual`)
+- Habit detail: current streak as a bar against the longest ("3 days to beat your best" / "best run
+  yet"), 7/30-day completion as rings, a 26-week heatmap (partial days of a multi-count habit shade
+  lighter), and days done per week for 12 weeks against a dashed weekly-goal line.
+- Shared `components/DayGrid.tsx` (heatmap + legend) now draws the dashboard grid too; its squares
+  stop growing at ~1.5rem, so the 12-week grid no longer turns into big tiles on a wide card.
+- Checked in a real browser against the backend (seeded half a year of logs straight into the local
+  database, since the API only takes check-ins up to 7 days back): desktop, 360px phone, dark mode.
+
+**Found and fixed**
+- Dashboard completion could read "18 of 17 done": a 3-a-week habit done 6 times counted its extra
+  days, covering for missed days on other habits. Each habit now counts only up to what it expected.
+- Detail said "6 of 3 done" for the same case; it now says "6 done, goal 3". Prorated expectations
+  (fractional days for N-a-week habits) are rounded for display.
+
+**API limits that shaped this:** logs page size is capped at 100 and a range at 366 days, so the
+heatmap is half a year and fetches two pages at most.
+
+**Next:** Phase G is complete. Frontend work now follows the backend: M2 goals first.
+
+---
+
 ## 2026-10-02 (G.2 — dashboard v1)
 
 **Done** (`feat/dashboard`)

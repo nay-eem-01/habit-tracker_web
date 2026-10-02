@@ -41,6 +41,10 @@ describe('completion across habits', () => {
     expect(combineWindows([win(7, 7), win(1, 3)])).toEqual({ done: 8, expected: 10, rate: 0.8 })
   })
 
+  it("doesn't let extra days on one habit cover for missed days on another", () => {
+    expect(combineWindows([win(6, 3), win(0, 7)])).toEqual({ done: 3, expected: 10, rate: 0.3 })
+  })
+
   it('has no rate while nothing was expected', () => {
     expect(combineWindows([win(0, 0)]).rate).toBeNull()
     expect(combineWindows([]).rate).toBeNull()
