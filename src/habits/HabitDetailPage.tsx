@@ -4,12 +4,13 @@ import { Link, useParams } from 'react-router-dom'
 import { getStats, getStreak, listLogs, type WindowStats } from '../api/checkins'
 import { getHabit } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
+import { SECONDARY, SURFACE } from '../components/styles'
 import { useAuth } from '../auth/context'
 import { formatDay, shiftDays } from '../today/today'
 import { useToday } from '../today/useToday'
 import { describeSchedule } from './form'
 
-const BUTTON = 'rounded-md border border-mist px-3 py-1.5 text-sm font-medium hover:border-ink-soft disabled:opacity-60'
+const BUTTON = SECONDARY
 
 /** How far back the history reaches; the API allows up to a year. */
 const HISTORY_DAYS = 90
@@ -22,7 +23,7 @@ function percent(rate: number | null): string {
 
 function Window({ label, stats }: { label: string; stats: WindowStats }) {
   return (
-    <div className="border-t border-mist pt-3">
+    <div className={`${SURFACE} p-4`}>
       <dt className="text-sm text-ink-soft">{label}</dt>
       <dd className="mt-1 font-display text-3xl font-semibold text-lapis">{percent(stats.rate)}</dd>
       <dd className="text-sm text-ink-soft">
@@ -52,7 +53,7 @@ export default function HabitDetailPage() {
 
   if (habit.isPending && habit.fetchStatus !== 'idle') {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-10">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
         <p role="status" className="text-ink-soft">
           Loading habit…
         </p>
@@ -61,7 +62,7 @@ export default function HabitDetailPage() {
   }
   if (!habit.data) {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-10">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
         <p role="alert" className="text-alert">
           {habit.error ? habitErrorMessage(habit.error) : NOT_FOUND}
         </p>
@@ -77,7 +78,7 @@ export default function HabitDetailPage() {
   const plural = (n: number) => `${n} ${unit}${n === 1 ? '' : 's'}`
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <Link to="/habits" className="text-sm font-medium text-lapis underline underline-offset-2">
         All habits
       </Link>
@@ -110,14 +111,14 @@ export default function HabitDetailPage() {
             Loading progress…
           </p>
         ) : (
-          <dl className="mt-3 grid gap-6 sm:grid-cols-4">
-            <div className="border-t border-mist pt-3">
+          <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-2xl bg-ember/15 p-4">
               <dt className="text-sm text-ink-soft">Current streak</dt>
               <dd className="mt-1 font-display text-3xl font-semibold text-ember-deep">
                 {plural(streak.data.current)}
               </dd>
             </div>
-            <div className="border-t border-mist pt-3">
+            <div className={`${SURFACE} p-4`}>
               <dt className="text-sm text-ink-soft">Longest streak</dt>
               <dd className="mt-1 font-display text-3xl font-semibold">{plural(streak.data.longest)}</dd>
             </div>
@@ -148,9 +149,9 @@ export default function HabitDetailPage() {
           <p className="mt-3 text-ink-soft">No check-ins in the last {HISTORY_DAYS} days.</p>
         ) : (
           <>
-            <ul className="mt-2">
+            <ul className={`${SURFACE} mt-3 divide-y divide-mist/70 px-4`}>
               {logs.data.content.map((log) => (
-                <li key={log.date} className="flex items-baseline justify-between gap-4 border-b border-mist py-3">
+                <li key={log.date} className="flex items-baseline justify-between gap-4 py-3">
                   <span className="font-medium">{formatDay(log.date)}</span>
                   <span className={log.done ? 'font-medium text-lapis' : 'text-ink-soft'}>
                     {targetCount > 1 ? `${log.completedCount} of ${targetCount}` : log.done ? 'Done' : 'Not done'}
