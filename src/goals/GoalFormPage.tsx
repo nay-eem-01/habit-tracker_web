@@ -90,10 +90,11 @@ export default function GoalFormPage() {
   const save = useMutation({
     mutationFn: (values: GoalFormValues) =>
       goalId === null ? createGoal(toGoalRequest(values)) : updateGoal(goalId, toGoalRequest(values)),
-    onSuccess: async () => {
+    // on to the goal itself: a new one is where its habits get linked
+    onSuccess: async (goal) => {
       await queryClient.invalidateQueries({ queryKey: ['goals'] })
       await queryClient.invalidateQueries({ queryKey: ['goal'] })
-      navigate('/goals')
+      navigate(`/goals/${goal.id}`)
     },
   })
 
@@ -124,7 +125,7 @@ export default function GoalFormPage() {
             pendingLabel={editing ? 'Saving…' : 'Adding…'}
             pending={save.isPending}
             error={save.error}
-            cancelTo="/goals"
+            cancelTo={editing ? `/goals/${goalId}` : '/goals'}
             onSubmit={(values) => save.mutate(values)}
           />
         )}

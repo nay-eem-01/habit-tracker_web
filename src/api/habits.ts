@@ -3,6 +3,7 @@ import type { components } from './schema'
 
 /** Request bodies come from the generated schema; the spec leaves response payloads untyped, so those are written here. */
 export type HabitRequest = components['schemas']['HabitRequest']
+export type GoalLinkRequest = components['schemas']['GoalLinkRequest']
 export type FrequencyType = HabitRequest['frequencyType']
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
 
@@ -21,6 +22,9 @@ export interface Habit {
   /** HH:mm in the user's timezone, or absent for no reminder. */
   reminderTime?: string | null
   archived: boolean
+  /** The goal it is linked to, and the done days that make it "built" for that goal. */
+  goalId?: number | null
+  goalTargetDays?: number | null
   createdAt: string
 }
 
@@ -59,4 +63,13 @@ export function archiveHabit(id: number): Promise<Habit> {
 
 export function unarchiveHabit(id: number): Promise<Habit> {
   return api(`/api/habits/${id}/unarchive`, { method: 'POST' })
+}
+
+/** Links to an active goal, or changes the target of the current link. Moves it off any other goal. */
+export function linkGoal(id: number, request: GoalLinkRequest): Promise<Habit> {
+  return api(`/api/habits/${id}/goal`, { method: 'PUT', body: request })
+}
+
+export function unlinkGoal(id: number): Promise<Habit> {
+  return api(`/api/habits/${id}/goal`, { method: 'DELETE' })
 }

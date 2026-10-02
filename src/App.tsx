@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { GuestOnly, RequireAuth } from './auth/guards'
 import DashboardPage from './dashboard/DashboardPage'
+import GoalDetailPage from './goals/GoalDetailPage'
 import GoalFormPage from './goals/GoalFormPage'
 import GoalsPage from './goals/GoalsPage'
 import HabitDetailPage from './habits/HabitDetailPage'
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/habits/:id/edit" element={<HabitFormPage />} />
             <Route path="/goals" element={<GoalsPage />} />
             <Route path="/goals/new" element={<GoalFormPage />} />
+            <Route path="/goals/:id" element={<GoalDetailPage />} />
             <Route path="/goals/:id/edit" element={<GoalFormPage />} />
           </Route>
         </Route>

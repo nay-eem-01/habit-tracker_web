@@ -32,6 +32,12 @@ export function goalErrorMessage(error: unknown): string {
         return 'Some details need fixing. Check the highlighted fields.'
       case 'GOAL_NOT_FOUND':
         return "This goal doesn't exist, or it isn't yours."
+      case 'GOAL_ALREADY_CLOSED':
+        return 'This goal is already achieved or abandoned.'
+      case 'GOAL_NOT_ACTIVE':
+        return 'Only an active goal can have habits linked to it.'
+      case 'HABIT_ARCHIVED':
+        return 'That habit is archived. Restore it before linking it.'
     }
   }
   return habitErrorMessage(error)

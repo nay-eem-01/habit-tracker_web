@@ -5,6 +5,28 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-03 (M2.2 — goal detail and progress)
+
+**Done** (`feat/goal-detail`, stacked on `feat/goals`)
+- `/goals/:id`: status badge, deadline, description; overall progress as a ring; each linked habit
+  as "30 of 60 done days · 50%" with a bar, counting since the day it was linked. Archived habits
+  stay listed, greyed, and say they no longer count (the backend leaves them out of the average).
+- Link a habit (active habits not on this goal; one on another goal is marked, and the form warns
+  that linking moves it and restarts its count), change a link's target, unlink.
+- Mark achieved / abandon, each confirmed first since neither can be undone. Closed goals hide the
+  link and finish controls. At 100% an active goal says so but stays open: the user decides.
+- Goal list cards show progress and how many habits count; titles open the goal. Saving the goal
+  form now lands on the goal, since that's where habits get linked.
+- Habit detail shows the goal it counts toward, with its own done days against the target.
+- `Button` got `size="small"` so a primary action can sit next to secondary buttons at their height.
+- Checked against the live backend: linked two habits through the UI, checked one in, progress
+  read 1 of 30 (3%) and 2% overall; desktop and 360px.
+
+**Next:** frontend waits on the backend (M3 resources). A goals card on the dashboard is an easy
+add if wanted (one progress call per active goal, same N+1 caveat as G.2).
+
+---
+
 ## 2026-10-03 (M2.1 — goals list and form)
 
 **Done** (`feat/goals`)

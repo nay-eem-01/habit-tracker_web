@@ -2,9 +2,10 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Archive, Target, Trophy } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listGoals, type Goal, type GoalStatus } from '../api/goals'
+import { getGoalProgress, listGoals, type Goal, type GoalStatus } from '../api/goals'
 import { goalErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
+import { ProgressBar } from '../components/ProgressBar'
 import { SECONDARY, SURFACE } from '../components/styles'
 import { useToday } from '../today/useToday'
 import { deadline, formatInstant } from './goals'
@@ -23,12 +24,33 @@ const EMPTY: Record<GoalStatus, { icon: typeof Target; text: string }> = {
   ABANDONED: { icon: Archive, text: 'No abandoned goals.' },
 }
 
+/** The card's bar and number; nothing while it loads or if it fails, the goal page has the detail. */
+function CardProgress({ goalId }: { goalId: number }) {
+  const progress = useQuery({ queryKey: ['goal-progress', goalId], queryFn: () => getGoalProgress(goalId) })
+  if (!progress.data) return null
+  const { percent, habits } = progress.data
+  const counted = habits.filter((habit) => !habit.archived).length
+  return (
+    <div className="mt-3 max-w-md">
+      <div className="mb-1.5 flex justify-between gap-4 text-sm">
+        <span className="text-ink-soft">{counted === 0 ? 'No habits linked yet' : `${counted} habit${counted === 1 ? '' : 's'}`}</span>
+        <span className="font-medium text-link">{percent}%</span>
+      </div>
+      <ProgressBar percent={percent} />
+    </div>
+  )
+}
+
 function GoalCard({ goal, today, timezone }: { goal: Goal; today: string; timezone: string }) {
   const due = deadline(goal, today)
   return (
     <li className={`${SURFACE} flex items-start justify-between gap-4 p-4 sm:p-5`}>
-      <div className="min-w-0">
-        <h2 className="font-display text-xl font-semibold tracking-tight">{goal.title}</h2>
+      <div className="min-w-0 flex-1">
+        <h2 className="font-display text-xl font-semibold tracking-tight">
+          <Link to={`/goals/${goal.id}`} className="hover:text-link hover:underline underline-offset-2">
+            {goal.title}
+          </Link>
+        </h2>
         {goal.description && <p className="mt-1 line-clamp-2 text-ink-soft">{goal.description}</p>}
         <p className="mt-1 flex flex-wrap gap-x-4 text-sm text-ink-soft">
           {goal.status === 'ACHIEVED' && goal.achievedAt && (
@@ -37,6 +59,7 @@ function GoalCard({ goal, today, timezone }: { goal: Goal; today: string; timezo
           {due && <span className={due.overdue ? 'font-medium text-alert' : undefined}>{due.text}</span>}
           {!due && goal.status === 'ACTIVE' && <span>No deadline</span>}
         </p>
+        <CardProgress goalId={goal.id} />
       </div>
       <Link to={`/goals/${goal.id}/edit`} aria-label={`Edit ${goal.title}`} className={`${BUTTON} shrink-0`}>
         Edit

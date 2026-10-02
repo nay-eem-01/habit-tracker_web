@@ -1,10 +1,13 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { Target } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getStats, getStreak, listLogs, type HabitLog, type Streak, type WindowStats } from '../api/checkins'
+import { getGoal, getGoalProgress } from '../api/goals'
 import { getHabit, type Habit } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
 import { DayGrid, DayGridLegend } from '../components/DayGrid'
+import { ProgressBar } from '../components/ProgressBar'
 import { Ring } from '../components/Ring'
 import { SECONDARY, SURFACE } from '../components/styles'
 import { useAuth } from '../auth/context'
@@ -131,6 +134,36 @@ function WeeklyBars({ totals, goal }: { totals: WeekTotal[]; goal: number }) {
   )
 }
 
+/** The goal this habit is linked to, and how far its done days have got toward the target. */
+function GoalLink({ habitId, goalId }: { habitId: number; goalId: number }) {
+  const goal = useQuery({ queryKey: ['goal', goalId], queryFn: () => getGoal(goalId) })
+  const progress = useQuery({ queryKey: ['goal-progress', goalId], queryFn: () => getGoalProgress(goalId) })
+  const mine = progress.data?.habits.find((habit) => habit.habitId === habitId)
+  if (!goal.data) return null
+  return (
+    <Link
+      to={`/goals/${goalId}`}
+      className={`${SURFACE} mt-6 flex items-center gap-4 p-4 transition-transform duration-150 ease-out active:scale-[0.99] sm:p-5`}
+    >
+      <Target size={28} weight="duotone" className="shrink-0 text-link" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-ink-soft">Toward the goal</p>
+        <p className="truncate font-medium">{goal.data.title}</p>
+        {mine && (
+          <div className="mt-2 flex items-center gap-3">
+            <div className="flex-1">
+              <ProgressBar percent={mine.percent} muted={mine.archived} />
+            </div>
+            <span className="shrink-0 text-sm text-ink-soft">
+              {mine.doneDays} of {mine.goalTargetDays} done days
+            </span>
+          </div>
+        )}
+      </div>
+    </Link>
+  )
+}
+
 function Charts({ habit, logs, today }: { habit: Habit; logs: HabitLog[]; today: string }) {
   const weeks = habitHeatmap(habit, logs, today)
   const days = weeks.flat().filter((day) => !day.blank)
@@ -229,6 +262,8 @@ export default function HabitDetailPage() {
           Edit
         </Link>
       </div>
+
+      {habit.data.goalId != null && <GoalLink habitId={id} goalId={habit.data.goalId} />}
 
       <section aria-labelledby="progress" className="mt-8">
         <h2 id="progress" className="font-display text-2xl font-semibold tracking-tight">
