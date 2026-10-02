@@ -5,6 +5,27 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-02 (design tooling for G.1)
+
+**Done**
+- Skills installed at project level (`.claude/skills/`, git-ignored; `skills-lock.json` is committed,
+  restore with `npx skills experimental_install`): **impeccable** (`pbakaus/impeccable`),
+  **emil-design-eng** plus nine of Emil Kowalski's others for the web (animate, review-animations,
+  improve-animations, find-animation-opportunities, animation-vocabulary, pick-ui-library,
+  prototype, mobile-native, break-ui) from `emilkowalski/skills`, and **design-taste-frontend** from
+  `Leonxlnx/taste-skill`. Left out: his Swift/Expo/Apple/Sonner skills (not this app).
+- MCP servers in `.mcp.json`: **playwright** (`@playwright/mcp`, drives a real browser) and
+  **figma** (`https://mcp.figma.com/mcp`, remote). Claude Code asks to approve project MCP servers
+  the first time it starts here; Figma then needs a one-time sign-in (`/mcp` → figma → authenticate).
+
+**Decided**
+- taste-skill says it is aimed at landing pages and redesigns, *not* dashboards or multi-step product
+  UI. Use it for the sign-in/register feel and the overall look; lean on impeccable and Emil's
+  skills for the data screens (Today, habits, detail, dashboard).
+- impeccable's own `skills install` failed (its zip download was not a zip), so it was installed as
+  a skill through the skills CLI instead. That route adds **no** editor hook; impeccable's hook
+  (auto-runs its detector on UI edits) is not installed.
+
 ## 2026-10-02 (G.0 — test pass against the live backend)
 
 **Done**
