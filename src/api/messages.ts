@@ -23,3 +23,20 @@ export function fieldError(error: unknown, field: string, label: string): string
   const message = error.fields?.[field]
   return message ? `${label} ${message}` : undefined
 }
+
+/** Plain-language text for a failed habit save, load or archive. */
+export function habitErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.errorCode) {
+      case 'VALIDATION_FAILED':
+        return 'Some details need fixing. Check the highlighted fields.'
+      case 'HABIT_INVALID_FREQUENCY':
+        return "That schedule doesn't work. Pick at least one day, or between 1 and 6 times a week."
+      case 'HABIT_NOT_FOUND':
+        return "This habit doesn't exist, or it isn't yours."
+    }
+    if (error.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
+  }
+  if (error instanceof TypeError) return "Can't reach the server. Check your connection and try again."
+  return "That didn't work. Try again in a moment."
+}
