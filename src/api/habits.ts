@@ -34,8 +34,10 @@ export interface Page<T> {
 
 export const HABITS_PAGE_SIZE = 20
 
-export function listHabits(options: { archived: boolean; page: number }): Promise<Page<Habit>> {
-  return api('/api/habits', { params: { archived: options.archived, page: options.page, size: HABITS_PAGE_SIZE } })
+export function listHabits(options: { archived: boolean; page: number; size?: number }): Promise<Page<Habit>> {
+  return api('/api/habits', {
+    params: { archived: options.archived, page: options.page, size: options.size ?? HABITS_PAGE_SIZE },
+  })
 }
 
 export function getHabit(id: number): Promise<Habit> {
