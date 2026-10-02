@@ -40,9 +40,12 @@ export function activityWeeks(logsByHabit: HabitLog[][], habitCount: number, tod
   )
 }
 
-/** Completion over a window, across every habit: all the days done against all the days expected. */
+/**
+ * Completion over a window, across every habit: the days done against the days expected. Each habit counts
+ * only up to what it expected, so six gym days on a three-a-week habit can't cover for a missed daily one.
+ */
 export function combineWindows(windows: WindowStats[]): { done: number; expected: number; rate: number | null } {
-  const done = windows.reduce((sum, w) => sum + w.done, 0)
+  const done = windows.reduce((sum, w) => sum + Math.min(w.done, w.expected), 0)
   const expected = windows.reduce((sum, w) => sum + w.expected, 0)
   return { done, expected, rate: expected > 0 ? Math.min(done / expected, 1) : null }
 }

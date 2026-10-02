@@ -25,3 +25,6 @@ dist-ssr
 
 # Claude Code: installed skills and local settings (restore skills with `npx skills experimental_install`)
 .claude/
+
+# Playwright MCP screenshots and snapshots
+.playwright-mcp/

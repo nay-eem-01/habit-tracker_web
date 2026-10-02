@@ -5,8 +5,10 @@ import { getStats, getStreak, listLogs } from '../api/checkins'
 import { listHabits } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
+import { DayGrid, DayGridLegend } from '../components/DayGrid'
 import { SECONDARY, SURFACE } from '../components/styles'
-import { formatToday, todayStatus } from '../today/today'
+import { formatDay, formatToday, todayStatus } from '../today/today'
+import { doneOf } from '../habits/detail'
 import { useToday } from '../today/useToday'
 import { activityStart, activityWeeks, combineStats, topStreaks, type ActivityDay } from './dashboard'
 
@@ -14,14 +16,6 @@ import { activityStart, activityWeeks, combineStats, topStreaks, type ActivityDa
 const MAX_HABITS = 100
 /** The activity grid's whole span fits in one page of logs per habit. */
 const LOGS_PAGE = 100
-
-const SHADES: Record<ActivityDay['level'], string> = {
-  0: 'bg-mist/45',
-  1: 'bg-lapis/25',
-  2: 'bg-lapis/50',
-  3: 'bg-lapis/75',
-  4: 'bg-lapis',
-}
 
 const percent = (rate: number | null) => (rate === null ? '–' : `${Math.round(rate * 100)}%`)
 
@@ -45,20 +39,18 @@ function Rate({ label, rate, detail }: { label: string; rate: number | null; det
 }
 
 function ActivityGrid({ weeks }: { weeks: ActivityDay[][] }) {
+  const days = weeks.flat().filter((day) => !day.future)
+  const active = days.filter((day) => day.done > 0).length
+  const grid = weeks.map((week) =>
+    week.map((day) => ({ date: day.date, level: day.level, blank: day.future, title: `${formatDay(day.date)}: ${day.done} done` })),
+  )
   return (
     <div className="mt-4">
-      <div className="grid grid-flow-col gap-[3px] sm:gap-1" style={{ gridTemplateRows: 'repeat(7, auto)', gridTemplateColumns: `repeat(${weeks.length}, 1fr)` }}>
-        {weeks.flat().map((day) => (
-          <span
-            key={day.date}
-            title={day.future ? undefined : `${day.date}: ${day.done} done`}
-            className={`aspect-square rounded-[4px] ${day.future ? 'invisible' : SHADES[day.level]}`}
-          />
-        ))}
+      <DayGrid weeks={grid} label={`At least one habit finished on ${active} of the last ${days.length} days`} />
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-ink-soft">The darker the day, the more of your habits you finished.</p>
+        <DayGridLegend />
       </div>
-      <p className="mt-3 text-sm text-ink-soft">
-        Each square is a day, from {weeks[0][0].date}; the darker it is, the more of your habits you finished.
-      </p>
     </div>
   )
 }
@@ -164,12 +156,12 @@ export default function DashboardPage() {
               <Rate
                 label="Last 7 days"
                 rate={combined.last7.rate}
-                detail={combined.last7.rate === null ? 'Nothing was due yet' : `${combined.last7.done} of ${Math.round(combined.last7.expected)} done`}
+                detail={combined.last7.rate === null ? 'Nothing was due yet' : doneOf(combined.last7.done, combined.last7.expected)}
               />
               <Rate
                 label="Last 30 days"
                 rate={combined.last30.rate}
-                detail={combined.last30.rate === null ? 'Nothing was due yet' : `${combined.last30.done} of ${Math.round(combined.last30.expected)} done`}
+                detail={combined.last30.rate === null ? 'Nothing was due yet' : doneOf(combined.last30.done, combined.last30.expected)}
               />
             </dl>
           </Card>

@@ -11,6 +11,10 @@ needed from the API. Update this file in the same PR that finishes a step.
 
 ## Where we are (2026-10-02)
 
+**Phase G is done** (G.0–G.3): tested, redesigned with dark mode, a dashboard home page and visual habit
+detail. Everything left on the frontend now waits on the backend (M2–M6). The text below is how it
+stood before Phase G.
+
 F.1–F.6 are merged: sign in / register, habits (create, edit, archive), Today with one-tap
 check-in, habit detail (streaks, 7/30-day stats, history), notification bell. It works, but it
 looks like a first draft — **function came first, the visual design never got its own pass**, and
@@ -38,8 +42,8 @@ there is no dashboard. Two separate reasons the app feels thin:
 |---|---|---|
 | G.0 | **Test pass** against the live backend: register → habits → check-ins → detail → bell, at phone and desktop width. Fix what it finds. | ✅ |
 | G.1 | **Design pass**: soft surfaces, tactile check-ins, progress banner, empty/loading states, phone nav, dark mode that follows the system (PRs #10–#14). | ✅ |
-| G.2 | **Dashboard v1** (`/dashboard`, the home page; Today moved to `/today`): today's progress, longest current streaks, 7/30-day completion across habits, a 12-week activity grid. Built from existing endpoints (habits list + per-habit `/streak`, `/stats`, `/logs`). | 🔄 |
-| G.3 | **Habit detail, visual**: calendar heatmap of the history, streak and completion shown as charts, not just numbers. | ⬜ |
+| G.2 | **Dashboard v1** (`/`, the home page; Today moved to `/today`): today's progress, longest current streaks, 7/30-day completion across habits, a 12-week activity grid. Built from existing endpoints (PR #15). | ✅ |
+| G.3 | **Habit detail, visual**: 26-week calendar heatmap, current streak as a bar against the best, 7/30-day completion as rings, days-per-week bars against the weekly goal. | ✅ |
 
 Notes on G.2: per-habit calls are N+1 and fine for a handful of habits, not for dozens. If it feels
 slow, ask the backend for one summary endpoint (that is the backend's M5 dashboard) instead of
