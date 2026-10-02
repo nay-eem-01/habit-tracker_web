@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code: installed skills and local settings (restore skills with `npx skills experimental_install`)
+.claude/
