@@ -37,4 +37,5 @@ the API under one domain.
 - If the refresh fails, the handler passed to `setSessionLostHandler` runs — the app signs the user
   out there.
 
-The plan and roadmap (Phase F) live in the backend repo: `docs/ROADMAP.md`.
+The plan, roadmap and dev log live here: `docs/ROADMAP.md`, `docs/DEV_LOG.md`. The backend's plan is
+in the backend repo.
