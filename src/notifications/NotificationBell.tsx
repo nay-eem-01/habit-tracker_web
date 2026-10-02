@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Bell } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getUnreadCount, listNotifications, markAllRead, markRead, type Notification } from '../api/notifications'
@@ -6,18 +7,6 @@ import { timeAgo } from './time'
 
 /** How often the unread count is asked for while the tab is visible. */
 export const POLL_MS = 30_000
-
-function BellIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path
-        d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7ZM10 20a2 2 0 0 0 4 0"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
 
 export function NotificationBell() {
   const queryClient = useQueryClient()
@@ -69,9 +58,9 @@ export function NotificationBell() {
         aria-controls="notifications-panel"
         aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
         onClick={() => setOpen(!open)}
-        className="relative grid size-9 place-items-center rounded-md border border-mist hover:border-ink-soft"
+        className="relative grid size-10 place-items-center rounded-full bg-white shadow-[0_1px_2px_rgb(29_36_51/0.12)] transition-transform duration-150 ease-out active:scale-95"
       >
-        <BellIcon />
+        <Bell size={20} weight="bold" aria-hidden="true" />
         {count > 0 && (
           <span
             aria-hidden="true"
@@ -88,7 +77,7 @@ export function NotificationBell() {
         <section
           id="notifications-panel"
           aria-label="Notifications"
-          className="fixed inset-x-4 top-28 z-10 rounded-md border border-mist bg-white shadow-lg sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
+          className="fixed inset-x-4 top-28 z-10 pop rounded-2xl border border-mist bg-white shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)] sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
         >
           <div className="flex items-center justify-between gap-3 border-b border-mist px-4 py-3">
             <h2 className="font-display text-lg font-semibold tracking-tight">Notifications</h2>
