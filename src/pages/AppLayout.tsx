@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/context'
+import { NotificationBell } from '../notifications/NotificationBell'
 
 /** The frame around every signed-in page. */
 export default function AppLayout() {
@@ -33,6 +34,7 @@ export default function AppLayout() {
             ))}
           </nav>
           <div className="flex items-center gap-4 text-sm">
+            <NotificationBell />
             <span className="hidden text-ink-soft sm:inline">{state.user.name}</span>
             <button
               type="button"
