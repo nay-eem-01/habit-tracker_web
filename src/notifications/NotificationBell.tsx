@@ -82,11 +82,13 @@ export function NotificationBell() {
         )}
       </button>
 
+      {/* On a phone the bell sits mid-header, so a panel hanging off it runs off the left edge: pin it
+          to the screen instead. From sm up it hangs under the bell. */}
       {open && (
         <section
           id="notifications-panel"
           aria-label="Notifications"
-          className="absolute right-0 z-10 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-md border border-mist bg-white shadow-lg"
+          className="fixed inset-x-4 top-28 z-10 rounded-md border border-mist bg-white shadow-lg sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
         >
           <div className="flex items-center justify-between gap-3 border-b border-mist px-4 py-3">
             <h2 className="font-display text-lg font-semibold tracking-tight">Notifications</h2>

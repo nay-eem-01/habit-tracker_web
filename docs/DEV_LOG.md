@@ -5,6 +5,32 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-02 (G.0 — test pass against the live backend)
+
+**Done**
+- Ran the real app in headless Chrome against the real backend and local Postgres, desktop (1280)
+  then phone (390): redirect to sign in, wrong password message, register, duplicate email message,
+  create habits (daily, daily target), Today, one-tap check-in, +1, reload keeps the session and the
+  check-in, habit detail (streak, stats, history), bell, archive, sign out. 22 of 23 steps passed;
+  the one failure was the test's own wrong assumption (it had archived a habit earlier).
+- API contract checked through the Vite proxy: register, login, 409 on duplicate, 401 on wrong
+  password, habits, check-in, streak, stats, logs, notifications, cookie refresh — all as the
+  frontend expects.
+
+**Found and fixed** (`fix/bell-panel-phone`)
+- Phone: the notification panel hung off the bell and ran off the left edge of the screen. It is now
+  pinned to the screen on phones and hangs under the bell from `sm` up.
+- 320px phones: the header (logo, links, bell, Sign out) was wider than the screen after the bell was
+  added. The links now drop to their own row on phones. Verified at 320, 360, 390, 768, 1280: no
+  sideways overflow, panel fully on screen.
+
+**Seen, not a bug**
+- Every first visit logs a red `401 POST /api/auth/refresh` in the console: that is the app asking
+  "am I still signed in?". Harmless; could be quieted later.
+- The look is plain (flat lists, no hierarchy beyond type) — that is G.1.
+
+**Next:** G.1 design pass.
+
 ## 2026-10-02 (planning moves here)
 
 **Done**

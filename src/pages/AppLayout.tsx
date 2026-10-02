@@ -12,11 +12,12 @@ export default function AppLayout() {
   return (
     <div className="min-h-dvh">
       <header className="border-b border-mist">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        {/* On a phone the links drop to their own row, so the bell and Sign out always fit, even at 320px. */}
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-4 sm:px-6">
           <Link to="/" className="font-display text-xl font-semibold tracking-tight">
             DevHabit
           </Link>
-          <nav aria-label="Main" className="flex gap-4 font-medium sm:gap-5">
+          <nav aria-label="Main" className="order-last flex w-full gap-5 font-medium sm:order-none sm:w-auto">
             {[
               { to: '/', label: 'Today', end: true },
               { to: '/habits', label: 'Habits', end: false },
