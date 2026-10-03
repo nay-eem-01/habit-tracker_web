@@ -43,6 +43,20 @@ export function goalErrorMessage(error: unknown): string {
   return habitErrorMessage(error)
 }
 
+/** Plain-language text for a failed note or link save, load or change. */
+export function resourceErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.errorCode) {
+      case 'RESOURCE_NOT_FOUND':
+        return "This note or link doesn't exist, or it isn't yours."
+      case 'RESOURCE_INVALID':
+        // the server says which rule it broke ("A link needs a url"), in plain words already
+        return error.message
+    }
+  }
+  return goalErrorMessage(error)
+}
+
 /** Plain-language text for a failed habit save, load or archive. */
 export function habitErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {

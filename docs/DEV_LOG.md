@@ -5,6 +5,37 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-03 (M3 — library: notes and links)
+
+**Done** (`feat/resources`, M3.1 + M3.2 in one PR)
+- Backend `staging` briefly had no resources: #48 reverted goal resources on the base branch and #49
+  carried that into `staging`, deleting the whole package. Nayeem restored it in backend #50 before
+  this work started; built against that.
+- `src/api/resources.ts`: list (type, title search, goal), a goal's list, get, create, replace, pin /
+  unpin, delete. `resourceErrorMessage` shows the server's own reason for `RESOURCE_INVALID`
+  ("A link needs a url", "The url must be an http or https address").
+- `/resources` "Library": All / Notes / Links, title search debounced 300 ms (one request per word,
+  not per key), `?goalId=` with a removable goal chip, paged. Cards: note body as Markdown (long
+  notes fold with Show all), links open in a new tab with `noopener noreferrer` and show the site,
+  the goal they belong to, a pin toggle, Edit, and Delete with a confirm (deleting is permanent).
+- `/resources/new` and `/resources/:id/edit`: Note / Link, title, address (links), Markdown note or
+  comment, goal (active goals, plus the current one even if closed), pin. `?back=` returns to where
+  it was opened from (only paths inside the app are followed); `?goalId=` and `?type=LINK` preset it.
+- Goal page: "Notes and links" section (first five, pinned first) between linking habits and
+  finishing, shown for closed goals too.
+- Nav: five links didn't fit at 320px, so "Dashboard" is now "Home" (the page title is unchanged)
+  and phone padding is tighter. Measured at 320px: no sideways scroll.
+- Markdown safety: `react-markdown` with `skipHtml`; links pass `safeHref` (http/https only, else
+  plain text); images render as their alt text. Tested with a note carrying `<img onerror>`, a
+  `javascript:` link and raw `<b>`.
+- Bundle: `react-markdown` pushed the main chunk over Vite's 500 kB warning (+45 kB gzipped), so
+  `Markdown` is lazy-loaded; the main chunk is 456 kB, the parser a separate 36 kB gzipped chunk.
+- Checked against the live backend at desktop, 360px and 320px with seeded notes and links.
+
+**Next:** waits on the backend — M4 levels, and R.3 file uploads once designed.
+
+---
+
 ## 2026-10-03 (M2.2 — goal detail and progress)
 
 **Done** (`feat/goal-detail`, stacked on `feat/goals`)

@@ -8,6 +8,8 @@ import GoalsPage from './goals/GoalsPage'
 import HabitDetailPage from './habits/HabitDetailPage'
 import HabitFormPage from './habits/HabitFormPage'
 import HabitsPage from './habits/HabitsPage'
+import LibraryPage from './resources/LibraryPage'
+import ResourceFormPage from './resources/ResourceFormPage'
 import TodayPage from './today/TodayPage'
 import AppLayout from './pages/AppLayout'
 import RegisterPage from './pages/RegisterPage'
@@ -33,6 +35,9 @@ export default function App() {
             <Route path="/goals/new" element={<GoalFormPage />} />
             <Route path="/goals/:id" element={<GoalDetailPage />} />
             <Route path="/goals/:id/edit" element={<GoalFormPage />} />
+            <Route path="/resources" element={<LibraryPage />} />
+            <Route path="/resources/new" element={<ResourceFormPage />} />
+            <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

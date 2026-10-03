@@ -4,6 +4,25 @@
  */
 
 export interface paths {
+    "/api/resources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of my resources */
+        get: operations["get"];
+        /** Replace a resource */
+        put: operations["update"];
+        post?: never;
+        /** Delete a resource for good */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/habits/{id}": {
         parameters: {
             query?: never;
@@ -12,9 +31,9 @@ export interface paths {
             cookie?: never;
         };
         /** One of my habits */
-        get: operations["get"];
+        get: operations["get_1"];
         /** Replace a habit's details and schedule */
-        put: operations["update"];
+        put: operations["update_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -48,10 +67,62 @@ export interface paths {
             cookie?: never;
         };
         /** One of my goals */
-        get: operations["get_1"];
+        get: operations["get_2"];
         /** Replace a goal's title, description and target date */
-        put: operations["update_1"];
+        put: operations["update_2"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My resources, pinned first then newest */
+        get: operations["list"];
+        put?: never;
+        /** Save a note or a link */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/resources/{id}/unpin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unpin a resource */
+        post: operations["unpin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/resources/{id}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pin a resource so it is listed first */
+        post: operations["pin"];
         delete?: never;
         options?: never;
         head?: never;
@@ -100,10 +171,10 @@ export interface paths {
             cookie?: never;
         };
         /** My habits, newest first by default */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         /** Create a habit */
-        post: operations["create"];
+        post: operations["create_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -169,10 +240,10 @@ export interface paths {
             cookie?: never;
         };
         /** My goals, newest first by default */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         /** Create a goal */
-        post: operations["create_1"];
+        post: operations["create_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -289,7 +360,7 @@ export interface paths {
             cookie?: never;
         };
         /** My notifications, unread first, then newest first */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -383,6 +454,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/goals/{goalId}/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A goal's resources, pinned first then newest */
+        get: operations["listForGoal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/me": {
         parameters: {
             query?: never;
@@ -404,6 +492,41 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ResourceRequest: {
+            /**
+             * @example LINK
+             * @enum {string}
+             */
+            type: "NOTE" | "LINK";
+            /** @example Couch to 5K plan */
+            title: string;
+            /** @description Markdown. Required for a NOTE; an optional comment for a LINK. */
+            body?: string;
+            /**
+             * @description http or https address. Required for a LINK, not allowed on a NOTE.
+             * @example https://example.com/plan
+             */
+            url?: string;
+            /**
+             * Format: int64
+             * @description The goal it belongs to. Omit for a stand-alone resource.
+             * @example 1
+             */
+            goalId?: number;
+            /** @description Shown first. Defaults to false. */
+            pinned?: boolean;
+        };
+        HttpResponse: {
+            status?: string;
+            success?: boolean;
+            message?: string;
+            errorCode?: string;
+            correlationId?: string;
+            fields?: {
+                [key: string]: string;
+            };
+            payload?: unknown;
+        };
         /** @description SPECIFIC_DAYS needs days; X_TIMES_PER_WEEK needs timesPerWeek (1-6); DAILY needs neither */
         FrequencyConfig: {
             /**
@@ -442,17 +565,6 @@ export interface components {
              * @example 07:30
              */
             reminderTime?: string;
-        };
-        HttpResponse: {
-            status?: string;
-            success?: boolean;
-            message?: string;
-            errorCode?: string;
-            correlationId?: string;
-            fields?: {
-                [key: string]: string;
-            };
-            payload?: unknown;
         };
         GoalLinkRequest: {
             /**
@@ -535,6 +647,108 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description The resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description No such resource, or not yours (RESOURCE_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceRequest"];
+            };
+        };
+        responses: {
+            /** @description The updated resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid fields (VALIDATION_FAILED, RESOURCE_INVALID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description No such resource or goal, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such resource, or not yours (RESOURCE_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description The habit */
             200: {
                 headers: {
@@ -555,7 +769,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -683,7 +897,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -714,7 +928,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -748,6 +962,140 @@ export interface operations {
                 };
             };
             /** @description No such goal, or not yours (GOAL_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                /** @description Only this goal's resources */
+                goalId?: number;
+                /** @description NOTE or LINK */
+                type?: "NOTE" | "LINK";
+                /** @description Title contains this text, any case */
+                q?: string;
+                page?: number;
+                /** @description 1-100 */
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created; Location points at the resource */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid fields, or fields that don't fit the type (RESOURCE_INVALID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description The goal isn't yours (GOAL_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    unpin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description No such resource, or not yours (RESOURCE_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    pin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The resource; pinning twice is fine */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description No such resource, or not yours (RESOURCE_NOT_FOUND) */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -809,7 +1157,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: {
                 /** @description true for the archived ones */
@@ -839,7 +1187,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -987,7 +1335,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: {
                 /** @description ACTIVE, ACHIEVED or ABANDONED; omit for all */
@@ -1017,7 +1365,7 @@ export interface operations {
             };
         };
     };
-    create_1: {
+    create_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1256,7 +1604,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: {
                 page?: number;
@@ -1422,6 +1770,41 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Progress 0-100 %, computed from the habits' done days */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description No such goal, or not yours (GOAL_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    listForGoal: {
+        parameters: {
+            query?: {
+                page?: number;
+                /** @description 1-100 */
+                size?: number;
+            };
+            header?: never;
+            path: {
+                goalId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of resources */
             200: {
                 headers: {
                     [name: string]: unknown;

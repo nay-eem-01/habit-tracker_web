@@ -41,20 +41,21 @@ export default function AppLayout() {
           </Link>
           <nav
             aria-label="Main"
-            className="order-last flex w-full gap-1 rounded-full bg-mist/45 p-1 text-sm font-medium sm:text-base md:order-none md:w-auto"
+            className="order-last flex w-full gap-0.5 rounded-full bg-mist/45 p-1 text-sm font-medium sm:text-base md:order-none md:w-auto"
           >
             {[
-              { to: '/', label: 'Dashboard', end: true },
+              { to: '/', label: 'Home', end: true },
               { to: '/today', label: 'Today', end: false },
               { to: '/habits', label: 'Habits', end: false },
               { to: '/goals', label: 'Goals', end: false },
+              { to: '/resources', label: 'Library', end: false },
             ].map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `flex-1 rounded-full px-2 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out md:flex-none md:px-4 ${
+                  `flex-1 rounded-full px-1.5 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out md:flex-none md:px-4 ${
                     isActive ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
                   }`
                 }
