@@ -372,7 +372,11 @@ export default function GoalDetailPage() {
     mutationFn: (outcome: GoalStatus) => (outcome === 'ACHIEVED' ? achieveGoal(id) : abandonGoal(id)),
     onSuccess: (updated) => {
       queryClient.setQueryData(['goal', id], updated)
-      return queryClient.invalidateQueries({ queryKey: ['goals'] })
+      // an achieved goal is worth XP
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['goals'] }),
+        queryClient.invalidateQueries({ queryKey: ['level'] }),
+      ])
     },
   })
 

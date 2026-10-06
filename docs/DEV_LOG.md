@@ -5,6 +5,25 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-06 (M4 — levels)
+
+**Done** (`feat/levels`, stacked on `feat/file-resources`)
+- `api/level.ts` (`GET /api/me/level`) and `useLevel` (`['level']`, refreshed after every check-in
+  on Today and when a goal is achieved).
+- Header badge: tier-coloured diamond + "Lv n", or only the number in a tier-coloured ring on phones
+  (at 320px the full badge wrapped the header to three rows). Screen readers hear the level, tier
+  and XP to the next level.
+- Dashboard card: level in a tier diamond, XP earned, a progress bar to the next level, "90 XP to
+  level 2", and a "How XP works" list matching the backend's rules.
+- Level-up moment: the last level seen is kept per user in `localStorage`. A first visit only
+  remembers it; a higher level later (a check-in, an achieved goal, another device) shows a card
+  with a burst of squares from behind its top edge, and names a new tier when it opens one. "Nice"
+  marks it seen. Reduced motion: a fade, no burst. If storage is blocked, it just isn't announced.
+
+**Checked live:** badge, card, and the moment (by lowering the remembered level), desktop and 320px.
+
+---
+
 ## 2026-10-06 (M3.3 — files in the library)
 
 **Done** (`feat/file-resources`; first of three stacked PRs for the backend's R.3, M4 and M5)

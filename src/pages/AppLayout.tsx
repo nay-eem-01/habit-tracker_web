@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/context'
+import { LevelBadge } from '../level/LevelBadge'
+import { LevelUp } from '../level/LevelUp'
 import { NotificationBell } from '../notifications/NotificationBell'
 import { UserMenu } from './UserMenu'
 
@@ -64,13 +66,15 @@ export default function AppLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LevelBadge />
             <NotificationBell />
             <UserMenu user={state.user} onSignOut={leave} />
           </div>
         </div>
       </header>
       <Outlet />
+      <LevelUp userId={state.user.id} />
 
       {signingOut && (
         <div

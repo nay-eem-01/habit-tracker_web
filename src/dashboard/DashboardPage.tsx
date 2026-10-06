@@ -9,6 +9,8 @@ import { DayGrid, DayGridLegend } from '../components/DayGrid'
 import { SECONDARY, SURFACE } from '../components/styles'
 import { formatDay, formatToday, todayStatus } from '../today/today'
 import { doneOf } from '../habits/detail'
+import { LevelCard } from '../level/LevelCard'
+import { useLevel } from '../level/useLevel'
 import { useToday } from '../today/useToday'
 import { activityStart, activityWeeks, combineStats, topStreaks, type ActivityDay } from './dashboard'
 
@@ -72,6 +74,7 @@ export default function DashboardPage() {
   const today = useToday(timezone)
   const since = activityStart(today)
 
+  const level = useLevel()
   const habits = useQuery({
     queryKey: ['habits', { archived: false, all: true }],
     queryFn: () => listHabits({ archived: false, page: 0, size: MAX_HABITS }),
@@ -186,6 +189,12 @@ export default function DashboardPage() {
               </ol>
             )}
           </Card>
+
+          {level.data && (
+            <div className="sm:col-span-2">
+              <LevelCard level={level.data} />
+            </div>
+          )}
 
           <div className="sm:col-span-2">
             <Card title="Last 12 weeks">
