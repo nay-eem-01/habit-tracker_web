@@ -5,6 +5,35 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-06 (M3.3 — files in the library)
+
+**Done** (`feat/file-resources`; first of three stacked PRs for the backend's R.3, M4 and M5)
+- `api/client.ts`: a `FormData` body goes as multipart (no JSON content type, the browser sets the
+  boundary); `apiBlob` fetches a file's bytes with the token and the same one-time silent refresh.
+- `uploadResourceFile` (multipart: `file` + title, body, goalId, pinned) and `downloadResourceFile`.
+  Messages for `FILE_EMPTY`, `FILE_TOO_LARGE`, `FILE_QUOTA_EXCEEDED`, `FILE_TYPE_NOT_ALLOWED`,
+  `FILE_NOT_FOUND`.
+- Form: a third kind, File, when adding: a drop-zone picker; the title starts as the file name; the
+  extension, emptiness and the 10 MB limit are checked before sending (the server still checks the
+  bytes). Editing a file shows the file and changes only title, comment, goal and pin; a note or
+  link can't become a file and a file stays a file, as the backend requires.
+- Cards: file icon by type, "name · size", Download (blob saved under its own name), and images
+  (the server only stores PNG / JPEG / WebP / GIF) previewed inline from the authenticated fetch.
+- Library has a Files tab; the goal section is now "Notes, links and files".
+
+**Backend bug found (not fixed here):** the first real upload failed with a 500. `resources` was
+created before `FILE` existed, and `ddl-auto=update` never updates Hibernate's enum check
+constraint, so `resources_type_check` still allowed only NOTE and LINK. Backend tests use a fresh
+database, so they pass. Any database created before R.3 needs the constraint widened, or a
+migration. I widened it in the local dev database only, to finish checking uploads:
+`alter table resources drop constraint resources_type_check, add constraint resources_type_check
+check (type in ('NOTE','LINK','FILE'))`. No other enum constraint is stale.
+
+**Checked live:** uploaded a PNG on a goal and a .md file, the preview loaded, and the download
+saved the file under its name.
+
+---
+
 ## 2026-10-03 (M3 — library: notes and links)
 
 **Done** (`feat/resources`, M3.1 + M3.2 in one PR)

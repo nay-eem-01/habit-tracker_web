@@ -13,7 +13,7 @@ needed from the API. Update this file in the same PR that finishes a step.
 
 **Phase G is done** (G.0–G.3): tested, redesigned with dark mode, a dashboard home page and visual habit
 detail. **M2 goals and M3 resources are done** on the backend's APIs. Next frontend work waits on the
-backend again (M4 levels; file uploads for resources are being designed there).
+backend again.
 The text below is how it stood before Phase G.
 
 F.1–F.6 are merged: sign in / register, habits (create, edit, archive), Today with one-tap
@@ -63,6 +63,7 @@ adding client-side cleverness. Record the ask in the backend dev log when it is 
 |---|---|---|
 | M3.1 | **Library** (`/resources`, "Library" in the nav, which now says Home for the dashboard): notes and links, pinned first, All / Notes / Links, title search, `?goalId=` filter. Add / edit (kind, title, address, Markdown note or comment, goal, pin), pin from the card, delete with a confirm. | ✅ |
 | M3.2 | **Notes and links on the goal page**: the first five, pinned first, with Add (files it under the goal and returns there) and "See all N in the library". | ✅ |
+| M3.3 | **Files** (backend R.3): upload PNG / JPEG / WebP / GIF / PDF / .txt / .md up to 10 MB from the form (title taken from the file name, type and size checked before sending), Files tab, download through the authenticated client, images previewed inline. A file keeps its file when edited. | ✅ |
 
 Notes are Markdown, rendered with `react-markdown`: raw HTML is dropped and only http(s) links are
 clickable. The parser is lazy-loaded (its own ~36 kB gzipped chunk) so pages without notes don't pay
@@ -73,7 +74,7 @@ for it.
 | Backend | Frontend screens | Status |
 |---|---|---|
 | M2 Goals | goals list and detail, link habits to goals, progress | ✅ Phase M2 above |
-| M3 Resources | resource library per habit/goal | ✅ Phase M3 above (files wait on backend R.3) |
+| M3 Resources | resource library per habit/goal | ✅ Phase M3 above |
 | M4 Levels | level, XP bar, level-up moment | ⏸ |
 | M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ⏸ |
 | M6 AI insights | insights panel on the dashboard | ⏸ |

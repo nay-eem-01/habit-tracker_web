@@ -43,12 +43,22 @@ export function goalErrorMessage(error: unknown): string {
   return habitErrorMessage(error)
 }
 
-/** Plain-language text for a failed note or link save, load or change. */
+/** Plain-language text for a failed note, link or file save, load, upload or download. */
 export function resourceErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     switch (error.errorCode) {
       case 'RESOURCE_NOT_FOUND':
         return "This note or link doesn't exist, or it isn't yours."
+      case 'FILE_EMPTY':
+        return 'That file is empty. Choose another one.'
+      case 'FILE_TOO_LARGE':
+        return 'That file is over 10 MB. Choose a smaller one.'
+      case 'FILE_QUOTA_EXCEEDED':
+        return 'Your 100 MB of file storage is full. Delete a file to make room.'
+      case 'FILE_TYPE_NOT_ALLOWED':
+        return 'That kind of file isn’t allowed. Use PNG, JPEG, WebP, GIF, PDF, or a .txt or .md text file.'
+      case 'FILE_NOT_FOUND':
+        return 'This file is missing. Delete the entry and upload it again.'
       case 'RESOURCE_INVALID':
         // the server says which rule it broke ("A link needs a url"), in plain words already
         return error.message

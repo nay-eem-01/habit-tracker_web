@@ -1,9 +1,11 @@
-import { ArrowSquareOut, LinkSimple, NotePencil, PushPin } from '@phosphor-icons/react'
-import { lazy, Suspense, useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { ArrowSquareOut, DownloadSimple, FileImage, FilePdf, FileText, LinkSimple, NotePencil, PushPin } from '@phosphor-icons/react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { Resource } from '../api/resources'
+import { resourceErrorMessage } from '../api/messages'
+import { downloadResourceFile, type Resource } from '../api/resources'
 import { SECONDARY, SURFACE } from '../components/styles'
-import { hostOf, safeHref } from './resources'
+import { formatBytes, hostOf, isImage, safeHref, saveBlob } from './resources'
 
 const BUTTON = SECONDARY
 
@@ -13,6 +15,39 @@ const Markdown = lazy(() => import('../components/Markdown'))
 /** Notes longer than this start folded, so one long note doesn't push the rest off the page. */
 const FOLD_CHARS = 600
 const FOLD_LINES = 10
+
+function iconFor(resource: Resource) {
+  if (resource.type === 'LINK') return { Icon: LinkSimple, label: 'Link' }
+  if (resource.type === 'NOTE') return { Icon: NotePencil, label: 'Note' }
+  const type = resource.file?.contentType ?? ''
+  if (type === 'application/pdf') return { Icon: FilePdf, label: 'PDF file' }
+  if (isImage(type)) return { Icon: FileImage, label: 'Image file' }
+  return { Icon: FileText, label: 'Text file' }
+}
+
+/** An uploaded image, fetched with the token (a plain <img src> can't send it) and shown inline. */
+function ImagePreview({ resource }: { resource: Resource }) {
+  const blob = useQuery({
+    queryKey: ['resource-file', resource.id],
+    queryFn: () => downloadResourceFile(resource.id),
+    staleTime: Infinity,
+  })
+  const image = useRef<HTMLImageElement>(null)
+  // the address only lives as long as the image shows it
+  useEffect(() => {
+    if (!blob.data || !image.current) return
+    const url = URL.createObjectURL(blob.data)
+    image.current.src = url
+    return () => URL.revokeObjectURL(url)
+  }, [blob.data])
+
+  if (blob.isError) return null
+  return blob.data ? (
+    <img ref={image} alt={resource.title} className="max-h-72 max-w-full rounded-xl border border-mist/70 object-contain" />
+  ) : (
+    <div role="status" aria-label="Loading image" className="h-40 w-full max-w-sm animate-pulse rounded-xl bg-mist/45" />
+  )
+}
 
 interface ResourceCardProps {
   resource: Resource
@@ -31,12 +66,17 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
   const long = body.length > FOLD_CHARS || body.split('\n').length > FOLD_LINES
   const [open, setOpen] = useState(!long)
   const href = resource.type === 'LINK' ? safeHref(resource.url) : null
-  const Icon = resource.type === 'LINK' ? LinkSimple : NotePencil
+  const { Icon, label } = iconFor(resource)
+  const file = resource.type === 'FILE' ? resource.file : null
+  const download = useMutation({
+    mutationFn: () => downloadResourceFile(resource.id),
+    onSuccess: (blob) => saveBlob(blob, file?.name ?? resource.title),
+  })
 
   return (
     <li className={`${SURFACE} p-4 sm:p-5`}>
       <div className="flex items-start gap-3">
-        <Icon size={22} weight="duotone" className="mt-0.5 shrink-0 text-link" aria-label={resource.type === 'LINK' ? 'Link' : 'Note'} />
+        <Icon size={22} weight="duotone" className="mt-0.5 shrink-0 text-link" aria-label={label} />
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-lg font-semibold tracking-tight break-words">
             {href ? (
@@ -48,9 +88,14 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
               resource.title
             )}
           </h2>
-          {(resource.type === 'LINK' || goal || resource.pinned) && (
+          {(resource.type !== 'NOTE' || goal || resource.pinned) && (
             <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-ink-soft">
               {resource.type === 'LINK' && resource.url && <span className="truncate">{hostOf(resource.url)}</span>}
+              {file && (
+                <span className="min-w-0 break-all">
+                  {file.name} · {formatBytes(file.sizeBytes)}
+                </span>
+              )}
               {goal && (
                 <Link to={`/goals/${goal.id}`} className="hover:text-link hover:underline underline-offset-2">
                   Goal: {goal.title}
@@ -74,6 +119,12 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
           <PushPin size={20} weight={resource.pinned ? 'fill' : 'regular'} aria-hidden="true" />
         </button>
       </div>
+
+      {file && isImage(file.contentType) && (
+        <div className="mt-3 sm:pl-[34px]">
+          <ImagePreview resource={resource} />
+        </div>
+      )}
 
       {body && (
         <div className="mt-3 sm:pl-[34px]">
@@ -109,6 +160,19 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
           </>
         ) : (
           <>
+            {file && (
+              <button
+                type="button"
+                disabled={download.isPending}
+                aria-busy={download.isPending || undefined}
+                onClick={() => download.mutate()}
+                aria-label={`Download ${file.name}`}
+                className={`${BUTTON} gap-1.5`}
+              >
+                <DownloadSimple size={16} weight="bold" aria-hidden="true" />
+                {download.isPending ? 'Downloading…' : 'Download'}
+              </button>
+            )}
             <Link
               to={`/resources/${resource.id}/edit?back=${encodeURIComponent(back)}`}
               aria-label={`Edit ${resource.title}`}
@@ -122,6 +186,11 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
           </>
         )}
       </div>
+      {download.error && (
+        <p role="alert" className="mt-2 text-sm text-alert sm:pl-[34px]">
+          {resourceErrorMessage(download.error)}
+        </p>
+      )}
     </li>
   )
 }
