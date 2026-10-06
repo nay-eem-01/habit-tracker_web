@@ -5,6 +5,34 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-06 (M5 — dashboard on the server's numbers)
+
+**Done** (`feat/dashboard-api`, stacked on `feat/levels`)
+- `api/dashboard.ts`: `GET /api/dashboard` and `GET /api/dashboard/patterns`, typed from the
+  backend records. The dashboard no longer makes 3 calls per habit; `dashboard.ts`'s client maths
+  (`combineStats`, `topStreaks`, `activityWeeks`) is gone, replaced by display helpers (heatmap
+  week columns, shade levels, "+12 pts" changes, hour labels).
+- Cards: Today (done of due, plus streaks that end tonight with the check-ins still needed);
+  completion for 7 / 30 / 90 days, each with its change against the same stretch before; last 30
+  days going well and slipping; active goals with progress; the level card from M4.
+- Patterns: a 365-day heatmap (53 week columns; on a phone it scrolls inside its card and opens on
+  the latest weeks), completion by weekday with the strongest and weakest named, check-ins by hour
+  with the peak.
+- The dashboard query is fetched fresh on every visit (one call), so check-ins made on Today show at
+  once; patterns are cached for a minute.
+
+**Found and fixed in the browser (sparse real data)**
+- "Going well" listed habits at 0%: the server sends the top three by rate even at zero. Only rates
+  above 0 are shown.
+- "Strongest on Mondays" with every weekday at 0%: the server breaks ties by the earlier day. When
+  every day has the same rate, no strongest or weakest is named.
+- At 360px the year heatmap stretched its grid column and the whole page scrolled sideways; the
+  grids now use `grid-cols-1` (`minmax(0, 1fr)`) so the heatmap scrolls inside its card.
+
+**Next:** waits on the backend: M6 AI insights, 2.3 Google sign-in.
+
+---
+
 ## 2026-10-06 (M4 — levels)
 
 **Done** (`feat/levels`, stacked on `feat/file-resources`)

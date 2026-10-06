@@ -9,11 +9,11 @@ needed from the API. Update this file in the same PR that finishes a step.
 **Branch flow:** one step per branch, taken from `staging` (or the previous step's branch), PR into
 `staging`. Claude commits and pushes and gives PR links; Nayeem opens and merges.
 
-## Where we are (2026-10-03)
+## Where we are (2026-10-06)
 
-**Phase G is done** (G.0–G.3): tested, redesigned with dark mode, a dashboard home page and visual habit
-detail. **M2 goals and M3 resources are done** on the backend's APIs. Next frontend work waits on the
-backend again.
+**Phase G is done** (G.0–G.3), and so is everything the backend offers so far: **M2 goals, M3
+resources (notes, links, files), M4 levels and M5 dashboard**. Left: M6 AI insights and Google
+sign-in, both waiting on the backend.
 The text below is how it stood before Phase G.
 
 F.1–F.6 are merged: sign in / register, habits (create, edit, archive), Today with one-tap
@@ -75,6 +75,12 @@ for it.
 |---|---|---|
 | M4.1 | **Level**: header badge (tier-coloured; just the number on phones), dashboard card with tier, XP bar, XP to the next level and how XP is earned, and a level-up moment the first time a higher level is seen (after a check-in, an achieved goal, or on another device). | ✅ |
 
+## Now — Phase M5: dashboard API (backend A.1–A.3 are done)
+
+| # | Step | Status |
+|---|---|---|
+| M5.1 | **Dashboard on `/api/dashboard`** (replaces G.2's per-habit calls and client maths): today with streaks at risk tonight, 7 / 30 / 90-day completion with the change against the stretch before, going well / slipping, active goals with progress, level. **Patterns** from `/api/dashboard/patterns`: a year heatmap (scrolls on phones, opens on the latest weeks), completion by weekday with the strongest and weakest day, check-ins by hour with the peak. | ✅ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |
@@ -82,7 +88,7 @@ for it.
 | M2 Goals | goals list and detail, link habits to goals, progress | ✅ Phase M2 above |
 | M3 Resources | resource library per habit/goal | ✅ Phase M3 above |
 | M4 Levels | level, XP bar, level-up moment | ✅ Phase M4 above |
-| M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ⏸ |
+| M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ✅ Phase M5 above |
 | M6 AI insights | insights panel on the dashboard | ⏸ |
 | 2.3 Google sign-in | "Continue with Google" on sign in / register | ⏸ |
 
