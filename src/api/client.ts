@@ -118,8 +118,21 @@ export async function restoreSession(): Promise<AuthSession | null> {
   }
 }
 
+/**
+ * Endpoints that work without an access token: a 401 there is the answer (wrong password, bad
+ * cookie), not an expired token to refresh. `/password/change` and `/me` need one, so they refresh.
+ */
+const PUBLIC_AUTH_PATHS = new Set([
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/auth/password/forgot',
+  '/api/auth/password/reset',
+])
+
 function isAuthPath(path: string): boolean {
-  return path.startsWith('/api/auth/')
+  return PUBLIC_AUTH_PATHS.has(path)
 }
 
 function send(path: string, { method = 'GET', body, params, accept = 'application/json' }: RequestOptions): Promise<Response> {

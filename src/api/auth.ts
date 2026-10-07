@@ -15,6 +15,23 @@ export async function register(input: RegisterInput): Promise<AuthSession> {
   return keep(await api<AuthSession>('/api/auth/register', { method: 'POST', body: input }))
 }
 
+/** Always succeeds the same way, whether or not the email has an account: the server never says. */
+export async function forgotPassword(email: string): Promise<void> {
+  await api<void>('/api/auth/password/forgot', { method: 'POST', body: { email } })
+}
+
+/** Sets a new password with the emailed token and signs in; other devices are signed out. */
+export async function resetPassword(token: string, newPassword: string): Promise<AuthSession> {
+  return keep(await api<AuthSession>('/api/auth/password/reset', { method: 'POST', body: { token, newPassword } }))
+}
+
+/** Needs the current password; this session gets fresh tokens, every other one is signed out. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<AuthSession> {
+  return keep(
+    await api<AuthSession>('/api/auth/password/change', { method: 'POST', body: { currentPassword, newPassword } }),
+  )
+}
+
 /** Revokes the refresh token and clears its cookie; the in-memory access token goes either way. */
 export async function logout(): Promise<void> {
   try {

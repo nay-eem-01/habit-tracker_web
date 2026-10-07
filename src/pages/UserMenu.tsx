@@ -1,5 +1,6 @@
-import { Desktop, Moon, SignOut, Sun } from '@phosphor-icons/react'
+import { Desktop, Key, Moon, SignOut, Sun } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { AuthUser } from '../api/client'
 import { getTheme, setTheme, type Theme } from '../theme'
 
@@ -77,6 +78,14 @@ export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () =>
               </button>
             ))}
           </div>
+          <Link
+            to="/account/password"
+            onClick={() => setOpen(false)}
+            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
+          >
+            <Key size={20} weight="bold" aria-hidden="true" />
+            Change password
+          </Link>
           <button
             type="button"
             onClick={onSignOut}

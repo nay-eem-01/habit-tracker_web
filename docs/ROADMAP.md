@@ -81,6 +81,12 @@ for it.
 |---|---|---|
 | M5.1 | **Dashboard on `/api/dashboard`** (replaces G.2's per-habit calls and client maths): today with streaks at risk tonight, 7 / 30 / 90-day completion with the change against the stretch before, going well / slipping, active goals with progress, level. **Patterns** from `/api/dashboard/patterns`: a year heatmap (scrolls on phones, opens on the latest weeks), completion by weekday with the strongest and weakest day, check-ins by hour with the peak. | ✅ |
 
+## Now — Phase P: passwords (backend forgot / reset / change)
+
+| # | Step | Status |
+|---|---|---|
+| P.1 | **Forgot, reset and change password**: "Forgot password?" on sign in (carries the typed email) → `/forgot-password` (same answer whether or not the account exists) → emailed `/reset-password#token=…` (token read, then taken out of the address bar; new password twice; signs in) → "Change password" in the account menu (`/account/password`). Pages are now loaded per route. | ✅ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |

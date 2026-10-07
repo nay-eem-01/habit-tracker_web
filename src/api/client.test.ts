@@ -172,3 +172,21 @@ describe('files', () => {
     await expect(apiBlob('/api/resources/3/file')).rejects.toMatchObject({ status: 404, errorCode: 'FILE_NOT_FOUND' })
   })
 })
+
+describe('auth endpoints that need a token', () => {
+  it('refreshes an expired token for a password change, unlike sign-in', async () => {
+    setAccessToken('old-token')
+    fetchMock
+      .mockResolvedValueOnce(fail(401, 'AUTH_TOKEN_EXPIRED'))
+      .mockResolvedValueOnce(ok(session))
+      .mockResolvedValueOnce(ok(session))
+
+    await api('/api/auth/password/change', { method: 'POST', body: { currentPassword: 'a', newPassword: 'b' } })
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      '/api/auth/password/change',
+      '/api/auth/refresh',
+      '/api/auth/password/change',
+    ])
+  })
+})

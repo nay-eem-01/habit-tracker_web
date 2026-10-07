@@ -1,6 +1,6 @@
 import { ApiError } from './errors'
 
-/** Plain-language text for a failed sign-in or registration. Branches on `errorCode`, never on the server's message. */
+/** Plain-language text for a failed sign-in, registration or password change. Branches on `errorCode`, never on the server's message. */
 export function authErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     switch (error.errorCode) {
@@ -8,6 +8,12 @@ export function authErrorMessage(error: unknown): string {
         return "That email and password don't match. Check them and try again."
       case 'USER_EMAIL_TAKEN':
         return 'An account with this email already exists. Sign in instead.'
+      case 'AUTH_INVALID_RESET_TOKEN':
+        return 'This reset link has expired or was already used. Ask for a new one.'
+      case 'AUTH_WRONG_PASSWORD':
+        return "That isn't your current password."
+      case 'AUTH_PASSWORD_NOT_SET':
+        return 'This account has no password yet. Use “Forgot password” to set one.'
       case 'VALIDATION_FAILED':
         return 'Some details need fixing. Check the highlighted fields.'
     }

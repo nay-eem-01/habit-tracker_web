@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { LevelBadge } from '../level/LevelBadge'
@@ -73,7 +73,16 @@ export default function AppLayout() {
           </div>
         </div>
       </header>
-      <Outlet />
+      {/* the header stays put while a page's code arrives */}
+      <Suspense
+        fallback={
+          <p role="status" className="mx-auto max-w-4xl px-4 py-10 text-ink-soft sm:px-6">
+            Loading…
+          </p>
+        }
+      >
+        <Outlet />
+      </Suspense>
       <LevelUp userId={state.user.id} />
 
       {signingOut && (
