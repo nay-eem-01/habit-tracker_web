@@ -1,69 +1,63 @@
 import { describe, expect, it } from 'vitest'
-import type { HabitLog, WindowStats } from '../api/checkins'
-import type { Habit } from '../api/habits'
-import { activityStart, activityWeeks, combineWindows, topStreaks } from './dashboard'
+import type { HeatmapDay } from '../api/dashboard'
+import { formatChange, hourLabel, levelOf, yearWeeks } from './dashboard'
 
-const log = (date: string, done = true): HabitLog => ({ id: 1, date, completedCount: done ? 1 : 0, done })
-const win = (done: number, expected: number): WindowStats => ({ days: 7, done, expected, rate: null })
-const habit = (id: number, name: string) => ({ id, name }) as Habit
+const day = (date: string, done: number, expected: number): HeatmapDay => ({
+  date,
+  done,
+  expected,
+  ratio: expected ? Math.round((done / expected) * 100) / 100 : null,
+})
 
-describe('the activity grid', () => {
-  // Friday 2 October 2026; its week starts Monday 28 September
-  const today = '2026-10-02'
-
-  it('starts on a Monday, eleven weeks before this week', () => {
-    expect(activityStart(today)).toBe('2026-07-13')
-  })
-
-  it('has twelve week columns of seven days, ending on the current week', () => {
-    const weeks = activityWeeks([], 1, today)
-    expect(weeks).toHaveLength(12)
-    expect(weeks.every((week) => week.length === 7)).toBe(true)
-    expect(weeks[11][0].date).toBe('2026-09-28')
-    expect(weeks[11].filter((day) => day.future).map((day) => day.date)).toEqual(['2026-10-03', '2026-10-04'])
-  })
-
-  it('shades a day by the share of habits finished, and ignores logs that were not done', () => {
-    const weeks = activityWeeks(
-      [[log('2026-09-28'), log('2026-09-29'), log('2026-09-30', false)], [log('2026-09-28')], [log('2026-09-28')], [log('2026-09-28')]],
-      4,
-      today,
-    )
-    const [mon, tue, wed] = weeks[11]
-    expect([mon.done, mon.level]).toEqual([4, 4])
-    expect([tue.done, tue.level]).toEqual([1, 1])
-    expect([wed.done, wed.level]).toEqual([0, 0])
+describe('levelOf', () => {
+  it('shades by the share done: none, some, half, most, all', () => {
+    expect([null, 0, 0.2, 0.5, 0.75, 1].map(levelOf)).toEqual([0, 0, 1, 2, 3, 4])
   })
 })
 
-describe('completion across habits', () => {
-  it('adds the days done and the days expected, not the rates', () => {
-    expect(combineWindows([win(7, 7), win(1, 3)])).toEqual({ done: 8, expected: 10, rate: 0.8 })
+describe('yearWeeks', () => {
+  it('pads the first week back to Monday and the last to Sunday with blanks', () => {
+    // Wednesday 30 September to Friday 2 October 2026
+    const weeks = yearWeeks([day('2026-09-30', 1, 2), day('2026-10-01', 0, 0), day('2026-10-02', 2, 2)])
+
+    expect(weeks).toHaveLength(1)
+    expect(weeks[0].map((d) => d.date)).toEqual([
+      '2026-09-28',
+      '2026-09-29',
+      '2026-09-30',
+      '2026-10-01',
+      '2026-10-02',
+      '2026-10-03',
+      '2026-10-04',
+    ])
+    expect(weeks[0].map((d) => d.blank)).toEqual([true, true, false, false, false, true, true])
+    expect(weeks[0][2].level).toBe(2)
+    expect(weeks[0][2].title).toMatch(/^Wed 30 Sept?: 1 of 2 done$/)
+    expect(weeks[0][3].title).toBe('Thu 1 Oct: nothing due')
+    expect(weeks[0][4].level).toBe(4)
   })
 
-  it("doesn't let extra days on one habit cover for missed days on another", () => {
-    expect(combineWindows([win(6, 3), win(0, 7)])).toEqual({ done: 3, expected: 10, rate: 0.3 })
-  })
-
-  it('has no rate while nothing was expected', () => {
-    expect(combineWindows([win(0, 0)]).rate).toBeNull()
-    expect(combineWindows([]).rate).toBeNull()
+  it('spans a whole year in week columns', () => {
+    const days: HeatmapDay[] = []
+    for (let d = new Date('2025-10-03T00:00:00Z'); d <= new Date('2026-10-02T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 1)) {
+      days.push(day(d.toISOString().slice(0, 10), 1, 1))
+    }
+    expect(days).toHaveLength(365)
+    expect(yearWeeks(days)).toHaveLength(53)
   })
 })
 
-describe('the longest streaks', () => {
-  const entry = (id: number, current: number, unit: 'DAYS' | 'WEEKS' = 'DAYS') => ({
-    habit: habit(id, `H${id}`),
-    streak: { current, longest: current, unit },
+describe('formatChange', () => {
+  it('says the change in percentage points, with a real minus sign', () => {
+    expect(formatChange(0.12)).toBe('+12 pts')
+    expect(formatChange(-0.05)).toBe('−5 pts')
+    expect(formatChange(0.001)).toBe('no change')
+    expect(formatChange(null)).toBeNull()
   })
+})
 
-  it('leaves out habits with no streak, longest first, three at most', () => {
-    const top = topStreaks([entry(1, 0), entry(2, 5), entry(3, 12), entry(4, 1), entry(5, 7)])
-    expect(top.map((e) => e.habit.id)).toEqual([3, 5, 2])
-  })
-
-  it('puts day streaks ahead of week streaks, which are not comparable', () => {
-    const top = topStreaks([entry(1, 20, 'WEEKS'), entry(2, 3)])
-    expect(top.map((e) => e.habit.id)).toEqual([2, 1])
+describe('hourLabel', () => {
+  it('names hours the way people say them', () => {
+    expect([0, 7, 12, 13, 23].map(hourLabel)).toEqual(['midnight', '7 am', '12 pm', '1 pm', '11 pm'])
   })
 })

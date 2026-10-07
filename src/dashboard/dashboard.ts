@@ -1,71 +1,69 @@
-import type { HabitLog, HabitStats, Streak, WindowStats } from '../api/checkins'
-import type { Habit } from '../api/habits'
-import { shiftDays, weekStart } from '../today/today'
+import type { HeatmapDay } from '../api/dashboard'
+import type { DayOfWeek } from '../api/habits'
+import type { GridDay } from '../components/DayGrid'
+import { formatDay, shiftDays, weekStart } from '../today/today'
 
-export const ACTIVITY_WEEKS = 12
-
-/** The first day of the activity grid: the Monday `ACTIVITY_WEEKS - 1` weeks before this week's. */
-export function activityStart(today: string): string {
-  return shiftDays(weekStart(today), -(ACTIVITY_WEEKS - 1) * 7)
-}
-
-export interface ActivityDay {
-  date: string
-  /** Habits finished that day. */
-  done: number
-  /** 0 (nothing) to 4 (everything), for shading. */
-  level: 0 | 1 | 2 | 3 | 4
-  future: boolean
-}
-
-function levelOf(done: number, habits: number): ActivityDay['level'] {
-  if (done <= 0 || habits <= 0) return 0
-  const share = Math.min(done / habits, 1)
-  return share <= 0.25 ? 1 : share <= 0.5 ? 2 : share < 1 ? 3 : 4
-}
-
-/** Weeks as columns, Monday first: each day with how many habits were finished and a shade for it. */
-export function activityWeeks(logsByHabit: HabitLog[][], habitCount: number, today: string): ActivityDay[][] {
-  const doneByDate = new Map<string, number>()
-  for (const logs of logsByHabit) {
-    for (const log of logs) if (log.done) doneByDate.set(log.date, (doneByDate.get(log.date) ?? 0) + 1)
-  }
-  const start = activityStart(today)
-  return Array.from({ length: ACTIVITY_WEEKS }, (_, week) =>
-    Array.from({ length: 7 }, (_, day) => {
-      const date = shiftDays(start, week * 7 + day)
-      const done = doneByDate.get(date) ?? 0
-      return { date, done, level: levelOf(done, habitCount), future: date > today }
-    }),
-  )
+/** A day's share of habits done as a shade: nothing, some, half, most, all. */
+export function levelOf(ratio: number | null): GridDay['level'] {
+  if (ratio === null || ratio <= 0) return 0
+  if (ratio <= 0.25) return 1
+  if (ratio <= 0.5) return 2
+  if (ratio < 1) return 3
+  return 4
 }
 
 /**
- * Completion over a window, across every habit: the days done against the days expected. Each habit counts
- * only up to what it expected, so six gym days on a three-a-week habit can't cover for a missed daily one.
+ * The server's year of days as week columns, Monday at the top: the first week is padded back to its
+ * Monday and the last forward to its Sunday with blank squares.
  */
-export function combineWindows(windows: WindowStats[]): { done: number; expected: number; rate: number | null } {
-  const done = windows.reduce((sum, w) => sum + Math.min(w.done, w.expected), 0)
-  const expected = windows.reduce((sum, w) => sum + w.expected, 0)
-  return { done, expected, rate: expected > 0 ? Math.min(done / expected, 1) : null }
+export function yearWeeks(days: HeatmapDay[]): GridDay[][] {
+  if (days.length === 0) return []
+  const byDate = new Map(days.map((day) => [day.date, day]))
+  const first = weekStart(days[0].date)
+  const last = days[days.length - 1].date
+  const weeks: GridDay[][] = []
+  for (let monday = first; monday <= last; monday = shiftDays(monday, 7)) {
+    weeks.push(
+      Array.from({ length: 7 }, (_, offset) => {
+        const date = shiftDays(monday, offset)
+        const day = byDate.get(date)
+        if (!day) return { date, level: 0, blank: true }
+        return {
+          date,
+          level: levelOf(day.ratio),
+          blank: false,
+          title:
+            day.expected === 0 ? `${formatDay(date)}: nothing due` : `${formatDay(date)}: ${day.done} of ${day.expected} done`,
+        }
+      }),
+    )
+  }
+  return weeks
 }
 
-export function combineStats(stats: HabitStats[]) {
-  return { last7: combineWindows(stats.map((s) => s.last7Days)), last30: combineWindows(stats.map((s) => s.last30Days)) }
+/** A rate change in percentage points: "+12 pts", "−5 pts", "no change"; null with nothing to compare. */
+export function formatChange(change: number | null): string | null {
+  if (change === null) return null
+  const points = Math.round(change * 100)
+  if (points === 0) return 'no change'
+  return `${points > 0 ? '+' : '−'}${Math.abs(points)} pts`
 }
 
-export interface StreakEntry {
-  habit: Habit
-  streak: Streak
+export const percent = (rate: number | null) => (rate === null ? '–' : `${Math.round(rate * 100)}%`)
+
+export const DAY_NAMES: Record<DayOfWeek, { short: string; long: string }> = {
+  MONDAY: { short: 'Mon', long: 'Monday' },
+  TUESDAY: { short: 'Tue', long: 'Tuesday' },
+  WEDNESDAY: { short: 'Wed', long: 'Wednesday' },
+  THURSDAY: { short: 'Thu', long: 'Thursday' },
+  FRIDAY: { short: 'Fri', long: 'Friday' },
+  SATURDAY: { short: 'Sat', long: 'Saturday' },
+  SUNDAY: { short: 'Sun', long: 'Sunday' },
 }
 
-/** The habits on the longest current runs. Day streaks and week streaks aren't comparable, so days come first. */
-export function topStreaks(entries: StreakEntry[], limit = 3): StreakEntry[] {
-  return entries
-    .filter((entry) => entry.streak.current > 0)
-    .sort((a, b) => {
-      const unit = Number(a.streak.unit === 'WEEKS') - Number(b.streak.unit === 'WEEKS')
-      return unit || b.streak.current - a.streak.current || a.habit.name.localeCompare(b.habit.name)
-    })
-    .slice(0, limit)
+/** "7 am", "12 pm", "11 pm" for an hour 0–23; "midnight" for 0. */
+export function hourLabel(hour: number): string {
+  if (hour === 0) return 'midnight'
+  if (hour === 12) return '12 pm'
+  return hour < 12 ? `${hour} am` : `${hour - 12} pm`
 }
