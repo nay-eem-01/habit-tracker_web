@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { api, getAccessToken, refreshSession, restoreSession, setAccessToken, setSessionLostHandler } from './client'
+import { api, apiBlob, getAccessToken, refreshSession, restoreSession, setAccessToken, setSessionLostHandler } from './client'
 import { ApiError } from './errors'
 
 const session = {
@@ -136,5 +136,39 @@ describe('restoreSession', () => {
     fetchMock.mockResolvedValueOnce(fail(401, 'AUTH_INVALID_REFRESH_TOKEN')).mockResolvedValueOnce(ok(session))
     await expect(refreshSession()).rejects.toBeInstanceOf(ApiError)
     expect((await refreshSession()).accessToken).toBe('new-token')
+  })
+})
+
+describe('files', () => {
+  it('sends FormData as multipart, leaving the boundary to the browser', async () => {
+    fetchMock.mockResolvedValueOnce(ok({ id: 1 }))
+    const form = new FormData()
+    form.append('title', 'Plan')
+
+    await api('/api/resources/files', { method: 'POST', body: form })
+
+    const [, init] = fetchMock.mock.calls[0]
+    expect(init.body).toBe(form)
+    expect(init.headers['Content-Type']).toBeUndefined()
+  })
+
+  it('downloads bytes with the token, refreshing it once when it has expired', async () => {
+    setAccessToken('old-token')
+    fetchMock
+      .mockResolvedValueOnce(fail(401, 'AUTH_TOKEN_EXPIRED'))
+      .mockResolvedValueOnce(ok(session))
+      .mockResolvedValueOnce(new Response('hello', { headers: { 'Content-Type': 'text/plain' } }))
+
+    const blob = await apiBlob('/api/resources/3/file')
+
+    expect(await blob.text()).toBe('hello')
+    const [, init] = fetchMock.mock.calls[2]
+    expect(init.headers.Authorization).toBe('Bearer new-token')
+    expect(init.headers.Accept).toBe('*/*')
+  })
+
+  it('throws the API error when a download fails', async () => {
+    fetchMock.mockResolvedValueOnce(fail(404, 'FILE_NOT_FOUND'))
+    await expect(apiBlob('/api/resources/3/file')).rejects.toMatchObject({ status: 404, errorCode: 'FILE_NOT_FOUND' })
   })
 })

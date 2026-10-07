@@ -13,10 +13,16 @@ export interface paths {
         };
         /** One of my resources */
         get: operations["get"];
-        /** Replace a resource */
+        /**
+         * Replace a resource
+         * @description A FILE keeps its file: only title, body, goal and pin change, and the type stays FILE.
+         */
         put: operations["update"];
         post?: never;
-        /** Delete a resource for good */
+        /**
+         * Delete a resource for good
+         * @description A FILE resource's file is deleted with it.
+         */
         delete: operations["delete"];
         options?: never;
         head?: never;
@@ -87,7 +93,10 @@ export interface paths {
         /** My resources, pinned first then newest */
         get: operations["list"];
         put?: never;
-        /** Save a note or a link */
+        /**
+         * Save a note or a link
+         * @description Files are uploaded with POST /api/resources/files.
+         */
         post: operations["create"];
         delete?: never;
         options?: never;
@@ -123,6 +132,26 @@ export interface paths {
         put?: never;
         /** Pin a resource so it is listed first */
         post: operations["pin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/resources/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload a file as a resource
+         * @description multipart/form-data: the `file` part plus title, body, goalId, pinned as form fields. PNG, JPEG, WebP, GIF, PDF or text (.txt, .md), at most 10 MB; 100 MB per user in total. The type is detected from the bytes and must match the file's extension.
+         */
+        post: operations["createFile"];
         delete?: never;
         options?: never;
         head?: never;
@@ -352,6 +381,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/resources/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a FILE resource's file
+         * @description Always as an attachment, with the stored (detected) type. Send the bearer token: fetch it and save or show the blob — a plain link can't carry the header.
+         */
+        get: operations["download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications": {
         parameters: {
             query?: never;
@@ -378,6 +427,26 @@ export interface paths {
         };
         /** How many notifications are unread (cheap to poll) */
         get: operations["unreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/level": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My XP, level and tier
+         * @description Computed from all my habits (archived too) and achieved goals; XP is never lost when a streak breaks. +10 per done day that counts for the streak, +5 more while the streak is at least 7 days (1 week), +50/+200/+500/+1500 at 7/30/100/365 days (1/4/14/52 weeks), +500 per achieved goal.
+         */
+        get: operations["level"];
         put?: never;
         post?: never;
         delete?: never;
@@ -471,6 +540,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My home screen: today, completion, highlights, goals and level
+         * @description Active habits only, in my timezone. `today` lists every habit with today's count, whether it's due and its current streak. `completion` gives 7/30/90-day rates, overall and per habit, each with the previous period of the same length and the change. `atRisk`: streaks of 3+ that end unless something happens today. `best` / `slipping`: top 3 by 30-day rate / by drop. `goals`: active goals with progress. `level`: as GET /api/me/level. Same numbers as the habit, goal and level endpoints.
+         */
+        get: operations["dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dashboard/patterns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My patterns: heatmap, weekdays, time of day
+         * @description Active habits, in my timezone. `heatmap`: the last 365 days, each with done / expected habits (N-a-week habits only add to the days they were done). `weekdays`: completion by weekday over the last 12 full weeks, daily and chosen-weekday habits only, with the weakest and strongest day. `hours`: when done check-ins of the last 90 days happened (first check-in, same-day only), with the peak hour.
+         */
+        get: operations["patterns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/me": {
         parameters: {
             query?: never;
@@ -497,7 +606,7 @@ export interface components {
              * @example LINK
              * @enum {string}
              */
-            type: "NOTE" | "LINK";
+            type: "NOTE" | "LINK" | "FILE";
             /** @example Couch to 5K plan */
             title: string;
             /** @description Markdown. Required for a NOTE; an optional comment for a LINK. */
@@ -590,6 +699,20 @@ export interface components {
              * @example 2026-12-31
              */
             targetDate?: string;
+        };
+        ResourceFileRequest: {
+            /** @example Week 1 plan */
+            title: string;
+            /** @description An optional comment about the file (Markdown). */
+            body?: string;
+            /**
+             * Format: int64
+             * @description The goal it belongs to. Omit for a stand-alone resource.
+             * @example 1
+             */
+            goalId?: number;
+            /** @description Shown first. Defaults to false. */
+            pinned?: boolean;
         };
         CheckInRequest: {
             /**
@@ -977,8 +1100,8 @@ export interface operations {
             query?: {
                 /** @description Only this goal's resources */
                 goalId?: number;
-                /** @description NOTE or LINK */
-                type?: "NOTE" | "LINK";
+                /** @description NOTE, LINK or FILE */
+                type?: "NOTE" | "LINK" | "FILE";
                 /** @description Title contains this text, any case */
                 q?: string;
                 page?: number;
@@ -1024,7 +1147,7 @@ export interface operations {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
             };
-            /** @description Invalid fields, or fields that don't fit the type (RESOURCE_INVALID) */
+            /** @description Invalid fields, fields that don't fit the type, or type FILE (RESOURCE_INVALID) */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1097,6 +1220,70 @@ export interface operations {
             };
             /** @description No such resource, or not yours (RESOURCE_NOT_FOUND) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    createFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    request?: components["schemas"]["ResourceFileRequest"];
+                };
+            };
+        };
+        responses: {
+            /** @description Created; Location points at the resource */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Missing file or invalid fields (MALFORMED_REQUEST, VALIDATION_FAILED, FILE_EMPTY) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description The goal isn't yours (GOAL_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description File over 10 MB, or your storage is full (FILE_TOO_LARGE, FILE_QUOTA_EXCEEDED) */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description File type not allowed (FILE_TYPE_NOT_ALLOWED) */
+            415: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1604,6 +1791,37 @@ export interface operations {
             };
         };
     };
+    download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The file's bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+            /** @description No such resource or not yours (RESOURCE_NOT_FOUND), or it has no file (FILE_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     list_3: {
         parameters: {
             query?: {
@@ -1638,6 +1856,26 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description The unread count */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    level: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The level */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1815,6 +2053,46 @@ export interface operations {
             };
             /** @description No such goal, or not yours (GOAL_NOT_FOUND) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The dashboard */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    patterns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The patterns */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

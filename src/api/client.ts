@@ -55,10 +55,24 @@ interface RequestOptions {
   body?: unknown
   /** Query string values; undefined ones are left out. */
   params?: Record<string, string | number | boolean | undefined>
+  /** What to accept back; JSON unless a file is expected. */
+  accept?: string
 }
 
-/** Calls the API and returns the envelope's payload; throws {@link ApiError} for anything but 2xx. */
-export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/**
+ * Calls the API and returns the envelope's payload; throws {@link ApiError} for anything but 2xx.
+ * A `FormData` body goes as multipart (the browser sets the boundary); anything else as JSON.
+ */
+export function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return request(path, options, parse<T>)
+}
+
+/** A file's bytes, for an endpoint that answers with the file itself instead of the envelope. */
+export function apiBlob(path: string): Promise<Blob> {
+  return request(path, { accept: '*/*' }, parseBlob)
+}
+
+async function request<T>(path: string, options: RequestOptions, read: (response: Response) => Promise<T>): Promise<T> {
   const first = await send(path, options)
   if (first.status === 401 && !isAuthPath(path)) {
     try {
@@ -67,9 +81,9 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       onSessionLost()
       throw await toError(first)
     }
-    return parse<T>(await send(path, options))
+    return read(await send(path, options))
   }
-  return parse<T>(first)
+  return read(first)
 }
 
 /**
@@ -108,19 +122,20 @@ function isAuthPath(path: string): boolean {
   return path.startsWith('/api/auth/')
 }
 
-function send(path: string, { method = 'GET', body, params }: RequestOptions): Promise<Response> {
+function send(path: string, { method = 'GET', body, params, accept = 'application/json' }: RequestOptions): Promise<Response> {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value !== undefined) query.set(key, String(value))
   }
   const url = `${BASE_URL}${path}${query.size > 0 ? `?${query}` : ''}`
-  const headers: Record<string, string> = { Accept: 'application/json' }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const multipart = body instanceof FormData
+  const headers: Record<string, string> = { Accept: accept }
+  if (body !== undefined && !multipart) headers['Content-Type'] = 'application/json'
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
   return fetch(url, {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : multipart ? body : JSON.stringify(body),
     credentials: 'include', // the refresh cookie
   })
 }
@@ -130,6 +145,11 @@ async function parse<T>(response: Response): Promise<T> {
   if (response.status === 204) return undefined as T
   const envelope = (await response.json()) as Envelope<T>
   return envelope.payload as T
+}
+
+async function parseBlob(response: Response): Promise<Blob> {
+  if (!response.ok) throw await toError(response)
+  return response.blob()
 }
 
 async function toError(response: Response): Promise<ApiError> {

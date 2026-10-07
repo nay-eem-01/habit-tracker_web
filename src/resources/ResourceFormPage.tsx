@@ -1,24 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { LinkSimple, NotePencil } from '@phosphor-icons/react'
+import { File as FileIcon, LinkSimple, NotePencil, UploadSimple } from '@phosphor-icons/react'
 import { useId, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { listGoals, type Goal } from '../api/goals'
 import { fieldError, resourceErrorMessage } from '../api/messages'
-import { createResource, getResource, updateResource, type ResourceType } from '../api/resources'
+import {
+  createResource,
+  FILE_EXTENSIONS,
+  getResource,
+  updateResource,
+  uploadResourceFile,
+  type FileInfo,
+  type ResourceType,
+} from '../api/resources'
 import { Button } from '../components/Button'
 import { Field, INPUT, TextAreaField } from '../components/Field'
 import { SURFACE } from '../components/styles'
-import { backPath, emptyResource, toResourceRequest, valuesFromResource, type ResourceFormValues } from './resources'
+import {
+  backPath,
+  emptyResource,
+  fileProblem,
+  formatBytes,
+  titleFromFileName,
+  toResourceRequest,
+  valuesFromResource,
+  type ResourceFormValues,
+} from './resources'
 
 const MAX_GOALS = 100
 
 const TYPES: { type: ResourceType; label: string; icon: typeof NotePencil }[] = [
   { type: 'NOTE', label: 'Note', icon: NotePencil },
   { type: 'LINK', label: 'Link', icon: LinkSimple },
+  { type: 'FILE', label: 'File', icon: FileIcon },
 ]
+
+const ACCEPT = FILE_EXTENSIONS.map((extension) => `.${extension}`).join(',')
 
 interface ResourceFormProps {
   initial: ResourceFormValues
+  /** Editing: what it is can't change, and a file keeps its file. Absent when adding. */
+  editing?: { type: ResourceType; file?: FileInfo | null }
   /** Goals to file it under: the active ones, plus the one it is already on whatever its status. */
   goals: Goal[]
   submitLabel: string
@@ -29,55 +51,126 @@ interface ResourceFormProps {
   onSubmit: (values: ResourceFormValues) => void
 }
 
-function ResourceForm({ initial, goals, submitLabel, pendingLabel, pending, error, cancelTo, onSubmit }: ResourceFormProps) {
+function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pending, error, cancelTo, onSubmit }: ResourceFormProps) {
   const goalSelect = useId()
+  const fileInput = useId()
   const [values, setValues] = useState(initial)
+  const [fileError, setFileError] = useState<string | null>(null)
   const set = <K extends keyof ResourceFormValues>(key: K, value: ResourceFormValues[K]) =>
     setValues((current) => ({ ...current, [key]: value }))
   const note = values.type === 'NOTE'
+  const isFile = values.type === 'FILE'
+  // a note or link can switch between the two when edited; a file stays a file
+  const kinds = editing ? TYPES.filter(({ type }) => (editing.type === 'FILE') === (type === 'FILE')) : TYPES
+
+  function pick(file: File | null) {
+    setFileError(file ? fileProblem(file) : null)
+    setValues((current) => ({
+      ...current,
+      file,
+      title: current.title || !file ? current.title : titleFromFileName(file.name),
+    }))
+  }
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    if (isFile && !editing) {
+      const problem = values.file ? fileProblem(values.file) : 'Choose a file to upload.'
+      setFileError(problem)
+      if (problem) return
+    }
     onSubmit(values)
   }
 
   return (
     <form onSubmit={submit} className="flex max-w-xl flex-col gap-6">
-      <fieldset>
-        <legend className="mb-1.5 text-sm font-medium">Kind</legend>
-        <div className="inline-flex gap-1 rounded-full bg-mist/45 p-1">
-          {TYPES.map(({ type, label, icon: Icon }) => (
-            <label
-              key={type}
-              className={`flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lapis ${
-                values.type === type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
-              }`}
-            >
-              <input
-                type="radio"
-                name="type"
-                value={type}
-                checked={values.type === type}
-                onChange={() => set('type', type)}
-                className="sr-only"
-              />
-              <Icon size={18} weight={values.type === type ? 'fill' : 'regular'} aria-hidden="true" />
-              {label}
-            </label>
-          ))}
+      {kinds.length > 1 && (
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-medium">Kind</legend>
+          <div className="inline-flex gap-1 rounded-full bg-mist/45 p-1">
+            {kinds.map(({ type, label, icon: Icon }) => (
+              <label
+                key={type}
+                className={`flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lapis ${
+                  values.type === type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="type"
+                  value={type}
+                  checked={values.type === type}
+                  onChange={() => set('type', type)}
+                  className="sr-only"
+                />
+                <Icon size={18} weight={values.type === type ? 'fill' : 'regular'} aria-hidden="true" />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+
+      {isFile && editing?.file && (
+        <div className="flex items-center gap-3 rounded-xl border border-mist px-4 py-3">
+          <FileIcon size={22} weight="duotone" className="shrink-0 text-link" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="font-medium break-all">{editing.file.name}</p>
+            <p className="text-sm text-ink-soft">
+              {formatBytes(editing.file.sizeBytes)} · the file stays as it is; to change it, upload a new one
+            </p>
+          </div>
         </div>
-      </fieldset>
+      )}
+      {isFile && !editing && (
+        <div>
+          <label
+            htmlFor={fileInput}
+            className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors duration-150 has-[:focus-visible]:border-lapis ${
+              fileError ? 'border-alert' : 'border-mist hover:border-ink-soft'
+            }`}
+          >
+            <UploadSimple size={28} weight="bold" className="text-link" aria-hidden="true" />
+            {values.file ? (
+              <span>
+                <span className="block font-medium break-all">{values.file.name}</span>
+                <span className="text-sm text-ink-soft">{formatBytes(values.file.size)} · choose another to replace it</span>
+              </span>
+            ) : (
+              <span>
+                <span className="block font-medium">Choose a file</span>
+                <span className="text-sm text-ink-soft">PNG, JPEG, WebP, GIF, PDF, .txt or .md · up to 10 MB</span>
+              </span>
+            )}
+            <input
+              id={fileInput}
+              type="file"
+              accept={ACCEPT}
+              aria-label="File to upload"
+              aria-invalid={fileError ? true : undefined}
+              aria-describedby={fileError ? `${fileInput}-error` : undefined}
+              onChange={(event) => pick(event.target.files?.[0] ?? null)}
+              className="sr-only"
+            />
+          </label>
+          {fileError && (
+            <p id={`${fileInput}-error`} className="mt-1.5 text-sm text-alert">
+              {fileError}
+            </p>
+          )}
+        </div>
+      )}
 
       <Field
         label="Title"
         required
         maxLength={200}
-        placeholder={note ? 'Race-day checklist' : 'Couch to 5K plan'}
+        placeholder={note ? 'Race-day checklist' : isFile ? 'Week 1 plan' : 'Couch to 5K plan'}
         value={values.title}
         onChange={(event) => set('title', event.target.value)}
         error={fieldError(error, 'title', 'Title')}
       />
-      {!note && (
+      {values.type === 'LINK' && (
         <Field
           label="Address"
           type="url"
@@ -149,8 +242,10 @@ function ResourceForm({ initial, goals, submitLabel, pendingLabel, pending, erro
   )
 }
 
+const startType = (type: string | null): ResourceType => (type === 'LINK' || type === 'FILE' ? type : 'NOTE')
+
 /**
- * `/resources/new` creates (`?goalId=` files it under a goal, `?type=LINK` starts as a link);
+ * `/resources/new` creates (`?goalId=` files it under a goal, `?type=LINK` or `FILE` picks the kind);
  * `/resources/:id/edit` replaces. `?back=` is where both return to.
  */
 export default function ResourceFormPage() {
@@ -172,8 +267,20 @@ export default function ResourceFormPage() {
   })
 
   const save = useMutation({
-    mutationFn: (values: ResourceFormValues) =>
-      resourceId === null ? createResource(toResourceRequest(values)) : updateResource(resourceId, toResourceRequest(values)),
+    mutationFn: (values: ResourceFormValues) => {
+      if (resourceId !== null) return updateResource(resourceId, toResourceRequest(values))
+      if (values.type === 'FILE') {
+        const request = toResourceRequest(values)
+        return uploadResourceFile({
+          file: values.file!,
+          title: request.title,
+          body: request.body,
+          goalId: request.goalId,
+          pinned: values.pinned,
+        })
+      }
+      return createResource(toResourceRequest(values))
+    },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['resources'] }),
@@ -187,7 +294,7 @@ export default function ResourceFormPage() {
   const editing = resourceId !== null
   const initial = existing.data
     ? valuesFromResource(existing.data)
-    : emptyResource(params.get('type') === 'LINK' ? 'LINK' : 'NOTE', params.get('goalId') ?? '')
+    : emptyResource(startType(params.get('type')), params.get('goalId') ?? '')
   const choices = (goals.data?.content ?? []).filter(
     (goal) => goal.status === 'ACTIVE' || String(goal.id) === initial.goalId,
   )
@@ -195,7 +302,7 @@ export default function ResourceFormPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <h1 className="font-display text-4xl font-semibold tracking-tight">
-        {editing ? 'Edit' : 'New note or link'}
+        {editing ? 'Edit' : 'Add to the library'}
       </h1>
       <div className={`${SURFACE} mt-6 p-5 sm:p-8`}>
         {(editing && existing.isPending) || goals.isPending ? (
@@ -215,6 +322,7 @@ export default function ResourceFormPage() {
           <ResourceForm
             key={existing.data?.id ?? 'new'}
             initial={initial}
+            editing={existing.data ? { type: existing.data.type, file: existing.data.file } : undefined}
             goals={choices}
             submitLabel={editing ? 'Save changes' : 'Save'}
             pendingLabel="Saving…"

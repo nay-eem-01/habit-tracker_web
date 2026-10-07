@@ -234,7 +234,7 @@ describe('adding and editing', () => {
     await input.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(await screen.findByRole('heading', { name: 'Run a half marathon' })).toBeTruthy()
-    expect(await screen.findByRole('heading', { name: 'Notes and links' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Notes, links and files' })).toBeTruthy()
     expect(calls.find((c) => c.method === 'POST' && c.path === '/api/resources')!.body).toEqual({
       type: 'LINK',
       title: 'Couch to 5K plan',
@@ -309,7 +309,7 @@ describe('on the goal page', () => {
     })
     renderApp('/goals/1')
 
-    const section = (await screen.findByRole('heading', { name: 'Notes and links' })).closest('section')!
+    const section = (await screen.findByRole('heading', { name: 'Notes, links and files' })).closest('section')!
     expect(await within(section).findByText('Race-day checklist')).toBeTruthy()
     // the goal's own page doesn't name the goal on each card
     expect(within(section).queryByText(/Goal:/)).toBeNull()

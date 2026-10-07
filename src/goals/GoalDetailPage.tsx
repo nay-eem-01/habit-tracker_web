@@ -30,7 +30,7 @@ const BUTTON = SECONDARY
 /** The goal page shows the first few; the library has the rest. */
 const GOAL_RESOURCES_SHOWN = 5
 
-/** The goal's notes and links, pinned first, with a way to add one and to see them all. */
+/** The goal's notes, links and files, pinned first, with a way to add one and to see them all. */
 function GoalResources({ goalId }: { goalId: number }) {
   const resources = useQuery({
     queryKey: ['goal-resources', goalId],
@@ -43,7 +43,7 @@ function GoalResources({ goalId }: { goalId: number }) {
     <section aria-labelledby="resources" className="mt-10">
       <div className="flex items-end justify-between gap-4">
         <h2 id="resources" className="font-display text-2xl font-semibold tracking-tight">
-          Notes and links
+          Notes, links and files
         </h2>
         <Link to={`/resources/new?goalId=${goalId}&back=${encodeURIComponent(back)}`} className={`${BUTTON} shrink-0`}>
           Add
@@ -64,7 +64,7 @@ function GoalResources({ goalId }: { goalId: number }) {
           </button>
         </div>
       ) : !resources.data ? (
-        <div role="status" aria-label="Loading notes and links" className="mt-3 h-24 animate-pulse rounded-2xl bg-mist/45" />
+        <div role="status" aria-label="Loading notes, links and files" className="mt-3 h-24 animate-pulse rounded-2xl bg-mist/45" />
       ) : resources.data.content.length === 0 ? (
         <p className="mt-3 text-ink-soft">Keep the plan, a note to self, or a useful link here, next to the goal.</p>
       ) : (

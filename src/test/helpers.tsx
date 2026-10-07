@@ -28,6 +28,7 @@ export interface Call {
   path: string
   params: URLSearchParams
   body: unknown
+  headers: Record<string, string>
 }
 
 type Handler = (call: Call) => Response
@@ -40,13 +41,15 @@ export function stubApi(handlers: Record<string, Handler>): Call[] {
   const calls: Call[] = []
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (url: string, init: { method?: string; body?: string } = {}) => {
+    vi.fn(async (url: string, init: { method?: string; body?: string | FormData; headers?: Record<string, string> } = {}) => {
       const [path, query = ''] = url.split('?')
       const call: Call = {
         method: init.method ?? 'GET',
         path,
         params: new URLSearchParams(query),
-        body: init.body ? JSON.parse(init.body) : undefined,
+        // an upload's FormData as sent, so a test can read its parts
+        body: init.body instanceof FormData ? init.body : init.body ? JSON.parse(init.body) : undefined,
+        headers: init.headers ?? {},
       }
       const handler = handlers[`${call.method} ${call.path}`]
       if (!handler) throw new Error(`unexpected request: ${call.method} ${url}`)

@@ -21,6 +21,7 @@ const TABS: { label: string; type: ResourceType | undefined }[] = [
   { label: 'All', type: undefined },
   { label: 'Notes', type: 'NOTE' },
   { label: 'Links', type: 'LINK' },
+  { label: 'Files', type: 'FILE' },
 ]
 
 function useDebounced(value: string, delay: number): string {
@@ -64,7 +65,7 @@ export default function LibraryPage() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-semibold tracking-tight">Library</h1>
-          <p className="mt-1 text-ink-soft">Notes and links that help, on their own or next to a goal.</p>
+          <p className="mt-1 text-ink-soft">Notes, links and files that help, on their own or next to a goal.</p>
         </div>
         <Link
           to={`/resources/new${goalId ? `?goalId=${goalId}&back=${encodeURIComponent(back)}` : ''}`}
@@ -82,7 +83,7 @@ export default function LibraryPage() {
               type="button"
               onClick={() => setType(tab.type)}
               aria-current={type === tab.type ? 'true' : undefined}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-out sm:px-5 sm:text-base ${
+              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-out sm:px-5 sm:text-base ${
                 type === tab.type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
               }`}
             >
@@ -146,7 +147,7 @@ export default function LibraryPage() {
           <p className="mt-3 max-w-sm">
             {filtered
               ? 'Nothing matches. Try another word or filter.'
-              : 'Nothing saved yet. Keep a plan, a note to self, or a link worth coming back to.'}
+              : 'Nothing saved yet. Keep a plan, a note to self, a link worth coming back to, or a file.'}
           </p>
         </div>
       ) : (
