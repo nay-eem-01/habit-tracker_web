@@ -40,6 +40,13 @@ export default function SignInPage() {
           onChange={(event) => setPassword(event.target.value)}
           error={fieldError(mutation.error, 'password', 'Password')}
         />
+        <Link
+          to="/forgot-password"
+          state={{ email: email.trim() }}
+          className="-mt-2 self-start text-sm font-medium text-link underline underline-offset-2"
+        >
+          Forgot password?
+        </Link>
         {mutation.isError && (
           <p role="alert" className="text-sm text-alert">
             {authErrorMessage(mutation.error)}

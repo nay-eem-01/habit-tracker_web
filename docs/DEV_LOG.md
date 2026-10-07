@@ -5,6 +5,43 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-08 (P.1 — forgot, reset and change password)
+
+**Done** (`feat/password-reset`)
+- `api/auth.ts`: `forgotPassword`, `resetPassword` and `changePassword`. Reset and change return a
+  session like sign-in does, and the new access token is kept the same way.
+- `/forgot-password`: opens from "Forgot password?" on sign in, with the typed email carried over.
+  It always answers "if there's an account…", like the server, so it never reveals whether an
+  account exists. Has a "Use a different email" link.
+- `/reset-password#token=…`: the token is read from the fragment, then removed from the address bar
+  and the history. The new password is typed twice and checked first (8+ characters, matching).
+  On success it signs in and opens the dashboard. An expired or used link, or one with no token,
+  gets "This link doesn't work" and "Ask for a new link".
+- `/account/password` ("Change password" in the account menu): current password, then the new one
+  twice. A wrong current password shows on its field. An account with no password yet is pointed
+  to "Set one by email". This session gets fresh tokens; the page says other devices are signed out.
+- Forgot and reset are open whether signed in or out: an emailed link can be opened anywhere.
+- **Client fix:** the API client didn't refresh an expired token on any `/api/auth/` path. That's
+  right for sign-in, but `/password/change` and `/me` need a token, so they now refresh like any
+  other call. Only the public auth endpoints skip the refresh.
+- **Bundle:** this pushed the main chunk past Vite's 500 kB warning (505 kB), so every page is now
+  lazy-loaded (`React.lazy`). The main chunk is 325 kB, and the header stays while a page loads.
+
+**Checked live** against the backend. Email is off in dev and the link isn't logged, so I inserted
+a reset token with a known value for the demo account (the server's own forgot request had made a
+real one). Results:
+- The link opened and the token left the address bar.
+- The new password was saved and it signed in.
+- The same link a second time gave "This link doesn't work".
+- Change password with a wrong current password showed the field error, then succeeded with the
+  right one, and the session survived a reload.
+- The demo password is back to `Demo-pass-123`.
+
+**Backend note:** it now runs Flyway, and its "restate enum checks" migration fixes the stale
+`resources_type_check` constraint found in M3.3.
+
+---
+
 ## 2026-10-06 (M5 — dashboard on the server's numbers)
 
 **Done** (`feat/dashboard-api`, stacked on `feat/levels`)
