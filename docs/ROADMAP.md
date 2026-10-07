@@ -69,13 +69,19 @@ Notes are Markdown, rendered with `react-markdown`: raw HTML is dropped and only
 clickable. The parser is lazy-loaded (its own ~36 kB gzipped chunk) so pages without notes don't pay
 for it.
 
+## Now — Phase M4: levels (backend X.1–X.2 are done)
+
+| # | Step | Status |
+|---|---|---|
+| M4.1 | **Level**: header badge (tier-coloured; just the number on phones), dashboard card with tier, XP bar, XP to the next level and how XP is earned, and a level-up moment the first time a higher level is seen (after a check-in, an achieved goal, or on another device). | ✅ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |
 |---|---|---|
 | M2 Goals | goals list and detail, link habits to goals, progress | ✅ Phase M2 above |
 | M3 Resources | resource library per habit/goal | ✅ Phase M3 above |
-| M4 Levels | level, XP bar, level-up moment | ⏸ |
+| M4 Levels | level, XP bar, level-up moment | ✅ Phase M4 above |
 | M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ⏸ |
 | M6 AI insights | insights panel on the dashboard | ⏸ |
 | 2.3 Google sign-in | "Continue with Google" on sign in / register | ⏸ |

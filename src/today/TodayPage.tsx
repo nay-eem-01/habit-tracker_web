@@ -122,6 +122,8 @@ export default function TodayPage() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: logsKey(habit.id, since) }),
         queryClient.invalidateQueries({ queryKey: ['streak', habit.id] }),
+        // a done day earns XP, and may be the one that levels up
+        queryClient.invalidateQueries({ queryKey: ['level'] }),
       ]),
   })
 

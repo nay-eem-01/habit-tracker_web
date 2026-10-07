@@ -205,3 +205,40 @@
     animation: none;
   }
 }
+
+/* Level up: the card rises in, a ring of squares bursts out of it once. */
+@keyframes level-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+@keyframes level-burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(160deg) scale(1);
+  }
+}
+
+.level-up {
+  animation: level-in 420ms var(--ease-out);
+}
+
+.level-burst {
+  opacity: 0;
+  animation: level-burst 900ms var(--ease-out) 120ms backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-up {
+    animation: fade 200ms ease-out;
+  }
+  .level-burst {
+    display: none;
+  }
+}
