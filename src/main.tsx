@@ -17,3 +17,6 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 )
+
+// shows reminders sent by web push; the app works without it
+if ('serviceWorker' in navigator) void navigator.serviceWorker.register('/sw.js').catch(() => {})

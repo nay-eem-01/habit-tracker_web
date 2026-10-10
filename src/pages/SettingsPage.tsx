@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle } from '@phosphor-icons/react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field, INPUT } from '../components/Field'
 import { SECONDARY, SURFACE } from '../components/styles'
+import { disablePush, enablePush, pushState } from '../push/push'
 import { saveBlob } from '../resources/resources'
 
 /** The browser's region name, the same kind the server accepts. */
@@ -110,6 +111,53 @@ function Profile({ user }: { user: AuthUser }) {
   )
 }
 
+/** Reminders as notifications on this device, through web push. */
+function Reminders() {
+  const queryClient = useQueryClient()
+  const state = useQuery({ queryKey: ['push-state'], queryFn: pushState })
+  const toggle = useMutation({
+    mutationFn: async (on: boolean) => {
+      if (!on) return disablePush()
+      if (!(await enablePush(state.data!.publicKey))) throw new Error('blocked')
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['push-state'] }),
+  })
+
+  if (state.isPending) return <p className="text-ink-soft">Checking this device…</p>
+  if (state.isError) return <p className="text-ink-soft">Couldn’t check notifications right now.</p>
+  const push = state.data
+  if (!push.supported) {
+    return <p className="text-ink-soft">This browser can’t show reminders. On iPhone, add DevHabit to your Home Screen first, then open it from there.</p>
+  }
+  if (!push.enabled) return <p className="text-ink-soft">Reminder notifications aren’t switched on yet. They’ll appear here when they are.</p>
+  if (push.permission === 'denied') {
+    return <p className="text-ink-soft">Notifications are blocked for DevHabit. Allow them in your browser’s site settings, then come back.</p>
+  }
+
+  return (
+    <>
+      <label className="flex cursor-pointer items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          checked={push.subscribed}
+          disabled={toggle.isPending}
+          onChange={(event) => toggle.mutate(event.target.checked)}
+          className="mt-0.5 size-4 accent-lapis"
+        />
+        <span>
+          <span className="font-medium">Notify me on this device</span>
+          <span className="block text-ink-soft">At each habit’s reminder time, unless it’s done or resting.</span>
+        </span>
+      </label>
+      {toggle.isError && (
+        <p role="alert" className="mt-2 text-sm text-alert">
+          {toggle.error.message === 'blocked' ? 'Notifications weren’t allowed, so nothing changed.' : authErrorMessage(toggle.error)}
+        </p>
+      )}
+    </>
+  )
+}
+
 function ExportData() {
   const download = useMutation({ mutationFn: exportData, onSuccess: (blob) => saveBlob(blob, 'devhabit-export.json') })
   return (
@@ -195,6 +243,9 @@ export default function SettingsPage() {
 
       <Section title="Profile">
         <Profile user={user} />
+      </Section>
+      <Section title="Reminders">
+        <Reminders />
       </Section>
       <Section title="Password" intro="Changing it signs you out everywhere else.">
         <Link to="/account/password" className={SECONDARY}>
