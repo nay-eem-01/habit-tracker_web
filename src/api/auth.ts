@@ -32,6 +32,16 @@ export async function changePassword(currentPassword: string, newPassword: strin
   )
 }
 
+/** Confirms the email with the token from the emailed link. Public: the link may open on another device. */
+export async function verifyEmail(token: string): Promise<void> {
+  await api<void>('/api/auth/email/verify', { method: 'POST', body: { token } })
+}
+
+/** Emails a new confirmation link (at most one a minute). */
+export async function resendVerification(): Promise<void> {
+  await api<void>('/api/auth/email/verification', { method: 'POST' })
+}
+
 /** Revokes the refresh token and clears its cookie; the in-memory access token goes either way. */
 export async function logout(): Promise<void> {
   try {

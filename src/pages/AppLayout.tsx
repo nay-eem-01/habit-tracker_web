@@ -5,6 +5,7 @@ import { LevelBadge } from '../level/LevelBadge'
 import { LevelUp } from '../level/LevelUp'
 import { NotificationBell } from '../notifications/NotificationBell'
 import { UserMenu } from './UserMenu'
+import { VerifyBanner } from './VerifyBanner'
 
 /** Long enough to read the goodbye, short enough that nobody waits on it. Skipped for reduced motion. */
 const FAREWELL_MS = 900
@@ -73,6 +74,7 @@ export default function AppLayout() {
           </div>
         </div>
       </header>
+      <VerifyBanner user={state.user} />
       {/* the header stays put while a page's code arrives */}
       <Suspense
         fallback={

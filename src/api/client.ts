@@ -17,6 +17,12 @@ export interface AuthUser {
   name: string
   authProvider: string
   timezone: string
+  /** False until the emailed link is opened. Absent on old fixtures. */
+  emailVerified?: boolean
+  /** Opted in to the occasional product email. */
+  marketingEmails?: boolean
+  /** FREE keeps 7 active habits and 2 active goals. */
+  plan?: 'FREE' | 'PRO'
 }
 
 export interface AuthSession {
