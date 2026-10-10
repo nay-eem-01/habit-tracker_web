@@ -8,6 +8,8 @@ const at = (level: number, tier: Level['tier'] = 'BRONZE'): Level => ({
   tier,
   xpForNextLevel: 600,
   progressToNextLevel: 0.4,
+  spentXp: 0,
+  xpBalance: 420,
 })
 
 describe('levelUp', () => {

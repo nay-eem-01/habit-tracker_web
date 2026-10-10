@@ -52,21 +52,36 @@ export interface TodayStatus {
   done: boolean
   /** For N-times-a-week habits: days done so far this week against the weekly goal. */
   week?: { done: number; goal: number }
+  /** Today is a rest day: the streak holds without a check-in. */
+  resting: boolean
+  /** XP a rest today would cost, or null when this habit can't rest today. */
+  restCost: number | null
 }
+
+/** The 1st, 2nd and 3rd rest day of a habit's Monday–Sunday week; there is no 4th. Mirrors the server. */
+const REST_COST = [0, 100, 200]
 
 /** What today looks like for one habit, from its logs since the start of the week. */
 export function todayStatus(habit: Habit, logs: HabitLog[], today: string): TodayStatus {
-  const count = logs.find((log) => log.date === today)?.completedCount ?? 0
+  const log = logs.find((entry) => entry.date === today)
+  const count = log?.completedCount ?? 0
+  const start = weekStart(today)
   const status: TodayStatus = {
     due: true,
     count,
     target: habit.targetCount,
     done: count >= habit.targetCount,
+    resting: Boolean(log?.rest),
+    restCost: null,
+  }
+  // only daily and chosen-weekday build habits rest; an N-a-week one already has its slack
+  if (habit.kind !== 'QUIT' && habit.frequencyType !== 'X_TIMES_PER_WEEK' && !status.done && !status.resting) {
+    const rests = logs.filter((entry) => entry.rest && entry.date >= start && entry.date <= today).length
+    status.restCost = REST_COST[rests] ?? null
   }
   if (habit.frequencyType === 'SPECIFIC_DAYS') {
     status.due = habit.frequencyConfig?.days?.includes(weekdayOf(today)) ?? false
   } else if (habit.frequencyType === 'X_TIMES_PER_WEEK') {
-    const start = weekStart(today)
     status.week = {
       done: logs.filter((log) => log.done && log.date >= start && log.date <= today).length,
       goal: habit.frequencyConfig?.timesPerWeek ?? 0,

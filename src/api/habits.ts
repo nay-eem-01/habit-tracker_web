@@ -5,6 +5,8 @@ import type { components } from './schema'
 export type HabitRequest = components['schemas']['HabitRequest']
 export type GoalLinkRequest = components['schemas']['GoalLinkRequest']
 export type FrequencyType = HabitRequest['frequencyType']
+/** BUILD: check in when done. QUIT: check in when you slip. Fixed at creation. */
+export type HabitKind = NonNullable<HabitRequest['kind']>
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
 
 export interface FrequencyConfig {
@@ -16,9 +18,13 @@ export interface Habit {
   id: number
   name: string
   category?: string | null
+  /** Absent on old fixtures; the server always sends it. */
+  kind?: HabitKind
   frequencyType: FrequencyType
   frequencyConfig?: FrequencyConfig | null
   targetCount: number
+  /** What is counted, shown with the target: "8 glasses". */
+  unit?: string | null
   /** HH:mm in the user's timezone, or absent for no reminder. */
   reminderTime?: string | null
   archived: boolean
@@ -72,4 +78,9 @@ export function linkGoal(id: number, request: GoalLinkRequest): Promise<Habit> {
 
 export function unlinkGoal(id: number): Promise<Habit> {
   return api(`/api/habits/${id}/goal`, { method: 'DELETE' })
+}
+
+/** Gone for good, with its check-ins and the XP and goal progress they earned. Archive keeps them. */
+export function deleteHabit(id: number): Promise<void> {
+  return api(`/api/habits/${id}`, { method: 'DELETE' })
 }

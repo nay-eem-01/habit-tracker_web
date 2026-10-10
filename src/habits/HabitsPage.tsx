@@ -143,8 +143,12 @@ export default function HabitsPage() {
                   </h2>
                   <p className="mt-1 flex flex-wrap gap-x-4 text-sm text-ink-soft">
                     {habit.category && <span>{habit.category}</span>}
-                    <span>{describeSchedule(habit)}</span>
-                    {habit.targetCount > 1 && <span>{habit.targetCount} times a day</span>}
+                    <span>{habit.kind === 'QUIT' ? 'Quitting' : describeSchedule(habit)}</span>
+                    {habit.targetCount > 1 && (
+                      <span>
+                        {habit.targetCount} {habit.unit ?? 'times'} a day
+                      </span>
+                    )}
                     {habit.reminderTime && <span>Reminder at {habit.reminderTime}</span>}
                   </p>
                 </div>

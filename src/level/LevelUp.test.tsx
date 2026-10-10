@@ -11,6 +11,8 @@ const level = (n: number, tier: Level['tier'] = 'BRONZE', xp = 420): Level => ({
   tier,
   xpForNextLevel: 50 * n * (n + 1),
   progressToNextLevel: 0.4,
+  spentXp: 0,
+  xpBalance: xp,
 })
 const read = {
   id: 1,
@@ -95,7 +97,7 @@ describe('level card', () => {
   it('shows the level, tier, XP and the way to the next level', async () => {
     const { render } = await import('@testing-library/react')
     const { LevelCard } = await import('./LevelCard')
-    render(<LevelCard level={{ xp: 1250, level: 5, tier: 'SILVER', xpForNextLevel: 1500, progressToNextLevel: 0.5 }} />)
+    render(<LevelCard level={{ xp: 1250, level: 5, tier: 'SILVER', xpForNextLevel: 1500, progressToNextLevel: 0.5, spentXp: 0, xpBalance: 1250 }} />)
 
     expect(screen.getByRole('heading').textContent).toBe('Level 5 · Silver')
     expect(screen.getByText('1,250 XP earned, never lost')).toBeTruthy()

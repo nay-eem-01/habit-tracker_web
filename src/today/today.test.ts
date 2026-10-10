@@ -59,6 +59,23 @@ describe('todayStatus', () => {
     const logs = [log('2026-09-30', 1), log('2026-09-28', 1), log('2026-09-27', 1)] // the 27th is last week
     expect(todayStatus(run, logs, '2026-10-02')).toMatchObject({ due: true, done: false, week: { done: 2, goal: 3 } })
   })
+
+  it('prices a rest by this week’s rests: free, 100, 200, then none', () => {
+    const rest = (date: string): HabitLog => ({ ...log(date, 0), rest: true })
+    const cost = (logs: HabitLog[]) => todayStatus(base, logs, '2026-10-02').restCost
+    expect(cost([rest('2026-09-27')])).toBe(0) // last week's rest doesn't count
+    expect(cost([rest('2026-09-28')])).toBe(100)
+    expect(cost([rest('2026-09-28'), rest('2026-09-29')])).toBe(200)
+    expect(cost([rest('2026-09-28'), rest('2026-09-29'), rest('2026-09-30')])).toBeNull()
+  })
+
+  it('a rest day today is resting; done, quit and N-a-week habits have no rest to offer', () => {
+    expect(todayStatus(base, [{ ...log('2026-10-02', 0), rest: true }], '2026-10-02')).toMatchObject({ resting: true, restCost: null })
+    expect(todayStatus(base, [log('2026-10-02', 1)], '2026-10-02').restCost).toBeNull()
+    expect(todayStatus({ ...base, kind: 'QUIT' }, [], '2026-10-02').restCost).toBeNull()
+    const run: Habit = { ...base, frequencyType: 'X_TIMES_PER_WEEK', frequencyConfig: { timesPerWeek: 3 } }
+    expect(todayStatus(run, [], '2026-10-02').restCost).toBeNull()
+  })
 })
 
 describe('withTodayCount', () => {

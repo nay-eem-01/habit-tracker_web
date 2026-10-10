@@ -2,11 +2,12 @@ import { useState, type ReactNode } from 'react'
 import { useMutation, useQueries, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { CalendarBlank, Plant } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import { checkIn, listLogs, type HabitLog } from '../api/checkins'
+import { cancelRest, checkIn, listLogs, restDay, type HabitLog } from '../api/checkins'
 import { listHabits, type Habit, type Page } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
-import { TodayRow } from './TodayRow'
+import { useLevel } from '../level/useLevel'
+import { QuitRow, TodayRow } from './TodayRow'
 import { formatToday, todayStatus, weekStart, withTodayCount } from './today'
 import { useToday } from './useToday'
 
@@ -130,14 +131,31 @@ export default function TodayPage() {
       ]),
   })
 
+  const level = useLevel()
+  // a rest is set or taken back; the server prices it, so the log and the XP balance are read again after
+  const rest = useMutation({
+    mutationFn: async ({ habit, on }: { habit: Habit; on: boolean }) => {
+      if (on) await restDay(habit.id)
+      else await cancelRest(habit.id, today)
+    },
+    onSettled: (_data, _error, { habit }) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: logsKey(habit.id, since) }),
+        queryClient.invalidateQueries({ queryKey: ['streak', habit.id] }),
+        queryClient.invalidateQueries({ queryKey: ['level'] }),
+      ]),
+  })
+
   const loading = habits.isPending || logs.some((result) => result.isPending)
   const failed = habits.error ?? logs.find((result) => result.error)?.error
 
-  const items: Item[] = list
-    .map((habit, index) => ({ habit, status: todayStatus(habit, logs[index]?.data?.content ?? [], today) }))
-    .filter((item) => item.status.due)
-  const todo = items.filter((item) => !item.status.done)
-  const finished = items.filter((item) => item.status.done)
+  const all: Item[] = list.map((habit, index) => ({ habit, status: todayStatus(habit, logs[index]?.data?.content ?? [], today) }))
+  // habits being quit are never "to do": they sit in their own list, clean until a slip
+  const quitting = all.filter((item) => item.habit.kind === 'QUIT')
+  const items = all.filter((item) => item.habit.kind !== 'QUIT' && item.status.due)
+  // a rest day keeps the chain, so it counts with the done ones
+  const todo = items.filter((item) => !item.status.done && !item.status.resting)
+  const finished = items.filter((item) => item.status.done || item.status.resting)
 
   const row = ({ habit, status }: Item) => (
     <TodayRow
@@ -149,6 +167,10 @@ export default function TodayPage() {
         if (!status.done && count >= status.target) setJustDone(habit.id)
         save.mutate({ habit, count })
       }}
+      onRest={() => rest.mutate({ habit, on: true })}
+      onCancelRest={() => rest.mutate({ habit, on: false })}
+      xpBalance={level.data?.xpBalance}
+      restBusy={rest.isPending}
     />
   )
 
@@ -160,6 +182,11 @@ export default function TodayPage() {
       {save.isError && (
         <p role="alert" className="mt-4 text-sm text-alert">
           Couldn’t save that check-in. {habitErrorMessage(save.error)}
+        </p>
+      )}
+      {rest.isError && (
+        <p role="alert" className="mt-4 text-sm text-alert">
+          {habitErrorMessage(rest.error)}
         </p>
       )}
 
@@ -192,7 +219,7 @@ export default function TodayPage() {
             </Link>
           </p>
         </Empty>
-      ) : items.length === 0 ? (
+      ) : items.length === 0 && quitting.length === 0 ? (
         <Empty>
           <CalendarBlank size={40} weight="duotone" className="text-link" aria-hidden="true" />
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">A day off</p>
@@ -205,7 +232,7 @@ export default function TodayPage() {
         </Empty>
       ) : (
         <>
-          <Progress done={finished.length} total={items.length} />
+          {items.length > 0 && <Progress done={finished.length} total={items.length} />}
           {todo.length > 0 && (
             <section aria-labelledby="todo" className="mt-8">
               <h2 id="todo" className="font-display text-2xl font-semibold tracking-tight">
@@ -220,6 +247,23 @@ export default function TodayPage() {
                 {todo.length === 0 ? 'All done for today' : 'Done'}
               </h2>
               <ul className="mt-3 flex flex-col gap-3">{finished.map(row)}</ul>
+            </section>
+          )}
+          {quitting.length > 0 && (
+            <section aria-labelledby="quitting" className="mt-8">
+              <h2 id="quitting" className="font-display text-2xl font-semibold tracking-tight">
+                Staying clean
+              </h2>
+              <ul className="mt-3 flex flex-col gap-3">
+                {quitting.map(({ habit, status }) => (
+                  <QuitRow
+                    key={habit.id}
+                    habit={habit}
+                    slipped={status.count > 0}
+                    onSetCount={(count) => save.mutate({ habit, count })}
+                  />
+                ))}
+              </ul>
             </section>
           )}
         </>

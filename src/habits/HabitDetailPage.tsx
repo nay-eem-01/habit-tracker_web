@@ -1,10 +1,10 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Target } from '@phosphor-icons/react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getStats, getStreak, listLogs, type HabitLog, type Streak, type WindowStats } from '../api/checkins'
 import { getGoal, getGoalProgress } from '../api/goals'
-import { getHabit, type Habit } from '../api/habits'
+import { deleteHabit, getHabit, type Habit } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
 import { DayGrid, DayGridLegend } from '../components/DayGrid'
 import { ProgressBar } from '../components/ProgressBar'
@@ -192,6 +192,56 @@ function Charts({ habit, logs, today }: { habit: Habit; logs: HabitLog[]; today:
   )
 }
 
+/** One history row in words: a rest day, a slip, a count, or done. */
+function logLabel(log: HabitLog, habit: Habit): string {
+  if (log.rest) return log.restCostXp ? `Rest day, ${log.restCostXp} XP` : 'Rest day'
+  if (habit.kind === 'QUIT') return log.completedCount > 0 ? 'Slipped' : 'Clean'
+  if (habit.targetCount > 1) return `${log.completedCount} of ${habit.targetCount}`
+  return log.done ? 'Done' : 'Not done'
+}
+
+/** Gone for good, after a second tap. Archive is the gentler way out, so the confirm says what goes. */
+function DeleteHabit({ habit }: { habit: Habit }) {
+  const [confirming, setConfirming] = useState(false)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const remove = useMutation({
+    mutationFn: () => deleteHabit(habit.id),
+    onSuccess: async () => {
+      // the cached lists still hold it: drop them so the list never flashes it; its XP and goal progress went too
+      queryClient.removeQueries({ queryKey: ['habits'] })
+      await Promise.all(['level', 'dashboard', 'goals'].map((key) => queryClient.invalidateQueries({ queryKey: [key] })))
+      navigate('/habits')
+    },
+  })
+  return (
+    <section aria-label="Delete" className="mt-10 border-t border-mist/70 pt-6">
+      {confirming ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="w-full text-sm sm:w-auto">
+            Delete {habit.name} and every check-in? The XP and goal progress they earned go too.
+          </p>
+          <button type="button" disabled={remove.isPending} onClick={() => remove.mutate()} className={`${BUTTON} text-alert`}>
+            Yes, delete
+          </button>
+          <button type="button" onClick={() => setConfirming(false)} className={BUTTON}>
+            Keep it
+          </button>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setConfirming(true)} className={`${BUTTON} text-alert`}>
+          Delete for good
+        </button>
+      )}
+      {remove.isError && (
+        <p role="alert" className="mt-2 text-sm text-alert">
+          {habitErrorMessage(remove.error)}
+        </p>
+      )}
+    </section>
+  )
+}
+
 export default function HabitDetailPage() {
   const id = Number(useParams().id)
   const { state } = useAuth()
@@ -239,6 +289,8 @@ export default function HabitDetailPage() {
   }
 
   const { name, category, targetCount, reminderTime, archived } = habit.data
+  const quit = habit.data.kind === 'QUIT'
+  const counted = habit.data.unit ? ` ${habit.data.unit}` : ' times'
   const unit = streak.data?.unit === 'WEEKS' ? 'week' : 'day'
   const plural = (n: number) => `${n} ${unit}${n === 1 ? '' : 's'}`
 
@@ -252,8 +304,13 @@ export default function HabitDetailPage() {
           <h1 className="font-display text-4xl font-semibold tracking-tight">{name}</h1>
           <p className="mt-1 flex flex-wrap gap-x-4 text-ink-soft">
             {category && <span>{category}</span>}
-            <span>{describeSchedule(habit.data)}</span>
-            {targetCount > 1 && <span>{targetCount} times a day</span>}
+            <span>{quit ? 'Quitting: a check-in is a slip' : describeSchedule(habit.data)}</span>
+            {targetCount > 1 && (
+              <span>
+                {targetCount}
+                {counted} a day
+              </span>
+            )}
             {reminderTime && <span>Reminder at {reminderTime}</span>}
             {archived && <span>Archived</span>}
           </p>
@@ -325,8 +382,8 @@ export default function HabitDetailPage() {
               {logs.data.content.map((log) => (
                 <li key={log.date} className="flex items-baseline justify-between gap-4 py-3">
                   <span className="font-medium">{formatDay(log.date)}</span>
-                  <span className={log.done ? 'font-medium text-link' : 'text-ink-soft'}>
-                    {targetCount > 1 ? `${log.completedCount} of ${targetCount}` : log.done ? 'Done' : 'Not done'}
+                  <span className={log.done && !quit ? 'font-medium text-link' : 'text-ink-soft'}>
+                    {logLabel(log, habit.data)}
                   </span>
                   {log.note && <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{log.note}</span>}
                 </li>
@@ -353,6 +410,8 @@ export default function HabitDetailPage() {
           </>
         )}
       </section>
+
+      <DeleteHabit habit={habit.data} />
     </main>
   )
 }

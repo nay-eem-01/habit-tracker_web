@@ -87,6 +87,16 @@ export function habitErrorMessage(error: unknown): string {
         return 'This habit is archived. Restore it to check in.'
       case 'LOG_DATE_OUT_OF_RANGE':
         return "That day can't be checked in."
+      case 'HABIT_QUIT_INVALID':
+        return 'A habit you’re quitting is daily, once, with no reminder or goal.'
+      case 'REST_NOT_ALLOWED':
+        return 'This habit can’t rest today. Only daily and chosen-day habits rest, on a day they’re due.'
+      case 'REST_DAY_DONE':
+        return 'It’s already done today, so there’s nothing to rest.'
+      case 'REST_LIMIT_REACHED':
+        return 'This habit has had its three rest days this week.'
+      case 'XP_NOT_ENOUGH':
+        return 'Not enough XP for this rest day. Check-ins earn more.'
     }
     if (error.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
   }

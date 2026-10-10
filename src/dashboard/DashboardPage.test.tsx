@@ -48,7 +48,7 @@ const dashboard: Dashboard = {
   best: [{ habitId: 1, name: 'Read', rate: 0.97, change: 0.1 }],
   slipping: [{ habitId: 3, name: 'Stretch', rate: 0.4, change: -0.3 }],
   goals: [{ goalId: 1, title: 'Run a half marathon', targetDate: '2026-12-31', percent: 42 }],
-  level: { xp: 420, level: 3, tier: 'BRONZE', xpForNextLevel: 600, progressToNextLevel: 0.4 },
+  level: { xp: 420, level: 3, tier: 'BRONZE', xpForNextLevel: 600, progressToNextLevel: 0.4, spentXp: 0, xpBalance: 420 },
 }
 
 const patterns: Patterns = {

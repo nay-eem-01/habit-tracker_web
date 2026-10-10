@@ -18,9 +18,25 @@ describe('toRequest', () => {
   it('sends a daily habit with no schedule details', () => {
     expect(toRequest({ ...EMPTY_HABIT, name: '  Read  ' })).toEqual({
       name: 'Read',
+      kind: 'BUILD',
       frequencyType: 'DAILY',
       targetCount: 1,
     })
+  })
+
+  it('sends a quit habit as daily, once, with no schedule, unit or reminder', () => {
+    const values = { ...EMPTY_HABIT, name: 'Smoking', kind: 'QUIT' as const, frequencyType: 'X_TIMES_PER_WEEK' as const }
+    expect(toRequest({ ...values, targetCount: '3', unit: 'cigarettes', remind: true })).toEqual({
+      name: 'Smoking',
+      kind: 'QUIT',
+      frequencyType: 'DAILY',
+      targetCount: 1,
+    })
+  })
+
+  it('sends a trimmed unit and leaves out a blank one', () => {
+    expect(toRequest({ ...EMPTY_HABIT, name: 'Water', targetCount: '8', unit: ' glasses ' }).unit).toBe('glasses')
+    expect(toRequest({ ...EMPTY_HABIT, name: 'Water', unit: '  ' })).not.toHaveProperty('unit')
   })
 
   it('keeps the chosen weekdays in week order and drops the times-a-week value', () => {
