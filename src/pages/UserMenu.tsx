@@ -1,4 +1,4 @@
-import { Desktop, Key, Moon, SignOut, Sun } from '@phosphor-icons/react'
+import { Desktop, GearSix, Key, Moon, SignOut, Sun } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { AuthUser } from '../api/client'
@@ -78,6 +78,14 @@ export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () =>
               </button>
             ))}
           </div>
+          <Link
+            to="/settings"
+            onClick={() => setOpen(false)}
+            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
+          >
+            <GearSix size={20} weight="bold" aria-hidden="true" />
+            Settings
+          </Link>
           <Link
             to="/account/password"
             onClick={() => setOpen(false)}
