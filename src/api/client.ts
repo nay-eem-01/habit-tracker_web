@@ -166,6 +166,7 @@ async function parseBlob(response: Response): Promise<Blob> {
 }
 
 async function toError(response: Response): Promise<ApiError> {
+  const retryAfter = Number(response.headers.get('Retry-After')) || null
   try {
     const body = (await response.clone().json()) as Partial<Envelope<unknown>>
     return new ApiError(
@@ -174,6 +175,7 @@ async function toError(response: Response): Promise<ApiError> {
       body.message ?? response.statusText,
       body.fields ?? null,
       body.correlationId ?? null,
+      retryAfter,
     )
   } catch {
     return new ApiError(response.status, null, response.statusText || 'Request failed')

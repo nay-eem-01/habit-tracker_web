@@ -1,5 +1,12 @@
 import { ApiError } from './errors'
 
+/** "Too many tries. Try again in 3 minutes." from a 429's Retry-After. */
+function rateLimited(error: ApiError): string {
+  const minutes = error.retryAfter ? Math.ceil(error.retryAfter / 60) : null
+  if (!minutes) return 'Too many tries. Wait a little and try again.'
+  return `Too many tries. Try again in ${minutes === 1 ? 'a minute' : `${minutes} minutes`}.`
+}
+
 /** Plain-language text for a failed sign-in, registration or password change. Branches on `errorCode`, never on the server's message. */
 export function authErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
@@ -16,6 +23,8 @@ export function authErrorMessage(error: unknown): string {
         return 'This account has no password yet. Use “Forgot password” to set one.'
       case 'VALIDATION_FAILED':
         return 'Some details need fixing. Check the highlighted fields.'
+      case 'RATE_LIMITED':
+        return rateLimited(error)
     }
     if (error.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
   }
@@ -65,6 +74,8 @@ export function resourceErrorMessage(error: unknown): string {
         return 'That kind of file isn’t allowed. Use PNG, JPEG, WebP, GIF, PDF, or a .txt or .md text file.'
       case 'FILE_NOT_FOUND':
         return 'This file is missing. Delete the entry and upload it again.'
+      case 'FILE_UPLOADS_DISABLED':
+        return 'File uploads are off for now. Add a note or a link instead.'
       case 'RESOURCE_INVALID':
         // the server says which rule it broke ("A link needs a url"), in plain words already
         return error.message
@@ -97,6 +108,11 @@ export function habitErrorMessage(error: unknown): string {
         return 'This habit has had its three rest days this week.'
       case 'XP_NOT_ENOUGH':
         return 'Not enough XP for this rest day. Check-ins earn more.'
+      case 'PLAN_LIMIT_REACHED':
+        // the server names the limit and the way out ("…up to 7 active habits; archive one first"), in plain words
+        return `${error.message}.`
+      case 'RATE_LIMITED':
+        return rateLimited(error)
     }
     if (error.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
   }
