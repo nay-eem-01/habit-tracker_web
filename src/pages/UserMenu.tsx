@@ -52,7 +52,7 @@ export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () =>
         <section
           id="user-menu"
           aria-label="Account"
-          className="pop absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-mist bg-surface p-2 shadow-[0_18px_40px_-12px_rgb(29_36_51/0.28)]"
+          className="pop absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-mist bg-surface p-2 shadow-[0_18px_40px_-12px_rgb(9_38_52/0.28)]"
         >
           <div className="px-3 pt-2 pb-3">
             <p className="truncate font-display text-lg font-semibold tracking-tight">{user.name}</p>

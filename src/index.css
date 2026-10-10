@@ -4,52 +4,56 @@
   --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-chalk: #eef1f4;
-  --color-ink: #1d2433;
-  --color-ink-soft: #566074;
-  --color-mist: #cbd3dd;
-  --color-lapis: #2f4bd8;
-  --color-lapis-deep: #22328f;
-  --color-ember: #e8892b;
-  /* ember as text: the plain one is too light on chalk */
-  --color-ember-deep: #a24f08;
+  --color-chalk: #f9f9f9;
+  --color-ink: #092634;
+  --color-ink-soft: #4f6470;
+  --color-mist: #d5dee3;
+  --color-lapis: #004e72;
+  --color-lapis-deep: #092634;
+  --color-ember: #ff6e42;
+  /* ember as text: the plain one is 2.6:1 on white */
+  --color-ember-deep: #b4441f;
   --color-alert: #b3261e;
   /* surfaces and links get their own names so dark mode can move them independently of the brand blue */
   --color-surface: #ffffff;
   --color-pill: #ffffff;
-  --color-link: #2f4bd8;
+  --color-link: #004e72;
+  /* text on orange is always navy, in both themes: white on orange is 2.6:1 */
+  --color-navy: #092634;
 }
 
-/* Dark palette: same hues, lifted for a night-time page. Chosen by the OS, or by the switch in the account menu. */
+/* Dark palette: the navy page, blue lifted so it reads on it. Chosen by the OS, or by the switch in the account menu. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-chalk: #0e1117;
-  --color-ink: #e9edf5;
-  --color-ink-soft: #99a3b6;
-  --color-mist: #38425a;
-  --color-lapis: #3d57e0;
-  --color-lapis-deep: #1b2670;
-  --color-ember-deep: #f0a24f;
+  --color-chalk: #092634;
+  --color-ink: #f9f9f9;
+  --color-ink-soft: #9fb3bf;
+  --color-mist: #234a62;
+  /* the brand blue is 1.7:1 on navy, so dark mode lifts it */
+  --color-lapis: #1c77a6;
+  --color-lapis-deep: #0a3a56;
+  --color-ember-deep: #ff8a63;
   --color-alert: #ff8f86;
-  --color-surface: #171c26;
-  --color-pill: #2c3548;
-  --color-link: #93a5ff;
+  --color-surface: #0e3047;
+  --color-pill: #1a4560;
+  --color-link: #5cb8e4;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --color-chalk: #0e1117;
-    --color-ink: #e9edf5;
-    --color-ink-soft: #99a3b6;
-    --color-mist: #38425a;
-    --color-lapis: #3d57e0;
-    --color-lapis-deep: #1b2670;
-    --color-ember-deep: #f0a24f;
+    --color-chalk: #092634;
+    --color-ink: #f9f9f9;
+    --color-ink-soft: #9fb3bf;
+    --color-mist: #234a62;
+    /* the brand blue is 1.7:1 on navy, so dark mode lifts it */
+    --color-lapis: #1c77a6;
+    --color-lapis-deep: #0a3a56;
+    --color-ember-deep: #ff8a63;
     --color-alert: #ff8f86;
-    --color-surface: #171c26;
-    --color-pill: #2c3548;
-    --color-link: #93a5ff;
+    --color-surface: #0e3047;
+    --color-pill: #1a4560;
+    --color-link: #5cb8e4;
   }
 }
 
@@ -83,10 +87,10 @@
 @keyframes chain-today {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(232 137 43 / 0.55);
+    box-shadow: 0 0 0 0 rgb(255 110 66 / 0.55);
   }
   60% {
-    box-shadow: 0 0 0 7px rgb(232 137 43 / 0);
+    box-shadow: 0 0 0 7px rgb(255 110 66 / 0);
   }
 }
 
@@ -240,5 +244,45 @@
   }
   .level-burst {
     display: none;
+  }
+}
+
+/* Check-in: a ring leaves the box once (the squares reuse .level-burst). */
+@keyframes check-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+.check-ring {
+  opacity: 0;
+  animation: check-ring 520ms var(--ease-out);
+}
+
+/* A streak of a week or more: the flame breathes, slowly, from its base. */
+@keyframes flame {
+  0%,
+  100% {
+    transform: translateY(-0.25rem) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-0.25rem) scale(1.08, 1.14) rotate(-3deg);
+  }
+}
+
+.flame-live {
+  transform-origin: 50% 90%;
+  animation: flame 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .check-ring,
+  .flame-live {
+    animation: none;
   }
 }

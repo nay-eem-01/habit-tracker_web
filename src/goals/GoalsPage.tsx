@@ -6,7 +6,7 @@ import { getGoalProgress, listGoals, type Goal, type GoalStatus } from '../api/g
 import { goalErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
 import { ProgressBar } from '../components/ProgressBar'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { PRIMARY, SECONDARY, SURFACE } from '../components/styles'
 import { useToday } from '../today/useToday'
 import { deadline, formatInstant } from './goals'
 
@@ -94,7 +94,7 @@ export default function GoalsPage() {
         <h1 className="font-display text-4xl font-semibold tracking-tight">Goals</h1>
         <Link
           to="/goals/new"
-          className="inline-flex h-11 items-center rounded-xl bg-lapis px-5 font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_8px_20px_-8px_rgb(34_50_143/0.7)] transition-[transform,background-color] duration-150 ease-out active:scale-[0.97] [@media(hover:hover)]:hover:bg-lapis-deep"
+          className={`${PRIMARY} h-11 px-5`}
         >
           New goal
         </Link>
@@ -108,7 +108,7 @@ export default function GoalsPage() {
             onClick={() => showTab(tab.status)}
             aria-current={status === tab.status ? 'true' : undefined}
             className={`rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-out sm:px-5 sm:text-base ${
-              status === tab.status ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+              status === tab.status ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
             }`}
           >
             {tab.label}

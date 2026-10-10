@@ -29,6 +29,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change my name, timezone and promotional-email choice
+         * @description A new timezone moves "today" for check-ins, streaks and reminders from now on; days already logged keep their dates.
+         */
+        put: operations["update_1"];
+        post?: never;
+        /**
+         * Delete my account and everything in it
+         * @description Habits, check-ins, goals, notes, links, files, notifications and sessions — for good. Needs the password when the account has one.
+         */
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/habits/{id}": {
         parameters: {
             query?: never;
@@ -39,9 +63,13 @@ export interface paths {
         /** One of my habits */
         get: operations["get_1"];
         /** Replace a habit's details and schedule */
-        put: operations["update_1"];
+        put: operations["update_2"];
         post?: never;
-        delete?: never;
+        /**
+         * Delete a habit for good
+         * @description Its check-ins and reminders go too, and the XP and goal progress they earned. To stop a habit but keep its history, archive it instead.
+         */
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -75,7 +103,7 @@ export interface paths {
         /** One of my goals */
         get: operations["get_2"];
         /** Replace a goal's title, description and target date */
-        put: operations["update_2"];
+        put: operations["update_3"];
         post?: never;
         delete?: never;
         options?: never;
@@ -153,6 +181,27 @@ export interface paths {
          */
         post: operations["createFile"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/push/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save this browser's push subscription
+         * @description The body is the browser's PushSubscription.toJSON(). Only the browsers' own push services are accepted (FCM, Mozilla, Apple, Windows). Saving the same browser again is fine.
+         */
+        post: operations["subscribe"];
+        /** Forget this browser's push subscription (on sign-out, or when notifications are turned off) */
+        delete: operations["unsubscribe"];
         options?: never;
         head?: never;
         patch?: never;
@@ -239,6 +288,27 @@ export interface paths {
         /** Archive a habit (the soft delete); its history is kept */
         post: operations["archive"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/habits/{habitId}/rest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rest the habit on a day (today by default)
+         * @description A rest day neither breaks nor extends the streak and isn't expected in completion rates. Daily and chosen-weekday habits, on a day they're due, not yet done. Per habit and Mon–Sun week: the 1st is free, the 2nd costs 100 XP, the 3rd 200 (from the level's xpBalance), no 4th. Same dates as a check-in. A check-in on the day ends the rest.
+         */
+        post: operations["rest"];
+        /** Take a rest day back; its XP is refunded */
+        delete: operations["cancelRest"];
         options?: never;
         head?: never;
         patch?: never;
@@ -347,6 +417,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Choose a new password with the emailed token, and sign in
+         * @description Signs the account out on every other device and retires its other reset links.
+         */
+        post: operations["resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Email a password reset link
+         * @description Always 202 with the same message, whether or not the email has an account. The link is <frontend>/reset-password#token=…, valid 30 minutes, single use. At most one email a minute and 5 an hour per account. A Google-only account gets a link to set its first password.
+         */
+        post: operations["forgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password/change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change my password
+         * @description Needs the current password. Signs out every other session and retires reset links; this session gets a fresh token pair. An account that only signs in with Google has no password yet: 409 — it sets one through "forgot password" (or, once Google sign-in exists, here after a fresh Google sign-in).
+         */
+        post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/logout": {
         parameters: {
             query?: never;
@@ -381,6 +511,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in (or up) with Google
+         * @description Send the ID token Google Identity Services gives the page. Finds the account by Google id, then by email (linking it), else creates one. Linking an account whose email was never confirmed removes its password and signs it out everywhere first.
+         */
+        post: operations["google"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/email/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm my email address with the emailed token
+         * @description Public: the link may be opened on a device that isn't signed in. Single use, valid 24 hours.
+         */
+        post: operations["verifyEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/email/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send me a new confirmation email
+         * @description One sent at sign-up already. At most one a minute and 5 an hour; past that nothing is sent.
+         */
+        post: operations["resendVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/resources/{id}/file": {
         parameters: {
             query?: never;
@@ -393,6 +583,23 @@ export interface paths {
          * @description Always as an attachment, with the stored (detected) type. Send the bearer token: fetch it and save or show the blob — a plain link can't carry the header.
          */
         get: operations["download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/push/public-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether push is on, and the key to subscribe with */
+        get: operations["publicKey"];
         put?: never;
         post?: never;
         delete?: never;
@@ -447,6 +654,26 @@ export interface paths {
          * @description Computed from all my habits (archived too) and achieved goals; XP is never lost when a streak breaks. +10 per done day that counts for the streak, +5 more while the streak is at least 7 days (1 week), +50/+200/+500/+1500 at 7/30/100/365 days (1/4/14/52 weeks), +500 per achieved goal.
          */
         get: operations["level"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download all my data as JSON
+         * @description Profile, habits (archived too), every check-in, goals, notes, links and file entries (not the files themselves — download those one by one). Same shapes as the rest of the API.
+         */
+        get: operations["export"];
         put?: never;
         post?: never;
         delete?: never;
@@ -636,6 +863,16 @@ export interface components {
             };
             payload?: unknown;
         };
+        UpdateProfileRequest: {
+            name: string;
+            /**
+             * @description IANA region name; the web app sends the browser's (Intl…resolvedOptions().timeZone)
+             * @example Asia/Dhaka
+             */
+            timezone: string;
+            /** @description Promotional email. Off unless the user turns it on. */
+            marketingEmails: boolean;
+        };
         /** @description SPECIFIC_DAYS needs days; X_TIMES_PER_WEEK needs timesPerWeek (1-6); DAILY needs neither */
         FrequencyConfig: {
             /**
@@ -658,6 +895,11 @@ export interface components {
             /** @example Learning */
             category?: string;
             /**
+             * @description BUILD (default): check in when done. QUIT: check in when you slip; daily, no reminder, target 1, no goal. Set at creation; it can't change.
+             * @enum {string}
+             */
+            kind?: "BUILD" | "QUIT";
+            /**
              * @example SPECIFIC_DAYS
              * @enum {string}
              */
@@ -669,6 +911,11 @@ export interface components {
              * @example 1
              */
             targetCount?: number;
+            /**
+             * @description What is counted, shown with the target: "8 glasses". Optional.
+             * @example glasses
+             */
+            unit?: string;
             /**
              * @description Reminder time of day (HH:mm) in your timezone. Omit for no reminder.
              * @example 07:30
@@ -714,6 +961,22 @@ export interface components {
             /** @description Shown first. Defaults to false. */
             pinned?: boolean;
         };
+        Keys: {
+            p256dh: string;
+            auth: string;
+        };
+        SubscribeRequest: {
+            endpoint: string;
+            keys: components["schemas"]["Keys"];
+        };
+        RestRequest: {
+            /**
+             * Format: date
+             * @description The day, in your timezone. Defaults to today; at most 7 days back.
+             * @example 2026-10-10
+             */
+            date?: string;
+        };
         CheckInRequest: {
             /**
              * Format: date
@@ -745,10 +1008,146 @@ export interface components {
              */
             timezone?: string;
         };
+        ResetPasswordRequest: {
+            /** @description The token from the emailed link (after #token=) */
+            token: string;
+            newPassword: string;
+        };
+        ForgotPasswordRequest: {
+            /**
+             * Format: email
+             * @example nayeem@example.com
+             */
+            email: string;
+        };
+        ChangePasswordRequest: {
+            /** @description Required when the account has a password */
+            currentPassword?: string;
+            newPassword: string;
+        };
         LoginRequest: {
             /** @example nayeem@example.com */
             email: string;
             password: string;
+        };
+        GoogleSignInRequest: {
+            /** @description The credential from Google Identity Services (a Google-signed ID token) */
+            idToken: string;
+            /**
+             * @description IANA timezone, used only when this creates the account. Defaults to UTC.
+             * @example Asia/Dhaka
+             */
+            timezone?: string;
+        };
+        VerifyEmailRequest: {
+            /** @description The token from the emailed link (after #token=) */
+            token: string;
+        };
+        AccountExport: {
+            /** Format: date-time */
+            exportedAt?: string;
+            profile?: components["schemas"]["UserResponse"];
+            habits?: components["schemas"]["HabitResponse"][];
+            checkIns?: components["schemas"]["ExportedCheckIn"][];
+            goals?: components["schemas"]["GoalResponse"][];
+            resources?: components["schemas"]["ResourceResponse"][];
+        };
+        ExportedCheckIn: {
+            /** Format: int64 */
+            habitId?: number;
+            /** Format: date */
+            date?: string;
+            /** Format: int32 */
+            completedCount?: number;
+            /** Format: int32 */
+            targetCount?: number;
+            note?: string;
+        };
+        FileInfo: {
+            /** @example Week 1 plan.pdf */
+            name?: string;
+            /**
+             * @description Detected from the file's bytes
+             * @example application/pdf
+             */
+            contentType?: string;
+            /**
+             * Format: int64
+             * @example 48213
+             */
+            sizeBytes?: number;
+        };
+        GoalResponse: {
+            /** Format: int64 */
+            id?: number;
+            title?: string;
+            description?: string;
+            /** Format: date */
+            targetDate?: string;
+            /** @enum {string} */
+            status?: "ACTIVE" | "ACHIEVED" | "ABANDONED";
+            /** Format: date-time */
+            achievedAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        HabitResponse: {
+            /** Format: int64 */
+            id?: number;
+            name?: string;
+            category?: string;
+            /** @enum {string} */
+            kind?: "BUILD" | "QUIT";
+            /** @enum {string} */
+            frequencyType?: "DAILY" | "SPECIFIC_DAYS" | "X_TIMES_PER_WEEK";
+            frequencyConfig?: components["schemas"]["FrequencyConfig"];
+            /** Format: int32 */
+            targetCount?: number;
+            unit?: string;
+            reminderTime?: string;
+            archived?: boolean;
+            /** Format: int64 */
+            goalId?: number;
+            /** Format: int32 */
+            goalTargetDays?: number;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        ResourceResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            type?: "NOTE" | "LINK" | "FILE";
+            title?: string;
+            body?: string;
+            url?: string;
+            /** Format: int64 */
+            goalId?: number;
+            /** @description The uploaded file; only for a FILE resource */
+            file?: components["schemas"]["FileInfo"];
+            pinned?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        UserResponse: {
+            /** Format: int64 */
+            id?: number;
+            email?: string;
+            name?: string;
+            /** @enum {string} */
+            authProvider?: "LOCAL" | "GOOGLE";
+            timezone?: string;
+            emailVerified?: boolean;
+            marketingEmails?: boolean;
+            /** @enum {string} */
+            plan?: "FREE" | "PRO";
+        };
+        UnsubscribeRequest: {
+            endpoint: string;
+        };
+        DeleteAccountRequest: {
+            /** @description Required when the account has a password */
+            password?: string;
         };
     };
     responses: never;
@@ -861,6 +1260,75 @@ export interface operations {
             };
         };
     };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description The updated user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid fields, or not an IANA region name (USER_INVALID_TIMEZONE) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Deleted; the tokens stop working */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Wrong password (AUTH_WRONG_PASSWORD) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many wrong passwords (RATE_LIMITED) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_1: {
         parameters: {
             query?: never;
@@ -892,7 +1360,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -933,6 +1401,33 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
+            };
+        };
+    };
+    delete_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such habit, or not yours (HABIT_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1051,7 +1546,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1293,6 +1788,61 @@ export interface operations {
             };
         };
     };
+    subscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description Saved */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Not a browser push subscription (PUSH_SUBSCRIPTION_INVALID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    unsubscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnsubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description Forgotten; also when it wasn't saved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     markRead: {
         parameters: {
             query?: never;
@@ -1466,6 +2016,79 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["HttpResponse"];
                 };
+            };
+        };
+    };
+    rest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habitId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RestRequest"];
+            };
+        };
+        responses: {
+            /** @description The day's log, with rest = true; resting twice is fine */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Not this habit or day (REST_NOT_ALLOWED), or a date out of range */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Already done (REST_DAY_DONE), 3 used this week (REST_LIMIT_REACHED), not enough XP (XP_NOT_ENOUGH), or archived */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    cancelRest: {
+        parameters: {
+            query: {
+                date: string;
+            };
+            header?: never;
+            path: {
+                habitId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Done; also when the day wasn't a rest day */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such habit, or not yours (HABIT_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1738,6 +2361,123 @@ export interface operations {
             };
         };
     };
+    resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password set; signed in (access token in the body, refresh cookie set) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid, expired or used link (AUTH_INVALID_RESET_TOKEN), or a password under 8 characters (VALIDATION_FAILED) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    forgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted (an email is sent only if the account exists) */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Not an email address (VALIDATION_FAILED) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Changed; new access token in the body, new refresh cookie set */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Wrong current password (AUTH_WRONG_PASSWORD), or a new password under 8 characters (VALIDATION_FAILED) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description The account has no password yet (AUTH_PASSWORD_NOT_SET) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
     logout: {
         parameters: {
             query?: never;
@@ -1791,6 +2531,101 @@ export interface operations {
             };
         };
     };
+    google: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleSignInRequest"];
+            };
+        };
+        responses: {
+            /** @description Signed in; access token in the body, refresh token cookie set */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid token (AUTH_INVALID_GOOGLE_TOKEN) or unverified Google email (AUTH_GOOGLE_EMAIL_UNVERIFIED) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    verifyEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Email confirmed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Invalid, expired or used link (AUTH_INVALID_VERIFY_TOKEN) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    resendVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Already confirmed (AUTH_EMAIL_ALREADY_VERIFIED) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
     download: {
         parameters: {
             query?: never;
@@ -1818,6 +2653,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": string;
+                };
+            };
+        };
+    };
+    publicKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description enabled, publicKey (null when off) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
                 };
             };
         };
@@ -1882,6 +2737,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description devhabit-export.json, as an attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountExport"];
                 };
             };
         };

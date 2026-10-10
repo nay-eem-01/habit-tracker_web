@@ -46,7 +46,7 @@ const unitOf = (n: number, unit: 'DAYS' | 'WEEKS') => `${n} ${unit === 'WEEKS' ?
 function Hero({ dashboard }: { dashboard: Dashboard }) {
   const { due, done } = dashboard.today
   return (
-    <div className="grain relative isolate overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(34_50_143/0.9)] sm:col-span-2 sm:p-8">
+    <div className="grain relative isolate overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(9_38_52/0.9)] sm:col-span-2 sm:p-8">
       <Link to="/today" className="block transition-transform duration-150 ease-out active:scale-[0.99]">
         <p className="text-sm text-white/75">Today</p>
         <p className="mt-1 font-display text-5xl font-semibold tracking-tight">

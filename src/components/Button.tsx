@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from 'react'
+import { PRIMARY } from './styles'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Swaps the label for a spinner and blocks further taps. */
@@ -15,14 +16,11 @@ export function Button({ className = '', busy, disabled, size = 'regular', child
       disabled={disabled || busy}
       aria-busy={busy || undefined}
       className={
-        `inline-flex items-center justify-center gap-2 rounded-xl bg-lapis font-medium text-white ${size === 'small' ? 'h-10 px-4 text-sm' : 'h-12 px-6'} ` +
-        'shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_8px_20px_-8px_rgb(34_50_143/0.7)] ' +
-        'transition-[transform,background-color,box-shadow] duration-150 ease-out active:scale-[0.97] ' +
-        'disabled:cursor-not-allowed disabled:opacity-70 disabled:active:scale-100 ' +
-        `[@media(hover:hover)]:hover:bg-lapis-deep ${className}`
+        `${PRIMARY} ${size === 'small' ? 'h-10 px-4 text-sm' : 'h-12 px-6'} ` +
+        `disabled:cursor-not-allowed disabled:opacity-70 disabled:active:scale-100 ${className}`
       }
     >
-      {busy && <span aria-hidden="true" className="spinner size-4 rounded-full border-2 border-white/35 border-t-white" />}
+      {busy && <span aria-hidden="true" className="spinner size-4 rounded-full border-2 border-navy/30 border-t-navy" />}
       {children}
     </button>
   )

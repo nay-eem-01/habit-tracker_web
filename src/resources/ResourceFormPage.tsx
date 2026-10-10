@@ -92,7 +92,7 @@ function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pend
               <label
                 key={type}
                 className={`flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-lapis ${
-                  values.type === type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+                  values.type === type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
                 }`}
               >
                 <input

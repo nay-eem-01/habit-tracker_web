@@ -10,10 +10,10 @@ export interface GridDay {
 
 const SHADES: Record<GridDay['level'], string> = {
   0: 'bg-mist/45',
-  1: 'bg-lapis/25',
-  2: 'bg-lapis/50',
-  3: 'bg-lapis/75',
-  4: 'bg-lapis',
+  1: 'bg-ember/25',
+  2: 'bg-ember/50',
+  3: 'bg-ember/75',
+  4: 'bg-ember',
 }
 
 /** A calendar heatmap: weeks as columns, Monday at the top, darker for more done. Described by `label`. */
