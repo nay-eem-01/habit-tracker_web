@@ -11,6 +11,7 @@ The backend's own log is in the backend repo; note there only what the frontend 
 - "Continue with Google" under the sign-in and register forms, drawn by Google Identity Services
   (loaded once, only on those pages). Its credential goes to `POST /api/auth/google` with the
   browser's timezone (used only for a new account); the answer is a session like sign-in.
+- The button is pinned to English (`locale: 'en'`); Google would otherwise follow the browser's language.
 - `VITE_GOOGLE_CLIENT_ID` is in a committed `.env` (Nayeem's client id; not secret). Without it the
   button and the "or" line don't render. If Google's script is blocked, the email form still works.
 - The button's slot is pinned to `color-scheme: light`: on a dark page Chrome otherwise paints

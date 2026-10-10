@@ -61,6 +61,8 @@ export function GoogleButton() {
           size: 'large',
           shape: 'pill',
           text: 'continue_with',
+          // Google follows the browser's language otherwise; the rest of the app is English
+          locale: 'en',
           width: Math.min(400, Math.max(200, slot.current.offsetWidth)),
         })
       })
