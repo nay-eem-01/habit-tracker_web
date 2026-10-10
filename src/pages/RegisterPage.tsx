@@ -8,6 +8,7 @@ import { useAuth } from '../auth/context'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
+import { GoogleButton } from '../components/GoogleButton'
 
 /** Check-ins and reminders follow the user's own calendar day, so their timezone is part of sign-up. */
 function browserTimezone(): string {
@@ -79,6 +80,7 @@ export default function RegisterPage() {
           {mutation.isPending ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
+      <GoogleButton />
       <p className="mt-6 text-sm text-ink-soft">
         Already have an account?{' '}
         <Link to="/signin" className="font-medium text-link underline underline-offset-2">

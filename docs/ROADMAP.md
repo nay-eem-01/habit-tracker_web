@@ -112,7 +112,7 @@ components that work (rings, grids, `Button`, `Field`).
 | N.3 | **Email verification**: `/verify-email#token=…` page, banner with "resend" while `emailVerified` is false. | ✅ |
 | N.4 | **Settings** (`/settings`): name, timezone (offer to switch when the browser differs), promotional-email toggle, theme, change password moved here, export my data, delete account (password). | ✅ |
 | N.5 | **PWA + push**: manifest, icons, service worker (shows `{title, body, url}`, click opens `url`), reminders toggle in settings → subscribe / unsubscribe; unsubscribe on sign-out. | ✅ |
-| N.6 | **Google sign-in** behind `VITE_GOOGLE_CLIENT_ID` (button hidden without it) → `POST /api/auth/google`. | ⬜ |
+| N.6 | **Google sign-in** behind `VITE_GOOGLE_CLIENT_ID` (button hidden without it) → `POST /api/auth/google`. | ✅ |
 
 ## Later — follows the backend milestones
 
@@ -123,7 +123,7 @@ components that work (rings, grids, `Button`, `Field`).
 | M4 Levels | level, XP bar, level-up moment | ✅ Phase M4 above |
 | M5 Dashboard API | swap G.2's client-side maths for the summary endpoint | ✅ Phase M5 above |
 | M6 AI insights | insights panel on the dashboard | ⏸ |
-| 2.3 Google sign-in | "Continue with Google" on sign in / register | ⏸ |
+| 2.3 Google sign-in | "Continue with Google" on sign in / register | ✅ Phase N (N.6) |
 
 ## Before any shared deploy
 

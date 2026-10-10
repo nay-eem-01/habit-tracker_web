@@ -5,6 +5,21 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.6 — Google sign-in)
+
+**Done** (`feat/google-signin`, on top of `feat/pwa-push`)
+- "Continue with Google" under the sign-in and register forms, drawn by Google Identity Services
+  (loaded once, only on those pages). Its credential goes to `POST /api/auth/google` with the
+  browser's timezone (used only for a new account); the answer is a session like sign-in.
+- `VITE_GOOGLE_CLIENT_ID` is in a committed `.env` (Nayeem's client id; not secret). Without it the
+  button and the "or" line don't render. If Google's script is blocked, the email form still works.
+- The button's slot is pinned to `color-scheme: light`: on a dark page Chrome otherwise paints
+  Google's iframe as an opaque white box.
+- Messages for `AUTH_INVALID_GOOGLE_TOKEN`, `AUTH_GOOGLE_EMAIL_UNVERIFIED`, `AUTH_GOOGLE_DISABLED`.
+- Checked: the button renders against the real client id (no origin error from Google), and the
+  local backend answers a bad token with 401 `AUTH_INVALID_GOOGLE_TOKEN`. Not checked: a real Google
+  account signing in (needs a person at the Google prompt).
+
 ## 2026-10-10 (N.5 — PWA and push reminders)
 
 **Done** (`feat/pwa-push`, on top of `feat/settings`)

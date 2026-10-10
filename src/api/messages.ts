@@ -21,6 +21,12 @@ export function authErrorMessage(error: unknown): string {
         return 'This confirmation link has expired or was already used. Ask for a new one.'
       case 'AUTH_EMAIL_ALREADY_VERIFIED':
         return 'Your email is already confirmed.'
+      case 'AUTH_INVALID_GOOGLE_TOKEN':
+        return 'Google sign-in didn’t go through. Try again.'
+      case 'AUTH_GOOGLE_EMAIL_UNVERIFIED':
+        return 'Your Google account’s email isn’t verified yet. Verify it with Google, or sign in with a password.'
+      case 'AUTH_GOOGLE_DISABLED':
+        return 'Google sign-in isn’t available right now. Use your email and password.'
       case 'AUTH_WRONG_PASSWORD':
         return "That isn't your current password."
       case 'AUTH_PASSWORD_NOT_SET':
