@@ -40,8 +40,13 @@ describe('Continue with Google', () => {
     })
     renderApp('/signin')
 
-    await screen.findByRole('heading', { name: 'Sign in' }, { timeout: 5000 })
-    const tag = await waitFor(() => document.head.querySelector<HTMLScriptElement>('script[src*="accounts.google.com/gsi"]')!)
+    await screen.findByRole('heading', { name: 'Sign in' })
+    // waitFor retries only on a throw, so a missing tag must throw rather than come back null
+    const tag = await waitFor(() => {
+      const found = document.head.querySelector<HTMLScriptElement>('script[src*="accounts.google.com/gsi"]')
+      if (!found) throw new Error('Google script not added yet')
+      return found
+    })
     tag.dispatchEvent(new Event('load'))
     await waitFor(() => expect(google.rendered).toBe(true))
 

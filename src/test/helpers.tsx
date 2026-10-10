@@ -1,10 +1,13 @@
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render } from '@testing-library/react'
+import { configure, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import App from '../App'
 import { setAccessToken } from '../api/client'
 import { queryClient } from '../queryClient'
+
+// pages are lazy chunks; on a busy machine the first one can take over the default second to arrive
+configure({ asyncUtilTimeout: 3000 })
 
 export const user = { id: 1, email: 'nayeem@example.com', name: 'Nayeem Ahmed', authProvider: 'LOCAL', timezone: 'Asia/Dhaka' }
 export const session = { accessToken: 'token-1', tokenType: 'Bearer', expiresIn: 900, user }
@@ -75,4 +78,10 @@ export function renderApp(path = '/') {
       </MemoryRouter>
     </QueryClientProvider>,
   )
+}
+
+/** Opens a dropdown by its label and picks an option, the way a person does. */
+export async function choose(user: { click: (element: Element) => Promise<void> }, label: string, option: string | RegExp) {
+  await user.click(screen.getByLabelText(label))
+  await user.click(await screen.findByRole('option', { name: option }))
 }

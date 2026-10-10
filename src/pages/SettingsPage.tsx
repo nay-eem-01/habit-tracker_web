@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle } from '@phosphor-icons/react'
-import { useId, useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteAccount, exportData, updateProfile } from '../api/account'
 import type { AuthUser } from '../api/client'
@@ -8,7 +8,8 @@ import { ApiError } from '../api/errors'
 import { authErrorMessage, fieldError } from '../api/messages'
 import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
-import { Field, INPUT } from '../components/Field'
+import { Field } from '../components/Field'
+import { SwitchField, TimezoneField } from '../components/pickers'
 import { SECONDARY, SURFACE } from '../components/styles'
 import { disablePush, enablePush, pushState } from '../push/push'
 import { saveBlob } from '../resources/resources'
@@ -36,7 +37,6 @@ function Section({ title, intro, children }: { title: string; intro?: string; ch
 
 function Profile({ user }: { user: AuthUser }) {
   const { updateUser } = useAuth()
-  const select = useId()
   const [name, setName] = useState(user.name)
   const [timezone, setTimezone] = useState(user.timezone)
   const [marketing, setMarketing] = useState(Boolean(user.marketingEmails))
@@ -68,17 +68,13 @@ function Profile({ user }: { user: AuthUser }) {
         error={fieldError(save.error, 'name', 'Name')}
       />
       <div>
-        <label htmlFor={select} className="mb-1.5 block text-sm font-medium">
-          Timezone
-        </label>
-        <select id={select} value={timezone} onChange={(event) => setTimezone(event.target.value)} className={`${INPUT} h-12 border-mist`}>
-          {timezones(timezone).map((zone) => (
-            <option key={zone} value={zone}>
-              {zone.replaceAll('_', ' ')}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1.5 text-sm text-ink-soft">Your day, streaks and reminders follow it.</p>
+        <TimezoneField
+          label="Timezone"
+          hint="Your day, streaks and reminders follow it."
+          value={timezone}
+          onChange={setTimezone}
+          zones={timezones(timezone)}
+        />
         {browser && browser !== timezone && (
           <p className="mt-1.5 text-sm">
             This device is on {browser.replaceAll('_', ' ')}.{' '}
@@ -88,13 +84,12 @@ function Profile({ user }: { user: AuthUser }) {
           </p>
         )}
       </div>
-      <label className="flex cursor-pointer items-start gap-3 text-sm">
-        <input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} className="mt-0.5 size-4 accent-lapis" />
-        <span>
-          <span className="font-medium">News and tips by email</span>
-          <span className="block text-ink-soft">Now and then, never more than once a month. Off unless you turn it on.</span>
-        </span>
-      </label>
+      <SwitchField
+        label="News and tips by email"
+        description="Now and then, never more than once a month. Off unless you turn it on."
+        checked={marketing}
+        onChange={setMarketing}
+      />
       {save.isError && (
         <p role="alert" className="text-sm text-alert">
           {save.error instanceof ApiError && save.error.errorCode === 'USER_INVALID_TIMEZONE'
@@ -136,19 +131,13 @@ function Reminders() {
 
   return (
     <>
-      <label className="flex cursor-pointer items-start gap-3 text-sm">
-        <input
-          type="checkbox"
-          checked={push.subscribed}
-          disabled={toggle.isPending}
-          onChange={(event) => toggle.mutate(event.target.checked)}
-          className="mt-0.5 size-4 accent-lapis"
-        />
-        <span>
-          <span className="font-medium">Notify me on this device</span>
-          <span className="block text-ink-soft">At each habit’s reminder time, unless it’s done or resting.</span>
-        </span>
-      </label>
+      <SwitchField
+        label="Notify me on this device"
+        description="At each habit’s reminder time, unless it’s done or resting."
+        checked={push.subscribed}
+        disabled={toggle.isPending}
+        onChange={(on) => toggle.mutate(on)}
+      />
       {toggle.isError && (
         <p role="alert" className="mt-2 text-sm text-alert">
           {toggle.error.message === 'blocked' ? 'Notifications weren’t allowed, so nothing changed.' : authErrorMessage(toggle.error)}

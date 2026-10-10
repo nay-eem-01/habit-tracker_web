@@ -5,6 +5,26 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-11 (N.7 — form controls on shadcn)
+
+**Done** (`feat/form-controls`, on top of `feat/google-signin`)
+- shadcn set up (Base UI, `base-nova`, `@/` alias, `components.json`). Its colour roles point at
+  the app's tokens in `index.css` (no `.dark` block: the tokens already switch), its `dark:` variant
+  follows `data-theme` / the OS like the app, and it keeps the app's fonts and the `xl`+ radii the
+  cards were drawn with. Vendored components live in `src/components/ui/` (lint skips them).
+- `components/pickers.tsx` wraps them in the app's field look (label, 48px trigger, hint/error):
+  `DateField` (calendar in a popover, Monday first, +1 mo / +3 mo / +6 mo / +1 yr quick picks, clear),
+  `SelectField`, `TimeField` (quarter hours, keeps an off-grid saved time), `TimezoneField`
+  (searchable combobox over ~400 region names), `SwitchField`, `Stepper` (− / + around a typed count).
+- Used on: goal deadline; habit form (schedule as icon cards like the kind picker, steppers for
+  times a day / week, reminder switch + time); library goal and pin; goal page habit picker (with a
+  "Choose a habit" check, the native `required` is gone); settings timezone and both switches.
+- Tests: a `choose(user, label, option)` helper drives the dropdowns. Testing Library's default wait
+  is 3s (pages are lazy chunks; on a busy machine the first one took over a second). The Google
+  test's `waitFor` returned null instead of throwing, so it never waited: that was the flaky test.
+  8 runs in a row green.
+- Checked at 390 in light and dark: no sideways scroll with the calendar open.
+
 ## 2026-10-10 (N.6 — Google sign-in)
 
 **Done** (`feat/google-signin`, on top of `feat/pwa-push`)

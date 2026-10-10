@@ -184,7 +184,7 @@ describe('editing a habit', () => {
 
     const name = (await screen.findByLabelText('Name')) as HTMLInputElement
     expect(name.value).toBe('Read 20 pages')
-    expect((screen.getByLabelText('Reminder time') as HTMLInputElement).value).toBe('07:30')
+    expect(screen.getByLabelText('Reminder time').textContent).toContain('07:30')
     expect(screen.getByRole('button', { name: 'Wednesday' }).getAttribute('aria-pressed')).toBe('true')
 
     await input.clear(name)
