@@ -14,7 +14,7 @@ The backend's own log is in the backend repo; note there only what the frontend 
   cards were drawn with. Vendored components live in `src/components/ui/` (lint skips them).
 - `components/pickers.tsx` wraps them in the app's field look (label, 48px trigger, hint/error):
   `DateField` (calendar in a popover, Monday first, +1 mo / +3 mo / +6 mo / +1 yr quick picks, clear),
-  `SelectField`, `TimeField` (quarter hours, keeps an off-grid saved time), `TimezoneField`
+  `SelectField`, `TimeField` (an hour and a minute dropdown, any minute; quarter-hour steps were tried and dropped), `TimezoneField`
   (searchable combobox over ~400 region names), `SwitchField`, `Stepper` (− / + around a typed count).
 - Used on: goal deadline; habit form (schedule as icon cards like the kind picker, steppers for
   times a day / week, reminder switch + time); library goal and pin; goal page habit picker (with a

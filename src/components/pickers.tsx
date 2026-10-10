@@ -180,36 +180,45 @@ export function SelectField({ label, value, onChange, options, hint, error, plac
   )
 }
 
-/** Every quarter hour of the day, plus the saved time if it falls between them. */
-function times(current: string): Option[] {
-  const all = Array.from({ length: 96 }, (_, i) => {
-    const value = `${String(Math.floor(i / 4)).padStart(2, '0')}:${String((i % 4) * 15).padStart(2, '0')}`
-    return { value, label: value }
-  })
-  if (current && !all.some((option) => option.value === current)) all.push({ value: current, label: current })
-  return all.sort((a, b) => a.value.localeCompare(b.value))
-}
+const pad = (n: number) => String(n).padStart(2, '0')
+const HOURS: Option[] = Array.from({ length: 24 }, (_, h) => ({ value: pad(h), label: pad(h) }))
+const MINUTES: Option[] = Array.from({ length: 60 }, (_, m) => ({ value: pad(m), label: pad(m) }))
 
-/** A time of day (HH:mm) in quarter hours. */
-export function TimeField({ label, value, onChange, hint, error, className }: {
+/** A time of day (HH:mm), to the minute: an hour and a minute, side by side. */
+export function TimeField({ label, value, onChange, hint, error }: {
   label: string
   value: string
   onChange: (time: string) => void
   hint?: string
   error?: string
-  className?: string
 }) {
+  const id = useId()
+  const [hour = '08', minute = '00'] = value.split(':')
+  const part = (options: Option[], current: string, name: string, set: (next: string) => void) => (
+    <Select items={options} value={current} onValueChange={(next) => set(String(next))}>
+      <SelectTrigger aria-label={`${label}, ${name}`} className={cn(FIELD_BUTTON, 'w-20 justify-center gap-1 px-3 data-[size=default]:h-12')}>
+        <SelectValue className="flex-none font-display text-lg font-semibold tabular-nums" />
+      </SelectTrigger>
+      <SelectContent className="max-h-72 rounded-xl">
+        <SelectGroup>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value} className="py-2 text-base tabular-nums">
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
   return (
-    <SelectField
-      label={label}
-      value={value}
-      onChange={onChange}
-      options={times(value)}
-      hint={hint}
-      error={error}
-      icon={<Clock size={20} weight="duotone" className="shrink-0 text-ember-deep" aria-hidden="true" />}
-      className={cn('max-w-40', className)}
-    />
+    <Labelled id={id} label={label} hint={hint} error={error}>
+      <div id={id} role="group" aria-labelledby={`${id}-label`} className="flex items-center gap-2">
+        <Clock size={22} weight="duotone" className="shrink-0 text-ember-deep" aria-hidden="true" />
+        {part(HOURS, hour, 'hour', (h) => onChange(`${h}:${minute}`))}
+        <span className="font-display text-xl font-semibold text-ink-soft">:</span>
+        {part(MINUTES, minute, 'minute', (m) => onChange(`${hour}:${m}`))}
+      </div>
+    </Labelled>
   )
 }
 

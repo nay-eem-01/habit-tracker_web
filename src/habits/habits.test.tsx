@@ -3,7 +3,7 @@ import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Habit } from '../api/habits'
-import { fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
+import { choose, fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
 
 const read: Habit = {
   id: 1,
@@ -122,6 +122,9 @@ describe('creating a habit', () => {
     await input.click(screen.getByRole('button', { name: 'Friday' }))
     await input.click(screen.getByRole('button', { name: 'Monday' }))
     await input.click(screen.getByLabelText('Remind me'))
+    // any minute, not just quarter hours
+    await choose(input, 'Reminder time, hour', '07')
+    await choose(input, 'Reminder time, minute', '43')
     await input.click(screen.getByRole('button', { name: 'Add habit' }))
 
     expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
@@ -132,7 +135,7 @@ describe('creating a habit', () => {
       frequencyType: 'SPECIFIC_DAYS',
       frequencyConfig: { days: ['MONDAY', 'FRIDAY'] },
       targetCount: 1,
-      reminderTime: '08:00',
+      reminderTime: '07:43',
     })
   })
 
@@ -184,7 +187,8 @@ describe('editing a habit', () => {
 
     const name = (await screen.findByLabelText('Name')) as HTMLInputElement
     expect(name.value).toBe('Read 20 pages')
-    expect(screen.getByLabelText('Reminder time').textContent).toContain('07:30')
+    expect(screen.getByLabelText('Reminder time, hour').textContent).toContain('07')
+    expect(screen.getByLabelText('Reminder time, minute').textContent).toContain('30')
     expect(screen.getByRole('button', { name: 'Wednesday' }).getAttribute('aria-pressed')).toBe('true')
 
     await input.clear(name)
