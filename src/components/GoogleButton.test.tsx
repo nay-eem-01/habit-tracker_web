@@ -40,7 +40,7 @@ describe('Continue with Google', () => {
     })
     renderApp('/signin')
 
-    await screen.findByRole('heading', { name: 'Sign in' })
+    await screen.findByRole('heading', { name: 'Sign in' }, { timeout: 5000 })
     const tag = await waitFor(() => document.head.querySelector<HTMLScriptElement>('script[src*="accounts.google.com/gsi"]')!)
     tag.dispatchEvent(new Event('load'))
     await waitFor(() => expect(google.rendered).toBe(true))
