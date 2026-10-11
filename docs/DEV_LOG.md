@@ -5,6 +5,12 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-11 (A.0 — suspended accounts)
+
+**Done** (`feat/admin-suspended`): API types regenerated (role, admin endpoints). Signing in to a
+suspended account, by password or Google, says "This account is suspended. Contact
+averydayhabits@gmail.com." (403 `AUTH_ACCOUNT_SUSPENDED`).
+
 ## 2026-10-11 (N.7 — form controls on shadcn)
 
 **Done** (`feat/form-controls`, on top of `feat/google-signin`)

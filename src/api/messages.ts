@@ -11,6 +11,8 @@ function rateLimited(error: ApiError): string {
 export function authErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     switch (error.errorCode) {
+      case 'AUTH_ACCOUNT_SUSPENDED':
+        return 'This account is suspended. Contact averydayhabits@gmail.com.'
       case 'AUTH_INVALID_CREDENTIALS':
         return "That email and password don't match. Check them and try again."
       case 'USER_EMAIL_TAKEN':

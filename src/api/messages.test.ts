@@ -17,6 +17,10 @@ describe('limits in plain words', () => {
     expect(goalErrorMessage(goals)).toBe('The free plan keeps up to 2 active goals; close one first.')
   })
 
+  it('tells a suspended account who to contact', () => {
+    expect(authErrorMessage(new ApiError(403, 'AUTH_ACCOUNT_SUSPENDED', 'x'))).toBe('This account is suspended. Contact averydayhabits@gmail.com.')
+  })
+
   it('says uploads are off', () => {
     expect(resourceErrorMessage(new ApiError(403, 'FILE_UPLOADS_DISABLED', 'off'))).toContain('File uploads are off')
   })
