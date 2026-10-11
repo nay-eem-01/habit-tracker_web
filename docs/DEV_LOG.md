@@ -5,6 +5,15 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-11 (A.3 — admin users list)
+
+**Done** (`feat/admin-users`, on top of `feat/admin-layout`)
+- `/admin/users`: search by email (asks after a 300 ms pause, back to page 1), sort (newest, oldest,
+  email A–Z / Z–A) with the app's dropdown, Previous / Next pages of 20; the old page stays, dimmed,
+  while the next loads. Each row opens the user.
+- One card per user on phones; on wider screens the same rows line up under column headings (user,
+  sign-in, email verified, joined). Plan and status show as badges: Suspended, Pro, Admin.
+
 ## 2026-10-11 (A.1–A.2 — admin area and overview)
 
 **Done** (`feat/admin-layout`, one PR: the tabs alone would lead nowhere)

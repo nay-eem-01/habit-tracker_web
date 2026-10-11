@@ -7,6 +7,7 @@ import AppLayout from './pages/AppLayout'
 /** Each page is its own chunk, fetched the first time it's opened; the app frame loads with the first. */
 const AdminLayout = lazy(() => import('./admin/AdminLayout'))
 const AdminOverview = lazy(() => import('./admin/AdminOverview'))
+const AdminUsers = lazy(() => import('./admin/AdminUsers'))
 const DashboardPage = lazy(() => import('./dashboard/DashboardPage'))
 const GoalDetailPage = lazy(() => import('./goals/GoalDetailPage'))
 const GoalFormPage = lazy(() => import('./goals/GoalFormPage'))
@@ -58,6 +59,7 @@ export default function App() {
               <Route element={<RequireAdmin />}>
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminOverview />} />
+                  <Route path="users" element={<AdminUsers />} />
                 </Route>
               </Route>
             </Route>
