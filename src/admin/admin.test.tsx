@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen, waitFor } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { choose, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
@@ -88,5 +88,65 @@ describe('admin users', () => {
     await choose(input, 'Sort', 'Email A–Z')
     await waitFor(() => expect(calls.at(-1)!.params.get('sortBy')).toBe('email'))
     expect(calls.at(-1)!.params.get('sortDir')).toBe('asc')
+  })
+})
+
+describe('one user, for an admin', () => {
+  const detail = (user: object) => ({ user, activeHabits: 5, archivedHabits: 1, checkIns: 42, goals: 2, lastActiveAt: null, pushSubscriptions: 1 })
+
+  it('shows counts only, switches the plan and suspends after a confirm', async () => {
+    let current = person(7, 'sam@example.com')
+    const calls = stubApi({
+      'POST /api/auth/refresh': () => ok(admin),
+      ...shell,
+      'GET /api/admin/users/7': () => ok(detail(current)),
+      'PUT /api/admin/users/7/plan': (call) => ok((current = { ...current, ...(call.body as object) })),
+      'POST /api/admin/users/7/suspend': () => ok((current = { ...current, suspendedAt: '2026-10-11T09:00:00Z' })),
+    })
+    renderApp('/admin/users/7')
+    const input = userEvent.setup()
+
+    expect(await screen.findByRole('heading', { name: 'sam@example.com' })).toBeTruthy()
+    expect(screen.getByText('42')).toBeTruthy()
+    expect(screen.getByText('Never')).toBeTruthy()
+
+    await input.click(screen.getByRole('radio', { name: 'Pro' }))
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Pro' }).getAttribute('aria-checked')).toBe('true'))
+    expect(calls.find((c) => c.method === 'PUT')!.body).toEqual({ plan: 'PRO' })
+
+    await input.click(screen.getByRole('button', { name: 'Suspend' }))
+    expect(calls.some((c) => c.path.endsWith('/suspend'))).toBe(false)
+    await input.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Suspend' }))
+    expect(await screen.findByText(/Suspended since/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Lift suspension' })).toBeTruthy()
+  })
+
+  it('deletes only once the email is typed, then goes back to the list', async () => {
+    const calls = stubApi({
+      'POST /api/auth/refresh': () => ok(admin),
+      ...shell,
+      'GET /api/admin/users/7': () => ok(detail(person(7, 'sam@example.com'))),
+      'DELETE /api/admin/users/7': () => new Response(null, { status: 204 }),
+      'GET /api/admin/users': () => ok(page([])),
+    })
+    renderApp('/admin/users/7')
+    const input = userEvent.setup()
+
+    await input.click(await screen.findByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('alertdialog')
+    const confirm = within(dialog).getByRole('button', { name: 'Delete for good' }) as HTMLButtonElement
+    expect(confirm.disabled).toBe(true)
+    await input.type(within(dialog).getByLabelText('Type sam@example.com to confirm'), 'sam@example.com')
+    await input.click(confirm)
+
+    expect(await screen.findByText('No users yet.')).toBeTruthy()
+    expect(calls.some((c) => c.method === 'DELETE' && c.path === '/api/admin/users/7')).toBe(true)
+  })
+
+  it('offers no actions on another admin', async () => {
+    stubApi({ 'POST /api/auth/refresh': () => ok(admin), ...shell, 'GET /api/admin/users/8': () => ok(detail(person(8, 'boss@example.com', { role: 'ADMIN' }))) })
+    renderApp('/admin/users/8')
+    expect(await screen.findByText(/Admins can’t be changed from here/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull()
   })
 })

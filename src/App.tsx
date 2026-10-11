@@ -8,6 +8,7 @@ import AppLayout from './pages/AppLayout'
 const AdminLayout = lazy(() => import('./admin/AdminLayout'))
 const AdminOverview = lazy(() => import('./admin/AdminOverview'))
 const AdminUsers = lazy(() => import('./admin/AdminUsers'))
+const AdminUserPage = lazy(() => import('./admin/AdminUser'))
 const DashboardPage = lazy(() => import('./dashboard/DashboardPage'))
 const GoalDetailPage = lazy(() => import('./goals/GoalDetailPage'))
 const GoalFormPage = lazy(() => import('./goals/GoalFormPage'))
@@ -60,6 +61,7 @@ export default function App() {
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminOverview />} />
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="users/:id" element={<AdminUserPage />} />
                 </Route>
               </Route>
             </Route>

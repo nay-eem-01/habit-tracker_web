@@ -78,4 +78,4 @@ list) · `ADMIN_TARGET_IS_ADMIN` (409, shouldn't happen when the buttons are hid
 | A.1 | `role` from `me`; Admin menu entry; guarded `/admin` layout with Overview / Users tabs | ✅ |
 | A.2 | Overview: cards, two charts, delivery panel | ✅ |
 | A.3 | Users list: search, sort, pages | ✅ |
-| A.4 | User page: counts, plan switch, suspend / lift, delete | ⬜ |
+| A.4 | User page: counts, plan switch, suspend / lift, delete | ✅ |
