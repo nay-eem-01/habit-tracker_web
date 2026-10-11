@@ -5,6 +5,19 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.4 — settings)
+
+**Done** (`feat/settings`, on top of `feat/verify-email`)
+- `/settings` ("Settings" in the account menu): profile (name, timezone from the browser's list of
+  region names, promotional email off by default) via `PUT /api/me`, which updates the signed-in
+  user in place. When this device's timezone differs from the saved one it offers "Use it".
+- Password: links to the existing change-password page (kept where it was; the menu still has it).
+- Your data: "Download my data" saves `devhabit-export.json` (checked live: profile, habits,
+  check-ins, goals, resources).
+- Delete account: opens a form; the password is required for password accounts (the app can't tell
+  if a Google account has one, so the hint says to leave it empty then). Success signs out here.
+- Theme stays in the account menu, not duplicated in Settings.
+
 ## 2026-10-10 (N.3 — email verification)
 
 **Done** (`feat/verify-email`, on top of `feat/error-states`)

@@ -19,6 +19,7 @@ const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const SignInPage = lazy(() => import('./pages/SignInPage'))
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
 
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/resources/new" element={<ResourceFormPage />} />
               <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
               <Route path="/account/password" element={<ChangePasswordPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
