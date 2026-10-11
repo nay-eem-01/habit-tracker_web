@@ -36,3 +36,10 @@ export function GuestOnly() {
   }
   return <Outlet />
 }
+
+/** The /admin screens. Anyone else is treated as if the page didn't exist, as the API does (404). */
+export function RequireAdmin() {
+  const { state } = useAuth()
+  if (state.status !== 'authenticated' || state.user.role !== 'ADMIN') return <Navigate to="/" replace />
+  return <Outlet />
+}

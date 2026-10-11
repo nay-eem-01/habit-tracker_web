@@ -1,10 +1,12 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
-import { GuestOnly, RequireAuth } from './auth/guards'
+import { GuestOnly, RequireAdmin, RequireAuth } from './auth/guards'
 import AppLayout from './pages/AppLayout'
 
 /** Each page is its own chunk, fetched the first time it's opened; the app frame loads with the first. */
+const AdminLayout = lazy(() => import('./admin/AdminLayout'))
+const AdminOverview = lazy(() => import('./admin/AdminOverview'))
 const DashboardPage = lazy(() => import('./dashboard/DashboardPage'))
 const GoalDetailPage = lazy(() => import('./goals/GoalDetailPage'))
 const GoalFormPage = lazy(() => import('./goals/GoalFormPage'))
@@ -53,6 +55,11 @@ export default function App() {
               <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
               <Route path="/account/password" element={<ChangePasswordPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route element={<RequireAdmin />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminOverview />} />
+                </Route>
+              </Route>
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
