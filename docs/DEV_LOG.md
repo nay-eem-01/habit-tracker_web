@@ -5,6 +5,27 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.5 — PWA and push reminders)
+
+**Done** (`feat/pwa-push`, on top of `feat/settings`)
+- Installable: `public/manifest.webmanifest` (starts at `/today`, standalone, navy splash), PNG icons
+  192 / 512 (maskable: the mark sits in the safe zone) and an Apple touch icon, all rendered from
+  one SVG. The favicon was still Vite's default; it is now the DevHabit mark. `theme-color` follows
+  light / dark.
+- `public/sw.js`, plain JS: shows a push as a notification (`{title, body, url}`); a tap focuses an
+  open tab and moves it to `url`, or opens one. No offline cache (the app needs the API anyway).
+  Registered from `main.tsx`.
+- Settings → Reminders: "Notify me on this device" (asks permission, subscribes, `POST
+  /api/push/subscriptions` with `toJSON()`; off → `DELETE` with the endpoint, then unsubscribes).
+  Clear words for an unsupported browser (iPhone: add to Home Screen first), push off on the
+  server, or notifications blocked. Sign-out unsubscribes this browser first (best effort).
+- Checked in Chromium with the server's key faked (push is off locally: no VAPID keys): subscribe
+  sends endpoint + keys, a push delivered through DevTools shows "title | body" with its url, and
+  turning it off sends the DELETE. Not checked: a real push from the backend, and tapping the
+  notification.
+
+**Deploy note:** serve `sw.js` with `Cache-Control: no-cache` so an update reaches browsers.
+
 ## 2026-10-10 (N.4 — settings)
 
 **Done** (`feat/settings`, on top of `feat/verify-email`)

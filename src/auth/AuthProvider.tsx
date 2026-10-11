@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { logout } from '../api/auth'
 import { restoreSession, setSessionLostHandler, type AuthSession, type AuthUser } from '../api/client'
+import { disablePush, pushSupported } from '../push/push'
 import { queryClient } from '../queryClient'
 import { AuthContext, type AuthState } from './context'
 
@@ -40,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
+      // a signed-out browser shouldn't get this user's reminders; best effort, it never blocks signing out
+      if (pushSupported()) await disablePush().catch(() => {})
       await logout()
     } catch {
       // the server couldn't be told; the session is gone locally either way

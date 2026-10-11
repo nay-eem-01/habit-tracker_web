@@ -111,7 +111,7 @@ components that work (rings, grids, `Button`, `Field`).
 | N.2 | **Errors**: `PLAN_LIMIT_REACHED` (7 habits / 2 goals, explained), `RATE_LIMITED` (+`Retry-After`), `XP_NOT_ENOUGH`, `REST_LIMIT_REACHED`; hide uploads on `FILE_UPLOADS_DISABLED`. | ✅ |
 | N.3 | **Email verification**: `/verify-email#token=…` page, banner with "resend" while `emailVerified` is false. | ✅ |
 | N.4 | **Settings** (`/settings`): name, timezone (offer to switch when the browser differs), promotional-email toggle, theme, change password moved here, export my data, delete account (password). | ✅ |
-| N.5 | **PWA + push**: manifest, icons, service worker (shows `{title, body, url}`, click opens `url`), reminders toggle in settings → subscribe / unsubscribe; unsubscribe on sign-out. | ⬜ |
+| N.5 | **PWA + push**: manifest, icons, service worker (shows `{title, body, url}`, click opens `url`), reminders toggle in settings → subscribe / unsubscribe; unsubscribe on sign-out. | ✅ |
 | N.6 | **Google sign-in** behind `VITE_GOOGLE_CLIENT_ID` (button hidden without it) → `POST /api/auth/google`. | ⬜ |
 
 ## Later — follows the backend milestones
