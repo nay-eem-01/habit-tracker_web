@@ -27,7 +27,8 @@ describe('settings', () => {
     renderApp('/settings')
     const input = userEvent.setup()
 
-    const name = await screen.findByLabelText('Name')
+    // the page is its own chunk and draws ~400 timezones; under a loaded CI box that takes over a second
+    const name = await screen.findByLabelText('Name', {}, { timeout: 5000 })
     await input.clear(name)
     await input.type(name, 'Nayeem A.')
     await input.click(screen.getByRole('button', { name: 'Use it' }))
@@ -48,7 +49,7 @@ describe('settings', () => {
     renderApp('/settings')
     const input = userEvent.setup()
 
-    await input.click(await screen.findByRole('button', { name: 'Delete my account' }))
+    await input.click(await screen.findByRole('button', { name: 'Delete my account' }, { timeout: 5000 }))
     await input.type(screen.getByLabelText('Password'), 'wrong-one')
     await input.click(screen.getByRole('button', { name: 'Delete everything' }))
     expect(await screen.findByText("That isn't your current password.")).toBeTruthy()

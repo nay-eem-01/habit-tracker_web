@@ -7,6 +7,7 @@ import { useAuth } from '../auth/context'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
+import { GoogleButton } from '../components/GoogleButton'
 
 export default function SignInPage() {
   const { signIn } = useAuth()
@@ -56,6 +57,7 @@ export default function SignInPage() {
           {mutation.isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
+      <GoogleButton />
       <p className="mt-6 text-sm text-ink-soft">
         New here?{' '}
         <Link to="/register" className="font-medium text-link underline underline-offset-2">

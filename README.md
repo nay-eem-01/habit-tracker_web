@@ -22,6 +22,7 @@ the API under one domain.
 | Variable | What it does |
 |---|---|
 | `VITE_API_BASE_URL` | API origin for a split deploy; leave unset when the app and API share a domain |
+| `VITE_GOOGLE_CLIENT_ID` | shows "Continue with Google"; set in `.env` (not secret). Its JavaScript origins are listed in Google Cloud |
 | `VITE_FILE_UPLOADS` | `false` hides "File" in the library form; match the backend's `APP_FILES_ENABLED` (off by default there) |
 
 ## Scripts

@@ -15,6 +15,11 @@ export async function register(input: RegisterInput): Promise<AuthSession> {
   return keep(await api<AuthSession>('/api/auth/register', { method: 'POST', body: input }))
 }
 
+/** Signs in (or up) with the ID token Google's button gave; the timezone is used only for a new account. */
+export async function googleSignIn(idToken: string, timezone: string): Promise<AuthSession> {
+  return keep(await api<AuthSession>('/api/auth/google', { method: 'POST', body: { idToken, timezone } }))
+}
+
 /** Always succeeds the same way, whether or not the email has an account: the server never says. */
 export async function forgotPassword(email: string): Promise<void> {
   await api<void>('/api/auth/password/forgot', { method: 'POST', body: { email } })
