@@ -136,14 +136,16 @@ describe('creating a goal', () => {
 
     await input.type(await screen.findByLabelText('Goal'), 'Run a half marathon')
     await input.type(screen.getByLabelText('Why it matters (optional)'), 'Under two hours')
-    await input.type(screen.getByLabelText('Target date (optional)'), '2026-12-31')
+    // the calendar opens on this month; pick its 15th
+    await input.click(screen.getByLabelText('Target date (optional)'))
+    await input.click(await screen.findByRole('button', { name: /15th/ }))
     await input.click(screen.getByRole('button', { name: 'Add goal' }))
 
     expect(await screen.findByRole('heading', { name: 'Run a half marathon' })).toBeTruthy()
     expect(calls.find((c) => c.method === 'POST' && c.path === '/api/goals')!.body).toEqual({
       title: 'Run a half marathon',
       description: 'Under two hours',
-      targetDate: '2026-12-31',
+      targetDate: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-15`,
     })
   })
 
@@ -173,10 +175,10 @@ describe('editing a goal', () => {
 
     const title = (await screen.findByLabelText('Goal')) as HTMLInputElement
     expect(title.value).toBe('Run a half marathon')
-    expect((screen.getByLabelText('Target date (optional)') as HTMLInputElement).value).toBe('2026-12-31')
+    expect(screen.getByLabelText('Target date (optional)').textContent).toContain('Thu 31 Dec 2026')
 
     await input.clear(screen.getByLabelText('Why it matters (optional)'))
-    await input.clear(screen.getByLabelText('Target date (optional)'))
+    await input.click(screen.getByRole('button', { name: 'Clear the date' }))
     await input.click(screen.getByRole('button', { name: 'Save changes' }))
 
     expect(await screen.findByRole('heading', { name: 'Run a half marathon' })).toBeTruthy()

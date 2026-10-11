@@ -14,7 +14,8 @@ import {
   type ResourceType,
 } from '../api/resources'
 import { Button } from '../components/Button'
-import { Field, INPUT, TextAreaField } from '../components/Field'
+import { Field, TextAreaField } from '../components/Field'
+import { SelectField, SwitchField } from '../components/pickers'
 import { SURFACE } from '../components/styles'
 import {
   backPath,
@@ -55,7 +56,6 @@ interface ResourceFormProps {
 }
 
 function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pending, error, cancelTo, onSubmit }: ResourceFormProps) {
-  const goalSelect = useId()
   const fileInput = useId()
   const [values, setValues] = useState(initial)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -197,36 +197,22 @@ function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pend
         error={fieldError(error, 'body', note ? 'Note' : 'Comment')}
       />
 
-      <div className="max-w-sm">
-        <label htmlFor={goalSelect} className="mb-1.5 block text-sm font-medium">
-          Goal (optional)
-        </label>
-        <select
-          id={goalSelect}
-          value={values.goalId}
-          onChange={(event) => set('goalId', event.target.value)}
-          className={`${INPUT} h-12 border-mist`}
-        >
-          <option value="">No goal</option>
-          {goals.map((goal) => (
-            <option key={goal.id} value={goal.id}>
-              {goal.title}
-              {goal.status === 'ACTIVE' ? '' : ` (${goal.status === 'ACHIEVED' ? 'achieved' : 'abandoned'})`}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1.5 text-sm text-ink-soft">It shows on the goal’s page too.</p>
-      </div>
+      <SelectField
+        className="max-w-sm"
+        label="Goal (optional)"
+        hint="It shows on the goal’s page too."
+        value={values.goalId}
+        onChange={(goalId) => set('goalId', goalId)}
+        options={[
+          { value: '', label: 'No goal' },
+          ...goals.map((goal) => ({
+            value: String(goal.id),
+            label: goal.title + (goal.status === 'ACTIVE' ? '' : ` (${goal.status === 'ACHIEVED' ? 'achieved' : 'abandoned'})`),
+          })),
+        ]}
+      />
 
-      <label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={values.pinned}
-          onChange={(event) => set('pinned', event.target.checked)}
-          className="size-4 accent-lapis"
-        />
-        Pin it to the top
-      </label>
+      <SwitchField label="Pin it to the top" checked={values.pinned} onChange={(pinned) => set('pinned', pinned)} />
 
       {error != null && (
         <p role="alert" className="text-sm text-alert">

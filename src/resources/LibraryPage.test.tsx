@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Goal } from '../api/goals'
 import type { Resource } from '../api/resources'
-import { fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
+import { choose, fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
 
 const marathon: Goal = {
   id: 1,
@@ -199,10 +199,10 @@ describe('adding and editing', () => {
     await input.type(await screen.findByLabelText('Title'), 'Race-day checklist')
     await input.type(screen.getByLabelText('Note', { selector: 'textarea' }), 'Shoes laced')
     // only active goals are offered for a new note
-    const goal = screen.getByLabelText('Goal (optional)')
-    expect(within(goal).queryByRole('option', { name: /Read 12 books/ })).toBeNull()
-    await input.selectOptions(goal, 'Run a half marathon')
-    await input.click(screen.getByLabelText('Pin it to the top'))
+    await input.click(screen.getByLabelText('Goal (optional)'))
+    expect(screen.queryByRole('option', { name: /Read 12 books/ })).toBeNull()
+    await input.click(await screen.findByRole('option', { name: 'Run a half marathon' }))
+    await input.click(screen.getByRole('switch', { name: 'Pin it to the top' }))
     await input.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(await screen.findByRole('heading', { name: 'Library' })).toBeTruthy()
@@ -228,7 +228,7 @@ describe('adding and editing', () => {
     const input = userEvent.setup()
 
     await input.click(await screen.findByLabelText('Link'))
-    expect((screen.getByLabelText('Goal (optional)') as HTMLSelectElement).value).toBe('1')
+    expect((await screen.findByLabelText('Goal (optional)')).textContent).toContain('Run a half marathon')
     await input.type(screen.getByLabelText('Title'), 'Couch to 5K plan')
     await input.type(screen.getByLabelText('Address'), 'https://www.example.com/c25k')
     await input.click(screen.getByRole('button', { name: 'Save' }))
@@ -276,10 +276,9 @@ describe('adding and editing', () => {
 
     const title = (await screen.findByLabelText('Title')) as HTMLInputElement
     expect(title.value).toBe('Race-day checklist')
-    expect((screen.getByLabelText('Goal (optional)') as HTMLSelectElement).value).toBe('2')
-    expect(screen.getByRole('option', { name: 'Read 12 books (achieved)' })).toBeTruthy()
+    expect(screen.getByLabelText('Goal (optional)').textContent).toContain('Read 12 books (achieved)')
 
-    await input.selectOptions(screen.getByLabelText('Goal (optional)'), 'No goal')
+    await choose(input, 'Goal (optional)', 'No goal')
     await input.click(screen.getByRole('button', { name: 'Save changes' }))
 
     await screen.findByRole('heading', { name: 'Library' })

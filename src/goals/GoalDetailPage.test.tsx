@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Goal, GoalProgress, HabitGoalProgress } from '../api/goals'
 import type { Habit } from '../api/habits'
-import { fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
+import { choose, fail, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
 
 // Saturday 3 October 2026, 10:00 in Dhaka
 const NOW = new Date('2026-10-03T04:00:00Z')
@@ -114,10 +114,10 @@ describe('goal detail', () => {
     renderApp('/goals/1')
     const input = userEvent.setup()
 
-    const select = await screen.findByLabelText('Habit')
+    await input.click(await screen.findByLabelText('Habit'))
     // the habit already on this goal isn't offered again
-    expect(within(select).queryByRole('option', { name: 'Morning run' })).toBeNull()
-    await input.selectOptions(select, 'Stretch')
+    expect(screen.queryByRole('option', { name: 'Morning run' })).toBeNull()
+    await input.click(await screen.findByRole('option', { name: 'Stretch' }))
     const target = screen.getByLabelText('Target, in done days')
     await input.clear(target)
     await input.type(target, '30')
@@ -136,7 +136,8 @@ describe('goal detail', () => {
     })
     renderApp('/goals/1')
 
-    await userEvent.selectOptions(await screen.findByLabelText('Habit'), 'Read 20 pages (on another goal)')
+    await screen.findByLabelText('Habit')
+    await choose(userEvent.setup(), 'Habit', 'Read 20 pages (on another goal)')
     expect(screen.getByText(/takes it off its other goal/)).toBeTruthy()
   })
 
@@ -175,7 +176,8 @@ describe('goal detail', () => {
     renderApp('/goals/1')
     const input = userEvent.setup()
 
-    await input.selectOptions(await screen.findByLabelText('Habit'), 'Stretch')
+    await screen.findByLabelText('Habit')
+    await choose(input, 'Habit', 'Stretch')
     await input.click(screen.getByRole('button', { name: 'Link habit' }))
 
     expect((await screen.findByRole('alert')).textContent).toBe('Only an active goal can have habits linked to it.')

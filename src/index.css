@@ -1,4 +1,18 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+/* shadcn's dark: classes follow the same switch as the app: the account menu's choice, else the OS */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
 
 @theme {
   --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
@@ -69,11 +83,37 @@
     outline: 2px solid var(--color-lapis);
     outline-offset: 2px;
   }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 /* Motion: strong ease-out so things answer at once, then settle. */
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  /* shadcn's roles, on the app's tokens: they already switch for dark mode, so there is no .dark block */
+  --background: var(--color-chalk);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ember);
+  --primary-foreground: var(--color-navy);
+  --secondary: var(--color-pill);
+  --secondary-foreground: var(--color-ink);
+  --muted: color-mix(in oklab, var(--color-mist) 45%, transparent);
+  --muted-foreground: var(--color-ink-soft);
+  --accent: color-mix(in oklab, var(--color-mist) 55%, transparent);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-alert);
+  --border: var(--color-mist);
+  --input: var(--color-mist);
+  --ring: var(--color-lapis);
+  --radius: 0.625rem;
 }
 
 /* The sign-in grid fills in once, left to right, then today's square breathes. */
@@ -286,3 +326,30 @@
     animation: none;
   }
 }
+
+@theme inline {
+  --font-heading: var(--font-display);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  /* xl and up stay Tailwind's: the app's cards and buttons were drawn with them */
+}
+

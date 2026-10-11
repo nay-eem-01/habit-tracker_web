@@ -113,6 +113,19 @@ components that work (rings, grids, `Button`, `Field`).
 | N.4 | **Settings** (`/settings`): name, timezone (offer to switch when the browser differs), promotional-email toggle, theme, change password moved here, export my data, delete account (password). | ✅ |
 | N.5 | **PWA + push**: manifest, icons, service worker (shows `{title, body, url}`, click opens `url`), reminders toggle in settings → subscribe / unsubscribe; unsubscribe on sign-out. | ✅ |
 | N.6 | **Google sign-in** behind `VITE_GOOGLE_CLIENT_ID` (button hidden without it) → `POST /api/auth/google`. | ✅ |
+| N.7 | **Form controls**: shadcn calendar date picker, dropdowns, searchable timezone, switches, steppers, schedule cards. | ✅ |
+
+## Next — Phase A: admin (backend Phase 12 done, 2026-10-11)
+
+Screens, API and errors are in `docs/ADMIN.md`. Run `npm run gen:api` first.
+
+| # | Step | Status |
+|---|---|---|
+| A.0 | `AUTH_ACCOUNT_SUSPENDED` message on sign-in (password and Google) | ⬜ |
+| A.1 | `role` from `me`; Admin menu entry; guarded `/admin` layout (Overview / Users) | ⬜ |
+| A.2 | Overview: stat cards, sign-ups and check-ins charts, delivery panel | ⬜ |
+| A.3 | Users list: search by email, sort, pages | ⬜ |
+| A.4 | User page: counts, plan switch, suspend / lift, delete | ⬜ |
 
 ## Later — follows the backend milestones
 

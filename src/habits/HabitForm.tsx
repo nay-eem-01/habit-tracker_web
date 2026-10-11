@@ -1,9 +1,11 @@
+import { CalendarCheck, CalendarDots, Repeat, type Icon } from '@phosphor-icons/react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { habitErrorMessage, fieldError } from '../api/messages'
 import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
+import { Stepper, SwitchField, TimeField } from '../components/pickers'
 import { EMPTY_HABIT, WEEK, type HabitFormValues } from './form'
 import type { DayOfWeek, FrequencyType, HabitKind } from '../api/habits'
 
@@ -23,19 +25,27 @@ interface HabitFormProps {
   editing?: boolean
 }
 
+/** A schedule option as a card; the radio stays for keyboards and screen readers. */
 function Choice({
   checked,
   onSelect,
+  icon: Icon,
   children,
 }: {
   checked: boolean
   onSelect: () => void
+  icon: Icon
   children: ReactNode
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 py-1.5">
-      <input type="radio" name="frequencyType" checked={checked} onChange={onSelect} className="size-4 accent-lapis" />
-      <span>{children}</span>
+    <label
+      className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-3 text-sm font-medium transition-[border-color,background-color] duration-150 ease-out has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-lapis ${
+        checked ? 'border-ember bg-ember/10' : 'border-mist bg-surface hover:border-ink-soft'
+      }`}
+    >
+      <input type="radio" name="frequencyType" checked={checked} onChange={onSelect} className="sr-only" />
+      <Icon size={22} weight={checked ? 'fill' : 'regular'} className={checked ? 'text-ember-deep' : 'text-ink-soft'} aria-hidden="true" />
+      {children}
     </label>
   )
 }
@@ -114,15 +124,20 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
       {!quit && (
         <>
           <fieldset>
-            <legend className="mb-1 text-sm font-medium">How often</legend>
-            <Choice checked={values.frequencyType === 'DAILY'} onSelect={() => pick('DAILY')}>
-              Every day
-            </Choice>
-            <Choice checked={values.frequencyType === 'SPECIFIC_DAYS'} onSelect={() => pick('SPECIFIC_DAYS')}>
-              On specific days
-            </Choice>
+            <legend className="mb-2 text-sm font-medium">How often</legend>
+            <div className="grid grid-cols-3 gap-2">
+              <Choice icon={Repeat} checked={values.frequencyType === 'DAILY'} onSelect={() => pick('DAILY')}>
+                Every day
+              </Choice>
+              <Choice icon={CalendarCheck} checked={values.frequencyType === 'SPECIFIC_DAYS'} onSelect={() => pick('SPECIFIC_DAYS')}>
+                On specific days
+              </Choice>
+              <Choice icon={CalendarDots} checked={values.frequencyType === 'X_TIMES_PER_WEEK'} onSelect={() => pick('X_TIMES_PER_WEEK')}>
+                A number of times a week
+              </Choice>
+            </div>
             {values.frequencyType === 'SPECIFIC_DAYS' && (
-              <div className="mt-1 mb-2 ml-7">
+              <div className="mt-3">
                 <div className="flex flex-wrap gap-2" role="group" aria-label="Days">
                   {WEEK.map(({ day, short, long }) => {
                     const on = values.days.includes(day)
@@ -149,35 +164,27 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
                 )}
               </div>
             )}
-            <Choice checked={values.frequencyType === 'X_TIMES_PER_WEEK'} onSelect={() => pick('X_TIMES_PER_WEEK')}>
-              A number of times a week
-            </Choice>
             {values.frequencyType === 'X_TIMES_PER_WEEK' && (
-              <Field
-                className="mt-1 mb-2 ml-7"
-                narrow
-                label="Times a week"
-                type="number"
-                min={1}
-                max={6}
-                required
-                hint="1 to 6. Any days count."
-                value={values.timesPerWeek}
-                onChange={(event) => set('timesPerWeek', event.target.value)}
-              />
+              <div className="mt-3">
+                <Stepper
+                  label="Times a week"
+                  min={1}
+                  max={6}
+                  hint="1 to 6. Any days count."
+                  value={values.timesPerWeek}
+                  onChange={(value) => set('timesPerWeek', value)}
+                />
+              </div>
             )}
           </fieldset>
 
-          <Field
-            narrow
+          <Stepper
             label="Times a day"
-            type="number"
             min={1}
             max={100}
-            required
             hint="How many check-ins make a day done, like 8 for glasses of water."
             value={values.targetCount}
-            onChange={(event) => set('targetCount', event.target.value)}
+            onChange={(value) => set('targetCount', value)}
             error={fieldError(error, 'targetCount', 'Times a day')}
           />
           <Field
@@ -192,27 +199,22 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
           />
 
           <div>
-            <label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
-              <input
-                type="checkbox"
-                checked={values.remind}
-                onChange={(event) => set('remind', event.target.checked)}
-                className="size-4 accent-lapis"
-              />
-              Remind me
-            </label>
+            <SwitchField
+              label="Remind me"
+              description="A notification at the time you pick, if it isn’t done yet."
+              checked={values.remind}
+              onChange={(on) => set('remind', on)}
+            />
             {values.remind && (
-              <Field
-                className="mt-3 ml-7"
-                narrow
-                label="Reminder time"
-                type="time"
-                required
-                hint={timezone ? `In your timezone, ${timezone}.` : undefined}
-                value={values.reminderTime}
-                onChange={(event) => set('reminderTime', event.target.value)}
-                error={fieldError(error, 'reminderTime', 'Reminder time')}
-              />
+              <div className="mt-3">
+                <TimeField
+                  label="Reminder time"
+                  hint={timezone ? `In your timezone, ${timezone}.` : undefined}
+                  value={values.reminderTime}
+                  onChange={(time) => set('reminderTime', time)}
+                  error={fieldError(error, 'reminderTime', 'Reminder time')}
+                />
+              </div>
             )}
           </div>
         </>

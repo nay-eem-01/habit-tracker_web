@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, Flag, LinkSimple, Trophy } from '@phosphor-icons/react'
-import { useId, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   abandonGoal,
@@ -16,7 +16,8 @@ import { goalErrorMessage, resourceErrorMessage } from '../api/messages'
 import { listGoalResources } from '../api/resources'
 import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
-import { Field, INPUT } from '../components/Field'
+import { Field } from '../components/Field'
+import { SelectField } from '../components/pickers'
 import { ProgressBar } from '../components/ProgressBar'
 import { Ring } from '../components/Ring'
 import { SECONDARY, SURFACE } from '../components/styles'
@@ -223,9 +224,9 @@ function LinkHabitForm({
   busy: boolean
   onLink: (habitId: number, days: number) => Promise<unknown>
 }) {
-  const selectId = useId()
   const choices = habits.filter((habit) => habit.goalId !== goalId)
   const [habitId, setHabitId] = useState('')
+  const [missing, setMissing] = useState(false)
   const [target, setTarget] = useState(DEFAULT_TARGET)
   const picked = choices.find((habit) => String(habit.id) === habitId)
 
@@ -243,6 +244,10 @@ function LinkHabitForm({
 
   async function submit(event: FormEvent) {
     event.preventDefault()
+    if (!habitId) {
+      setMissing(true)
+      return
+    }
     try {
       await onLink(Number(habitId), Number(target))
       setHabitId('')
@@ -254,31 +259,19 @@ function LinkHabitForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      <div className="max-w-sm">
-        <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium">
-          Habit
-        </label>
-        <select
-          id={selectId}
-          required
-          value={habitId}
-          onChange={(event) => setHabitId(event.target.value)}
-          className={`${INPUT} h-12 border-mist`}
-        >
-          <option value="" disabled>
-            Choose a habit
-          </option>
-          {choices.map((habit) => (
-            <option key={habit.id} value={habit.id}>
-              {habit.name}
-              {habit.goalId ? ' (on another goal)' : ''}
-            </option>
-          ))}
-        </select>
-        {picked?.goalId && (
-          <p className="mt-1.5 text-sm text-ink-soft">Linking it here takes it off its other goal and starts its count again.</p>
-        )}
-      </div>
+      <SelectField
+        className="max-w-sm"
+        label="Habit"
+        placeholder="Choose a habit"
+        value={habitId}
+        onChange={(id) => {
+          setHabitId(id)
+          setMissing(false)
+        }}
+        options={choices.map((habit) => ({ value: String(habit.id), label: habit.name + (habit.goalId ? ' (on another goal)' : '') }))}
+        error={missing ? 'Choose a habit to link.' : undefined}
+        hint={picked?.goalId ? 'Linking it here takes it off its other goal and starts its count again.' : undefined}
+      />
       <TargetField value={target} onChange={setTarget} />
       <div>
         <Button type="submit" busy={busy}>

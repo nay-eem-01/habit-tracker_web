@@ -5,6 +5,7 @@ import { createGoal, getGoal, updateGoal } from '../api/goals'
 import { fieldError, goalErrorMessage } from '../api/messages'
 import { Button } from '../components/Button'
 import { Field, TextAreaField } from '../components/Field'
+import { DateField } from '../components/pickers'
 import { SURFACE } from '../components/styles'
 import { EMPTY_GOAL, toGoalRequest, valuesFromGoal, type GoalFormValues } from './goals'
 
@@ -47,13 +48,12 @@ function GoalForm({ initial, submitLabel, pendingLabel, pending, error, cancelTo
         onChange={(event) => set('description', event.target.value)}
         error={fieldError(error, 'description', 'Description')}
       />
-      <Field
-        narrow
+      <DateField
         label="Target date (optional)"
-        type="date"
+        placeholder="No deadline"
         hint="Leave it empty for no deadline."
         value={values.targetDate}
-        onChange={(event) => set('targetDate', event.target.value)}
+        onChange={(day) => set('targetDate', day)}
         error={fieldError(error, 'targetDate', 'Target date')}
       />
 
