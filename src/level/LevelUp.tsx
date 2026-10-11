@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { TIERS, levelUp, readSeenLevel, writeSeenLevel } from './level'
+import { PRIMARY } from '../components/styles'
 import { useLevel } from './useLevel'
 
 /**
@@ -35,7 +36,7 @@ export function LevelUp({ userId }: { userId: number }) {
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
       <div
         role="status"
-        className="level-up pointer-events-auto relative w-full max-w-sm rounded-3xl bg-surface p-5 text-center shadow-[0_24px_48px_-16px_rgb(29_36_51/0.45)]"
+        className="level-up pointer-events-auto relative w-full max-w-sm rounded-3xl bg-surface p-5 text-center shadow-[0_24px_48px_-16px_rgb(9_38_52/0.45)]"
         style={{ border: `2px solid ${tier.color}` }}
       >
         {/* behind the card: the pieces show only once they clear its edge */}
@@ -69,7 +70,7 @@ export function LevelUp({ userId }: { userId: number }) {
         <button
           type="button"
           onClick={() => setSeen(up.level)}
-          className="mt-4 inline-flex h-10 items-center rounded-xl bg-lapis px-5 text-sm font-medium text-white transition-transform duration-150 ease-out active:scale-95"
+          className={`${PRIMARY} mt-4 h-10 px-5 text-sm`}
         >
           Nice
         </button>

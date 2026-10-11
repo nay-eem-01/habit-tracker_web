@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { archiveHabit, listHabits, unarchiveHabit, type Habit } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { PRIMARY, SECONDARY, SURFACE } from '../components/styles'
 import { describeSchedule } from './form'
 
 const BUTTON = SECONDARY
@@ -57,7 +57,7 @@ export default function HabitsPage() {
         <h1 className="font-display text-4xl font-semibold tracking-tight">Habits</h1>
         <Link
           to="/habits/new"
-          className="inline-flex h-11 items-center rounded-xl bg-lapis px-5 font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_8px_20px_-8px_rgb(34_50_143/0.7)] transition-[transform,background-color] duration-150 ease-out active:scale-[0.97] [@media(hover:hover)]:hover:bg-lapis-deep"
+          className={`${PRIMARY} h-11 px-5`}
         >
           New habit
         </Link>
@@ -74,7 +74,7 @@ export default function HabitsPage() {
             onClick={() => showTab(tab.value)}
             aria-current={archived === tab.value ? 'true' : undefined}
             className={`rounded-full px-5 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out ${
-              archived === tab.value ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+              archived === tab.value ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
             }`}
           >
             {tab.label}

@@ -11,8 +11,8 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
 /** The text-input look, for inputs and selects outside `Field`. */
 export const INPUT =
   'w-full rounded-xl border bg-surface px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
-  'shadow-[0_1px_2px_rgb(29_36_51/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
-  'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(47_75_216/0.16)] focus-visible:outline-none'
+  'shadow-[0_1px_2px_rgb(9_38_52/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
+  'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(0_120_170/0.2)] focus-visible:outline-none'
 
 export function Field({ label, hint, error, narrow, type, className = '', ...input }: FieldProps) {
   const id = useId()

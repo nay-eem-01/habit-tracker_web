@@ -87,6 +87,33 @@ for it.
 |---|---|---|
 | P.1 | **Forgot, reset and change password**: "Forgot password?" on sign in (carries the typed email) → `/forgot-password` (same answer whether or not the account exists) → emailed `/reset-password#token=…` (token read, then taken out of the address bar; new password twice; signs in) → "Change password" in the account menu (`/account/password`). Pages are now loaded per route. | ✅ |
 
+## Next — Phase N: new look + backend Phases 6–10 (planned 2026-10-10)
+
+The backend finished Phases 6–10; its `docs/DEV_LOG.md` lists what the web app needs ("Frontend
+needs"). Each step is one small PR. Start each by running `npm run gen:api` against the running backend.
+
+**Design direction (confirmed 2026-10-10):** palette `#F9F9F9` white, `#004E72` blue, `#FF6E42`
+orange, `#092634` navy. Orange is the brand color and stands for streaks and things done; blue is for
+actions; navy is the dark-mode page and the brand panel. Contrast rules, measured:
+orange on white is 2.6:1, so it is **never text on light** (use `#B4441F`, 5.3:1). Buttons are orange
+**with navy text** (5.7:1), not white. In dark mode, blue on navy is 1.7:1, so links and focus use
+a lighter sky `#5CB8E4` (7:1). Most of the change is in the tokens in `index.css`, because components
+already use names like `lapis` and `ember`.
+
+**UI kit (confirmed):** use **shadcn only**, HeroUI as the fallback if a piece breaks or doesn't fit. Add just the primitives a step needs (Dialog, DropdownMenu, Switch,
+Sonner toasts, Tooltip). Its code is copied into the repo and styled with our tokens. Keep the house
+components that work (rings, grids, `Button`, `Field`).
+
+| # | Step | Status |
+|---|---|---|
+| N.0 | **Look**: new palette tokens (light + dark). Signature moments: a check-in that bursts orange, a streak flame that grows with the streak, and a navy hero on Today/Home. Verify with Playwright at 390 and 1280 in both themes. | ✅ |
+| N.1 | **Habits+**: `unit` ("8 glasses"), QUIT habits (daily, no reminder; check-in reads "I slipped", clean-days count), delete for good (confirm dialog), rest day (`POST/DELETE …/rest`, cost from `restCostXp` against `xpBalance`), `resting`/`kind` on Today. | ⬜ |
+| N.2 | **Errors**: `PLAN_LIMIT_REACHED` (7 habits / 2 goals, explained), `RATE_LIMITED` (+`Retry-After`), `XP_NOT_ENOUGH`, `REST_LIMIT_REACHED`; hide uploads on `FILE_UPLOADS_DISABLED`. | ⬜ |
+| N.3 | **Email verification**: `/verify-email#token=…` page, banner with "resend" while `emailVerified` is false. | ⬜ |
+| N.4 | **Settings** (`/settings`): name, timezone (offer to switch when the browser differs), promotional-email toggle, theme, change password moved here, export my data, delete account (password). | ⬜ |
+| N.5 | **PWA + push**: manifest, icons, service worker (shows `{title, body, url}`, click opens `url`), reminders toggle in settings → subscribe / unsubscribe; unsubscribe on sign-out. | ⬜ |
+| N.6 | **Google sign-in** behind `VITE_GOOGLE_CLIENT_ID` (button hidden without it) → `POST /api/auth/google`. | ⬜ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |

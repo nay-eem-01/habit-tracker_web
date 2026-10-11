@@ -7,6 +7,7 @@ import { authErrorMessage, fieldError } from '../api/messages'
 import { useAuth } from '../auth/context'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
+import { PRIMARY } from '../components/styles'
 import { newPasswordProblem } from '../auth/password'
 import { NewPasswordFields } from './NewPasswordFields'
 
@@ -60,7 +61,7 @@ export default function ResetPasswordPage() {
         <div className="stagger flex flex-col gap-5">
           <Link
             to="/forgot-password"
-            className="inline-flex h-12 items-center justify-center rounded-xl bg-lapis px-6 font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_8px_20px_-8px_rgb(34_50_143/0.7)] transition-transform duration-150 ease-out active:scale-[0.97]"
+            className={`${PRIMARY} h-12 px-6`}
           >
             Ask for a new link
           </Link>

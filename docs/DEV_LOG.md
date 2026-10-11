@@ -5,6 +5,28 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.0 — new look)
+
+**Done** (`feat/new-look`)
+- Palette confirmed by Nayeem: `#F9F9F9` white, `#004E72` blue, `#FF6E42` orange, `#092634` navy.
+  Swapped in the tokens in `index.css` (names kept, so pages didn't change): navy is the ink and the
+  dark-mode page, blue is for actions and links, orange means done and streaks.
+- Contrast, measured: orange text on light is 2.6:1, so `ember-deep` is `#B4441F` (5.5:1). Text on
+  orange is always navy (`--color-navy`, 5.7:1). Dark mode lifts the blue to `#1C77A6` and links to
+  `#5CB8E4` (6:1 on the surface).
+- Primary actions are orange with navy text, from one `PRIMARY` class in `components/styles.ts`
+  (`Button` and the five "Add"/"Continue" links copied the same string before).
+- Today: the check box fills orange; finishing a habit throws a ring and six squares (reusing the
+  level-up burst). The row moves to Done when it's finished, so `TodayPage` remembers which habit was
+  just finished and that row plays the burst as it mounts. The streak flame grows with the run (up
+  to a month) and flickers gently from 7 days on. Heatmaps fill orange.
+- Checked in Playwright at 1280 / 390 / 320, light and dark: no sideways scroll; burst seen.
+- `src/api/schema.d.ts` regenerated from the backend (Phases 6–10).
+
+**Decided**
+- UI kit: shadcn only, added a component at a time when a step needs one; HeroUI is the fallback if
+  a shadcn piece breaks or doesn't fit. N.0 needed none.
+
 ## 2026-10-08 (P.1 — forgot, reset and change password)
 
 **Done** (`feat/password-reset`)

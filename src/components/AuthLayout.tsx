@@ -9,7 +9,7 @@ export function AuthLayout({ title, intro, children }: { title: string; intro: s
         {/* two soft light pools: lapis from above, ember from below, so the panel has depth without a gradient blob */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_15%_0%,rgb(70_100_240/0.55),transparent),radial-gradient(70%_50%_at_100%_100%,rgb(232_137_43/0.16),transparent)]"
+          className="absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_15%_0%,rgb(0_120_170/0.55),transparent),radial-gradient(70%_50%_at_100%_100%,rgb(255_110_66/0.16),transparent)]"
         />
         <p className="rise flex items-center gap-2.5 font-display text-2xl font-semibold tracking-tight">
           <span aria-hidden="true" className="grid grid-cols-2 gap-[3px]">

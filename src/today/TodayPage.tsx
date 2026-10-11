@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useMutation, useQueries, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { CalendarBlank, Plant } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
@@ -41,10 +41,10 @@ function message(done: number, total: number): string {
 /** The day at a glance: how many are done, and one line of encouragement. */
 function Progress({ done, total }: { done: number; total: number }) {
   return (
-    <div className="grain relative isolate mt-6 overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(34_50_143/0.9)] sm:p-8">
+    <div className="grain relative isolate mt-6 overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(9_38_52/0.9)] sm:p-8">
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(80%_90%_at_0%_0%,rgb(70_100_240/0.5),transparent),radial-gradient(60%_70%_at_100%_100%,rgb(232_137_43/0.22),transparent)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(80%_90%_at_0%_0%,rgb(0_120_170/0.5),transparent),radial-gradient(60%_70%_at_100%_100%,rgb(255_110_66/0.22),transparent)]"
       />
       <p className="font-display text-5xl font-semibold tracking-tight">
         {done} of {total} done
@@ -100,6 +100,9 @@ export default function TodayPage() {
     })),
   })
 
+  // the habit a tap just finished; its row moves to Done (a fresh mount), which is where the burst plays
+  const [justDone, setJustDone] = useState<number | null>(null)
+
   const save = useMutation({
     mutationFn: ({ habit, count }: { habit: Habit; count: number }) => checkIn(habit.id, { completedCount: count }),
     // show the tap at once; the server's answer replaces it, and a failure puts things back
@@ -137,7 +140,16 @@ export default function TodayPage() {
   const finished = items.filter((item) => item.status.done)
 
   const row = ({ habit, status }: Item) => (
-    <TodayRow key={habit.id} habit={habit} status={status} onSetCount={(count) => save.mutate({ habit, count })} />
+    <TodayRow
+      key={habit.id}
+      habit={habit}
+      status={status}
+      burst={habit.id === justDone}
+      onSetCount={(count) => {
+        if (!status.done && count >= status.target) setJustDone(habit.id)
+        save.mutate({ habit, count })
+      }}
+    />
   )
 
   return (

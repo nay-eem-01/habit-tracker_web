@@ -6,7 +6,7 @@ import { listGoals } from '../api/goals'
 import { resourceErrorMessage } from '../api/messages'
 import { listResources, type ResourceType } from '../api/resources'
 import { INPUT } from '../components/Field'
-import { SECONDARY } from '../components/styles'
+import { PRIMARY, SECONDARY } from '../components/styles'
 import { ResourceCard } from './ResourceCard'
 import { useResourceActions } from './useResourceActions'
 
@@ -69,7 +69,7 @@ export default function LibraryPage() {
         </div>
         <Link
           to={`/resources/new${goalId ? `?goalId=${goalId}&back=${encodeURIComponent(back)}` : ''}`}
-          className="inline-flex h-11 shrink-0 items-center rounded-xl bg-lapis px-5 font-medium text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_8px_20px_-8px_rgb(34_50_143/0.7)] transition-[transform,background-color] duration-150 ease-out active:scale-[0.97] [@media(hover:hover)]:hover:bg-lapis-deep"
+          className={`${PRIMARY} h-11 shrink-0 px-5`}
         >
           Add
         </Link>
@@ -84,7 +84,7 @@ export default function LibraryPage() {
               onClick={() => setType(tab.type)}
               aria-current={type === tab.type ? 'true' : undefined}
               className={`rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-out sm:px-5 sm:text-base ${
-                type === tab.type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(29_36_51/0.14)]' : 'text-ink-soft hover:text-ink'
+                type === tab.type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
               }`}
             >
               {tab.label}
