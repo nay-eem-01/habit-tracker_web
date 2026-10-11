@@ -23,6 +23,8 @@ export interface AuthUser {
   marketingEmails?: boolean
   /** FREE keeps 7 active habits and 2 active goals. */
   plan?: 'FREE' | 'PRO'
+  /** ADMIN sees the /admin screens; the API checks it on every call. */
+  role?: 'USER' | 'ADMIN'
 }
 
 export interface AuthSession {

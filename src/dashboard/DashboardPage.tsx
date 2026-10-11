@@ -5,25 +5,14 @@ import { Link } from 'react-router-dom'
 import { getDashboard, getPatterns, type Dashboard, type HabitRate, type Patterns, type Period } from '../api/dashboard'
 import { habitErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
+import { Card } from '../components/Card'
 import { DayGrid, DayGridLegend } from '../components/DayGrid'
 import { ProgressBar } from '../components/ProgressBar'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { SECONDARY } from '../components/styles'
 import { formatDate } from '../goals/goals'
 import { LevelCard } from '../level/LevelCard'
 import { formatToday } from '../today/today'
 import { DAY_NAMES, formatChange, hourLabel, percent, yearWeeks } from './dashboard'
-
-function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <section className={`${SURFACE} p-5 sm:p-6`}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  )
-}
 
 /** "+12 pts" in the link colour, "−5 pts" in the alert colour, with an arrow; nothing to compare, nothing shown. */
 function Change({ change, against }: { change: number | null; against?: string }) {

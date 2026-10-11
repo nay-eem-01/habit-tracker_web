@@ -5,6 +5,20 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-11 (A.1–A.2 — admin area and overview)
+
+**Done** (`feat/admin-layout`, one PR: the tabs alone would lead nowhere)
+- `role` on the user. "Admin" in the account menu for admins only; `/admin/*` sits behind
+  `RequireAdmin`, which sends anyone else home (the app has no not-found page; `*` goes home too).
+- `/admin` with Overview / Users tabs in the app's pill style.
+- Overview, built from the dashboard's pieces (navy hero, white cards, the "Time of day" bar style;
+  `Card` moved to `components/Card.tsx` for both): users total, active today / 7 / 30 days in
+  orange, verified (with %), Google, Pro, suspended; tiles for active habits, goals, push users and
+  "Might upgrade" (ringed in orange when above 0); 30-day sign-ups (blue) and check-ins (orange,
+  done = orange) with today's bar solid; delivery since the server started, failures above 0 in the
+  alert colour and a note that a restart resets them.
+- Checked live at 1280 and 390, light and dark, with the demo account made admin in the local DB.
+
 ## 2026-10-11 (A.0 — suspended accounts)
 
 **Done** (`feat/admin-suspended`): API types regenerated (role, admin endpoints). Signing in to a
