@@ -20,6 +20,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const SignInPage = lazy(() => import('./pages/SignInPage'))
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
 
 export default function App() {
   return (
@@ -30,9 +31,10 @@ export default function App() {
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Route>
-          {/* open signed in or out: a reset link can be opened anywhere, and signed-in users can ask for one */}
+          {/* open signed in or out: emailed links can be opened anywhere, and signed-in users can ask for one */}
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />

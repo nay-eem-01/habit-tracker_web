@@ -5,6 +5,21 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.3 — email verification)
+
+**Done** (`feat/verify-email`, on top of `feat/error-states`)
+- `/verify-email#token=…` (open signed in or out): token read from the fragment and taken out of the
+  address bar, then confirmed at once. A query, not an effect, so the single-use token is sent once
+  even when React renders twice. Success says "Email confirmed" (→ app or sign in); a used or
+  expired link says so.
+- A banner under the header while `user.emailVerified` is false, with "Send it again"
+  (`POST /api/auth/email/verification`); a 429 says how long to wait; "already confirmed" (from another
+  device) hides it.
+- `AuthUser` gains `emailVerified`, `marketingEmails`, `plan`; the auth context gains `updateUser`
+  (Settings uses it next).
+- Checked live: banner and resend, bad link. The happy path is covered by tests only (the token
+  is in the email).
+
 ## 2026-10-10 (N.2 — limits and errors)
 
 **Done** (`feat/error-states`, on top of `feat/habits-plus`)

@@ -10,6 +10,8 @@ export interface AuthContextValue {
   state: AuthState
   /** Call with the session a successful sign-in or registration returned. */
   signIn: (session: AuthSession) => void
+  /** The signed-in user changed (confirmed email, new profile); the session stays. */
+  updateUser: (user: AuthUser) => void
   signOut: () => Promise<void>
 }
 

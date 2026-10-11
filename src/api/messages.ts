@@ -17,6 +17,10 @@ export function authErrorMessage(error: unknown): string {
         return 'An account with this email already exists. Sign in instead.'
       case 'AUTH_INVALID_RESET_TOKEN':
         return 'This reset link has expired or was already used. Ask for a new one.'
+      case 'AUTH_INVALID_VERIFY_TOKEN':
+        return 'This confirmation link has expired or was already used. Ask for a new one.'
+      case 'AUTH_EMAIL_ALREADY_VERIFIED':
+        return 'Your email is already confirmed.'
       case 'AUTH_WRONG_PASSWORD':
         return "That isn't your current password."
       case 'AUTH_PASSWORD_NOT_SET':

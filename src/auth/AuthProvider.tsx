@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { logout } from '../api/auth'
-import { restoreSession, setSessionLostHandler, type AuthSession } from '../api/client'
+import { restoreSession, setSessionLostHandler, type AuthSession, type AuthUser } from '../api/client'
 import { queryClient } from '../queryClient'
 import { AuthContext, type AuthState } from './context'
 
@@ -34,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: 'authenticated', user: session.user })
   }, [])
 
+  const updateUser = useCallback((user: AuthUser) => {
+    setState((current) => (current.status === 'authenticated' ? { status: 'authenticated', user } : current))
+  }, [])
+
   const signOut = useCallback(async () => {
     try {
       await logout()
@@ -45,6 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value = useMemo(() => ({ state, signIn, signOut }), [state, signIn, signOut])
+  const value = useMemo(() => ({ state, signIn, updateUser, signOut }), [state, signIn, updateUser, signOut])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
