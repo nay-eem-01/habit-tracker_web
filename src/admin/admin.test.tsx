@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
+import { choose, ok, page, renderApp, resetApp, session, stubApi } from '../test/helpers'
 
 const days = (counts: number[]) => counts.map((count, i) => ({ date: `2026-10-${String(i + 1).padStart(2, '0')}`, count }))
 const stats = {
@@ -47,5 +48,45 @@ describe('admin overview', () => {
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeTruthy()
     expect(calls.some((c) => c.path.startsWith('/api/admin'))).toBe(false)
+  })
+})
+
+const person = (id: number, email: string, extra: object = {}) => ({
+  id,
+  email,
+  name: 'Someone',
+  authProvider: 'LOCAL',
+  emailVerified: true,
+  plan: 'FREE',
+  role: 'USER',
+  suspendedAt: null,
+  createdAt: '2026-10-01T10:00:00Z',
+  ...extra,
+})
+
+describe('admin users', () => {
+  it('lists users with their badges, searches after a pause and sorts', async () => {
+    const calls = stubApi({
+      'POST /api/auth/refresh': () => ok(admin),
+      ...shell,
+      'GET /api/admin/users': (call) =>
+        ok(page(call.params.get('q') ? [person(2, 'sam@example.com')] : [person(1, 'ana@example.com', { plan: 'PRO', suspendedAt: '2026-10-05T00:00:00Z' }), person(2, 'sam@example.com')])),
+    })
+    renderApp('/admin/users')
+    const input = userEvent.setup()
+
+    expect(await screen.findByText('ana@example.com')).toBeTruthy()
+    expect(screen.getByText('Suspended')).toBeTruthy()
+    expect(screen.getByText('Pro')).toBeTruthy()
+    expect(screen.getByRole('link', { name: /sam@example.com/ }).getAttribute('href')).toBe('/admin/users/2')
+
+    await input.type(screen.getByLabelText('Search by email'), 'sam')
+    await waitFor(() => expect(screen.queryByText('ana@example.com')).toBeNull())
+    // one request for the whole word, not one per letter
+    expect(calls.filter((c) => c.params.get('q')).map((c) => c.params.get('q'))).toEqual(['sam'])
+
+    await choose(input, 'Sort', 'Email A–Z')
+    await waitFor(() => expect(calls.at(-1)!.params.get('sortBy')).toBe('email'))
+    expect(calls.at(-1)!.params.get('sortDir')).toBe('asc')
   })
 })
