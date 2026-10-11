@@ -127,6 +127,7 @@ describe('creating a habit', () => {
     expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
     expect(calls.find((c) => c.method === 'POST' && c.path === '/api/habits')!.body).toEqual({
       name: 'Read 20 pages',
+      kind: 'BUILD',
       category: 'Learning',
       frequencyType: 'SPECIFIC_DAYS',
       frequencyConfig: { days: ['MONDAY', 'FRIDAY'] },
@@ -194,6 +195,7 @@ describe('editing a habit', () => {
     await screen.findByRole('heading', { name: 'Habits' })
     expect(calls.find((c) => c.method === 'PUT')!.body).toEqual({
       name: 'Read 30 pages',
+      kind: 'BUILD',
       category: 'Learning',
       frequencyType: 'SPECIFIC_DAYS',
       frequencyConfig: { days: ['MONDAY', 'WEDNESDAY', 'FRIDAY'] },

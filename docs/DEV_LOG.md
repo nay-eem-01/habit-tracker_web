@@ -5,6 +5,26 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.1 — habits+: units, quit habits, rest days, delete)
+
+**Done** (`feat/habits-plus`, on top of `feat/new-look`)
+- Units: optional "Unit" on the form (≤ 20); Today reads "3 of 8 glasses today", the list and detail
+  "8 glasses a day".
+- Quit habits: "Build a habit / Quit a habit" on create only (the server refuses a change; editing
+  says so). A quit habit is sent as daily, once, no unit or reminder. On Today they sit in their own
+  "Staying clean" list, outside the done count: "Clean today" with "I slipped" (a check-in of 1) and
+  Undo. History says Clean / Slipped.
+- Rest days: daily and chosen-day build habits that aren't started today get "Rest today · free /
+  100 XP / 200 XP", priced from this week's rests in the logs Today already loads (same rule as the
+  server). A paid rest asks first and shows the XP balance (`xpBalance` from `/api/me/level`); short
+  of XP it says so and offers no Yes. A rested habit shows in Done with a moon and "Take it back"
+  (refunded). History shows "Rest day, 100 XP".
+- Delete for good on the habit page, with the same inline "Yes, delete / Keep it" as the library.
+  It drops the cached habit lists so the list doesn't flash the deleted one.
+- Messages for `REST_*`, `XP_NOT_ENOUGH`, `HABIT_QUIT_INVALID`.
+- No shadcn component needed: the house inline confirm covered both confirms.
+- Checked live at 390: quit habit created, slip and undo, free rest, delete.
+
 ## 2026-10-10 (N.0 — new look)
 
 **Done** (`feat/new-look`)

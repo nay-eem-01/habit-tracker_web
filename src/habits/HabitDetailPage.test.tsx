@@ -123,6 +123,24 @@ describe('habit detail', () => {
     expect(calls.filter(historyCalls(1)).map((c) => c.params.get('page'))).toEqual(['0', '1'])
   })
 
+  it('deletes for good only after a second tap, then goes back to the list', async () => {
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/habits/1': () => ok(read),
+      ...progress(1),
+      'GET /api/habits/1/logs': () => ok(page([])),
+      'DELETE /api/habits/1': () => new Response(null, { status: 204 }),
+      'GET /api/habits': () => ok(page([])),
+    })
+    renderApp('/habits/1')
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete for good' }))
+    expect(calls.some((c) => c.method === 'DELETE')).toBe(false)
+    await userEvent.click(screen.getByRole('button', { name: 'Yes, delete' }))
+    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
+    expect(calls.some((c) => c.method === 'DELETE' && c.path === '/api/habits/1')).toBe(true)
+  })
+
   it('says when the habit is not there or not yours', async () => {
     stubApi({ ...signedIn, 'GET /api/habits/9': () => fail(404, 'HABIT_NOT_FOUND') })
     renderApp('/habits/9')

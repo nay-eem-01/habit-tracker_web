@@ -165,6 +165,67 @@ describe('the Today page', () => {
   })
 })
 
+describe('rest days and quit habits', () => {
+  const level = { 'GET /api/me/level': () => ok({ xp: 150, level: 2, tier: 'BRONZE', xpForNextLevel: 300, progressToNextLevel: 0.2, spentXp: 100, xpBalance: 50 }) }
+
+  it('rests a habit for free, then shows it resting in Done', async () => {
+    let logs: HabitLog[] = []
+    const calls = stubApi({
+      ...signedIn,
+      ...level,
+      'GET /api/habits': () => ok(page([read])),
+      'GET /api/habits/1/streak': () => streak(3),
+      'GET /api/habits/1/logs': () => ok(page(logs)),
+      'POST /api/habits/1/rest': () => {
+        logs = [{ ...log('2026-10-02', 0, false), rest: true }]
+        return ok(logs[0])
+      },
+    })
+    renderApp('/today')
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Rest Read today' }))
+    expect(calls.some((c) => c.method === 'POST' && c.path === '/api/habits/1/rest')).toBe(true)
+    expect(await screen.findByText('Resting today. The streak holds.')).toBeTruthy()
+    expect(screen.getByText('1 of 1 done')).toBeTruthy()
+  })
+
+  it('asks before a rest that costs XP, and says when there isn’t enough', async () => {
+    const rests = [{ ...log('2026-09-28', 0, false), rest: true }, { ...log('2026-09-29', 0, false), rest: true }]
+    stubApi({
+      ...signedIn,
+      ...level,
+      'GET /api/habits': () => ok(page([read])),
+      'GET /api/habits/1/streak': () => streak(3),
+      'GET /api/habits/1/logs': () => ok(page(rests)),
+    })
+    renderApp('/today')
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Rest Read today' }))
+    expect(await screen.findByText('A rest costs 200 XP; you have 50.')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Yes, rest' })).toBeNull()
+  })
+
+  it('keeps quit habits out of the count; “I slipped” checks in once', async () => {
+    const smoking = habit({ id: 5, name: 'Smoking', kind: 'QUIT' })
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/habits': () => ok(page([read, smoking])),
+      'GET /api/habits/1/streak': () => streak(0),
+      'GET /api/habits/5/streak': () => streak(9),
+      'GET /api/habits/1/logs': () => ok(page([])),
+      'GET /api/habits/5/logs': () => ok(page([])),
+      'POST /api/habits/5/checkin': () => ok(log('2026-10-02', 1, true)),
+    })
+    renderApp('/today')
+
+    expect(await screen.findByText('0 of 1 done')).toBeTruthy()
+    const clean = (await screen.findByRole('heading', { name: 'Staying clean' })).closest('section')!
+    expect(within(clean).getByText('Clean today')).toBeTruthy()
+    await userEvent.click(within(clean).getByRole('button', { name: 'I slipped on Smoking' }))
+    expect(posts(calls)).toContainEqual({ completedCount: 1 })
+  })
+})
+
 describe('when there is nothing to check in', () => {
   it('invites the first habit when there are none', async () => {
     stubApi({ ...signedIn, 'GET /api/habits': () => ok(page([])) })

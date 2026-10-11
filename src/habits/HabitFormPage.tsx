@@ -57,6 +57,7 @@ export default function HabitFormPage() {
             pending={save.isPending}
             error={save.error}
             onSubmit={(values) => save.mutate(values)}
+            editing={editing}
           />
         )}
       </div>
