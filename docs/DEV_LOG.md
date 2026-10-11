@@ -5,6 +5,18 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-10 (N.2 — limits and errors)
+
+**Done** (`feat/error-states`, on top of `feat/habits-plus`)
+- `PLAN_LIMIT_REACHED` (7 habits / 2 goals on the free plan): the server's message already names the
+  limit and the way out, so it is shown as is, wherever habits or goals are created or restored.
+- `RATE_LIMITED`: `ApiError.retryAfter` from the `Retry-After` header; auth pages say "Try again in
+  a minute / N minutes". Checked through the dev proxy: the header arrives.
+- Uploads: `VITE_FILE_UPLOADS=false` hides "File" in the library form (on unless set, so dev and
+  tests are unchanged); `FILE_UPLOADS_DISABLED` gets a plain message if the server refuses anyway.
+  Existing files still show and download.
+- No toasts: every error already has an inline place next to what failed, so Sonner wasn't needed.
+
 ## 2026-10-10 (N.1 — habits+: units, quit habits, rest days, delete)
 
 **Done** (`feat/habits-plus`, on top of `feat/new-look`)

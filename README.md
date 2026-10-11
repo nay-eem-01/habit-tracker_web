@@ -17,6 +17,13 @@ origins (default `http://localhost:3000`) and would answer 403 "Invalid CORS req
 port. For a split deploy set `VITE_API_BASE_URL`; otherwise serve the app and
 the API under one domain.
 
+## Settings (build-time, `VITE_*`)
+
+| Variable | What it does |
+|---|---|
+| `VITE_API_BASE_URL` | API origin for a split deploy; leave unset when the app and API share a domain |
+| `VITE_FILE_UPLOADS` | `false` hides "File" in the library form; match the backend's `APP_FILES_ENABLED` (off by default there) |
+
 ## Scripts
 
 | Command | What it does |

@@ -29,10 +29,13 @@ import {
 
 const MAX_GOALS = 100
 
+/** The server keeps uploads off until it has lasting storage; set VITE_FILE_UPLOADS=false to match. */
+const UPLOADS = import.meta.env?.VITE_FILE_UPLOADS !== 'false'
+
 const TYPES: { type: ResourceType; label: string; icon: typeof NotePencil }[] = [
   { type: 'NOTE', label: 'Note', icon: NotePencil },
   { type: 'LINK', label: 'Link', icon: LinkSimple },
-  { type: 'FILE', label: 'File', icon: FileIcon },
+  ...(UPLOADS ? [{ type: 'FILE' as const, label: 'File', icon: FileIcon }] : []),
 ]
 
 const ACCEPT = FILE_EXTENSIONS.map((extension) => `.${extension}`).join(',')
