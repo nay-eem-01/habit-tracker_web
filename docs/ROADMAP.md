@@ -126,6 +126,7 @@ Screens, API and errors are in `docs/ADMIN.md`. Run `npm run gen:api` first.
 | A.2 | Overview: stat cards, sign-ups and check-ins charts, delivery panel | ⬜ |
 | A.3 | Users list: search by email, sort, pages | ⬜ |
 | A.4 | User page: counts, plan switch, suspend / lift, delete | ⬜ |
+| A.5 | Admin UI separate from the user app (`docs/ADMIN.md` "Admin UI is separate"): admins land on `/admin`, user routes redirect them, own layout and menu, no user-only API calls | ⬜ |
 
 ## Phase A — admin screens (backend Phase 12) ✅
 
