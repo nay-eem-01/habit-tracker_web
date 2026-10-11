@@ -5,6 +5,21 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-11 (A.4 — one user, for an admin)
+
+**Done** (`feat/admin-user`, on top of `feat/admin-users`)
+- `/admin/users/:id`: email, name, sign-in, verified, joined, badges; a red line when suspended;
+  counts only (active / archived habits, days checked in, goals, push browsers, last active as
+  "8 days ago").
+- Actions (hidden for admins): Free / Pro switch; Suspend and Lift suspension in a dialog
+  (shadcn AlertDialog, the app's buttons inside); Delete in a dialog that stays disabled until the
+  email is typed, then back to the list. Each answer replaces the user in the page's cache; lists and
+  the overview are refreshed. `USER_NOT_FOUND` says the user is gone and offers the list.
+- Found while testing: the Suspend and Lift confirms sit in the same place, so React reused one
+  instance and its open state; each now has its own key.
+- Checked live on a throwaway account: Pro, suspend (its sign-in then gets 403
+  `AUTH_ACCOUNT_SUSPENDED`), lift, delete. Phase A done.
+
 ## 2026-10-11 (A.3 — admin users list)
 
 **Done** (`feat/admin-users`, on top of `feat/admin-layout`)
