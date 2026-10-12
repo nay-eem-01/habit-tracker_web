@@ -59,4 +59,11 @@ describe('settings', () => {
     expect(await screen.findByRole('heading', { name: /Welcome back|Sign in/ })).toBeTruthy()
     expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(2)
   })
+
+  it('links the privacy policy', async () => {
+    stubApi({ ...appShell })
+    renderApp('/settings')
+    const link = await screen.findByRole('link', { name: 'Privacy policy' })
+    expect(link.getAttribute('href')).toBe('/privacy.html')
+  })
 })

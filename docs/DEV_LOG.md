@@ -5,6 +5,16 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-13 (D.2 — privacy policy links)
+
+**Done** (`feat/privacy-links`)
+- "Privacy policy" under every signed-out page (sign in, sign up, forgot and reset password: one
+  link in `AuthLayout`) and in Settings → Your data ("What we keep, why, and for how long").
+- A plain `<a href="/privacy.html">`, not a router link: the policy is the static page in `public/`
+  (D.0), so it loads without the app for Google's consent screen and signed-out visitors. The
+  production build copies it to `dist/`.
+- Checked live at 390, light and dark: the link opens the policy, its "Back to AveryDay" returns.
+
 ## 2026-10-12 (A.5 — the admin app is its own)
 
 **Done** (`feat/admin-only-ui`)

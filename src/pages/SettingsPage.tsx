@@ -243,6 +243,12 @@ export default function SettingsPage() {
       </Section>
       <Section title="Your data" intro="Everything in your account as one JSON file: habits, check-ins, goals and notes.">
         <ExportData />
+        <p className="mt-4 text-sm text-ink-soft">
+          What we keep, why, and for how long:{' '}
+          <a href="/privacy.html" className="font-medium text-link underline underline-offset-2">
+            Privacy policy
+          </a>
+        </p>
       </Section>
       <Section title="Delete account">
         <DeleteAccount user={user} />

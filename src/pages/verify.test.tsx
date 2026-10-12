@@ -18,6 +18,14 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+describe('the privacy policy', () => {
+  it('is linked from the signed-out pages, as a plain page outside the app', async () => {
+    stubApi({ ...guest })
+    renderApp('/signin')
+    expect((await screen.findByRole('link', { name: 'Privacy policy' })).getAttribute('href')).toBe('/privacy.html')
+  })
+})
+
 describe('confirming an email', () => {
   it('confirms once from the link, signed out, and offers sign in', async () => {
     const calls = stubApi({ ...guest, 'POST /api/auth/email/verify': () => ok(null) })
