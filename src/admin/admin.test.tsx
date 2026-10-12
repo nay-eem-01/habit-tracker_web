@@ -25,7 +25,7 @@ afterEach(() => {
 
 describe('admin overview', () => {
   it('shows users, who is active, usage and delivery, with failures in the alert colour', async () => {
-    stubApi({ 'POST /api/auth/refresh': () => ok(admin), ...shell, 'GET /api/admin/stats': () => ok(stats) })
+    stubApi({ 'POST /api/auth/refresh': () => ok(admin), 'GET /api/admin/stats': () => ok(stats) })
     renderApp('/admin')
 
     expect(await screen.findByText('40')).toBeTruthy()
@@ -68,7 +68,6 @@ describe('admin users', () => {
   it('lists users with their badges, searches after a pause and sorts', async () => {
     const calls = stubApi({
       'POST /api/auth/refresh': () => ok(admin),
-      ...shell,
       'GET /api/admin/users': (call) =>
         ok(page(call.params.get('q') ? [person(2, 'sam@example.com')] : [person(1, 'ana@example.com', { plan: 'PRO', suspendedAt: '2026-10-05T00:00:00Z' }), person(2, 'sam@example.com')])),
     })
@@ -98,7 +97,6 @@ describe('one user, for an admin', () => {
     let current = person(7, 'sam@example.com')
     const calls = stubApi({
       'POST /api/auth/refresh': () => ok(admin),
-      ...shell,
       'GET /api/admin/users/7': () => ok(detail(current)),
       'PUT /api/admin/users/7/plan': (call) => ok((current = { ...current, ...(call.body as object) })),
       'POST /api/admin/users/7/suspend': () => ok((current = { ...current, suspendedAt: '2026-10-11T09:00:00Z' })),
@@ -124,7 +122,6 @@ describe('one user, for an admin', () => {
   it('deletes only once the email is typed, then goes back to the list', async () => {
     const calls = stubApi({
       'POST /api/auth/refresh': () => ok(admin),
-      ...shell,
       'GET /api/admin/users/7': () => ok(detail(person(7, 'sam@example.com'))),
       'DELETE /api/admin/users/7': () => new Response(null, { status: 204 }),
       'GET /api/admin/users': () => ok(page([])),
@@ -144,9 +141,32 @@ describe('one user, for an admin', () => {
   })
 
   it('offers no actions on another admin', async () => {
-    stubApi({ 'POST /api/auth/refresh': () => ok(admin), ...shell, 'GET /api/admin/users/8': () => ok(detail(person(8, 'boss@example.com', { role: 'ADMIN' }))) })
+    stubApi({ 'POST /api/auth/refresh': () => ok(admin), 'GET /api/admin/users/8': () => ok(detail(person(8, 'boss@example.com', { role: 'ADMIN' }))) })
     renderApp('/admin/users/8')
     expect(await screen.findByText(/Admins can’t be changed from here/)).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull()
+  })
+})
+
+describe('the admin app is its own', () => {
+  it('takes an admin from the user app to /admin, with no user-only calls', async () => {
+    const calls = stubApi({ 'POST /api/auth/refresh': () => ok(admin), 'GET /api/admin/stats': () => ok(stats) })
+    renderApp('/today')
+
+    expect(await screen.findByRole('heading', { name: 'Overview' })).toBeTruthy()
+    expect(calls.map((c) => c.path).filter((path) => !path.startsWith('/api/admin') && !path.startsWith('/api/auth'))).toEqual([])
+    expect(screen.queryByRole('button', { name: 'Notifications' })).toBeNull()
+    expect(screen.queryByText(/Confirm your email/)).toBeNull()
+  })
+
+  it('has an account menu with only change password and sign out', async () => {
+    stubApi({ 'POST /api/auth/refresh': () => ok(admin), 'GET /api/admin/stats': () => ok(stats) })
+    renderApp('/admin')
+
+    await userEvent.click(await screen.findByRole('button', { name: /^Account,/ }))
+    expect(screen.getByRole('link', { name: 'Change password' }).getAttribute('href')).toBe('/admin/password')
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Settings' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Admin' })).toBeNull()
   })
 })

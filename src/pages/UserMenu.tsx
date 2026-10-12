@@ -1,4 +1,4 @@
-import { Desktop, GearSix, Key, Moon, ShieldCheck, SignOut, Sun } from '@phosphor-icons/react'
+import { Desktop, GearSix, Key, Moon, SignOut, Sun } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { AuthUser } from '../api/client'
@@ -16,8 +16,8 @@ function initials(name: string): string {
   return letters.toUpperCase()
 }
 
-/** The person's avatar; opens a small card with who is signed in and the way out. */
-export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () => void }) {
+/** The person's avatar; opens a small card with who is signed in and the way out. An admin's has no settings. */
+export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut: () => void; admin?: boolean }) {
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const [theme, setThemeState] = useState<Theme>(getTheme)
@@ -78,26 +78,18 @@ export function UserMenu({ user, onSignOut }: { user: AuthUser; onSignOut: () =>
               </button>
             ))}
           </div>
-          {user.role === 'ADMIN' && (
+          {!admin && (
             <Link
-              to="/admin"
+              to="/settings"
               onClick={() => setOpen(false)}
               className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
             >
-              <ShieldCheck size={20} weight="bold" aria-hidden="true" />
-              Admin
+              <GearSix size={20} weight="bold" aria-hidden="true" />
+              Settings
             </Link>
           )}
           <Link
-            to="/settings"
-            onClick={() => setOpen(false)}
-            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
-          >
-            <GearSix size={20} weight="bold" aria-hidden="true" />
-            Settings
-          </Link>
-          <Link
-            to="/account/password"
+            to={admin ? '/admin/password' : '/account/password'}
             onClick={() => setOpen(false)}
             className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
           >

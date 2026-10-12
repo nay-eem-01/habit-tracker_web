@@ -1,9 +1,10 @@
 import { Suspense, useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { LevelBadge } from '../level/LevelBadge'
 import { LevelUp } from '../level/LevelUp'
 import { NotificationBell } from '../notifications/NotificationBell'
+import { Brand } from '../components/Brand'
 import { UserMenu } from './UserMenu'
 import { VerifyBanner } from './VerifyBanner'
 
@@ -33,15 +34,7 @@ export default function AppLayout() {
       <header className="sticky top-0 z-10 border-b border-mist/70 bg-chalk/85 backdrop-blur-md">
         {/* Below md the links drop to their own row, so the bell and avatar always fit, even at 320px. */}
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight">
-            <span aria-hidden="true" className="grid grid-cols-2 gap-[2px]">
-              <span className="size-[7px] rounded-[2px] bg-lapis" />
-              <span className="size-[7px] rounded-[2px] bg-lapis" />
-              <span className="size-[7px] rounded-[2px] bg-lapis" />
-              <span className="size-[7px] rounded-[2px] bg-ember" />
-            </span>
-            DevHabit
-          </Link>
+          <Brand to="/" />
           <nav
             aria-label="Main"
             className="order-last flex w-full gap-0.5 rounded-full bg-mist/45 p-1 text-sm font-medium sm:text-base md:order-none md:w-auto"
