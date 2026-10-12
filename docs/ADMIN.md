@@ -7,12 +7,32 @@ needs to build the `/admin` screens. Run `npm run gen:api` against the running b
 ## Who is an admin
 
 - `GET /api/auth/me` (and every sign-in response's `user`) now has `role`: `"USER"` or `"ADMIN"`.
-- Show an **Admin** entry in the user menu only when `role === "ADMIN"`; guard the `/admin/*` routes
-  the same way (anyone else → the not-found page).
+- **An admin account only administers (backend 12.5, 2026-10-12).** It is not a user with extra
+  powers: it has no habits, goals, dashboard, notifications, push, level or settings. The API enforces
+  it — for an admin, every app endpoint answers **403 `FORBIDDEN`**; only `/api/admin/**` and
+  `/api/auth/**` (me, change password, sign out, refresh) work. So the web app has **two separate
+  UIs in one build**, chosen by `role` (step A.5 below).
+- Guard the `/admin/*` routes by role (a user → the not-found page).
 - The API is the real guard: a non-admin calling `/api/admin/**` gets **404 `NOT_FOUND`** (not 403),
   so treat 404 there as "not found", not as a bug.
 - There is no "make admin" in the app. Locally: `update users set role = 'ADMIN' where email = '…';`
   then sign in again (or just reload — the role is read on every request).
+
+## Admin UI is separate from the user app (A.5)
+
+- **Where an admin lands:** after any sign-in (password, Google) and on load with a session, `role ===
+  "ADMIN"` → `/admin`. Every user route (`/`, `/today`, `/habits`, `/goals`, `/settings`, …) redirects
+  an admin to `/admin` — the reverse of the existing `/admin` guard.
+- **Its own layout:** brand + "Admin", tabs Overview / Users, and an account menu with only **Change
+  password** (`/admin/password`, reusing the change-password form → `POST /api/auth/password/change`)
+  and **Sign out**. No user navigation, no notification bell, no level badge, no "Admin" entry in the
+  user menu (users never see it, admins never see the user menu — remove it).
+- **Never call user endpoints for an admin** — they 403: no unread-count polling
+  (`/api/notifications/unread-count`), no push subscribe or the unsubscribe on sign-out
+  (`/api/push/…`), no timezone-switch prompt (`PUT /api/me`), no level or dashboard queries. Start
+  those only inside the user layout.
+- The email-verification banner isn't needed for admins; hide it there.
+- Backstop: a `FORBIDDEN` from any non-admin endpoint while `role === "ADMIN"` → go to `/admin`.
 
 ## Suspended accounts (affects every user, not just admin screens)
 
@@ -79,3 +99,4 @@ list) · `ADMIN_TARGET_IS_ADMIN` (409, shouldn't happen when the buttons are hid
 | A.2 | Overview: cards, two charts, delivery panel | ✅ |
 | A.3 | Users list: search, sort, pages | ✅ |
 | A.4 | User page: counts, plan switch, suspend / lift, delete | ✅ |
+| A.5 | Admin UI separate from the user app: admins land on `/admin`, user routes redirect them there, own layout and account menu (change password, sign out), no user-only calls; drop the "Admin" user-menu entry | ⬜ |
