@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { api, apiBlob, getAccessToken, refreshSession, restoreSession, setAccessToken, setSessionLostHandler } from './client'
+import { api, apiBlob, getAccessToken, refreshSession, restoreSession, setAccessToken, setForbiddenHandler, setSessionLostHandler } from './client'
 import { ApiError } from './errors'
 
 const session = {
@@ -188,5 +188,20 @@ describe('auth endpoints that need a token', () => {
       '/api/auth/refresh',
       '/api/auth/password/change',
     ])
+  })
+})
+
+describe('a 403 from the app', () => {
+  it('tells the forbidden handler for app endpoints, not for admin or auth ones', async () => {
+    const forbidden = vi.fn()
+    setForbiddenHandler(forbidden)
+    fetchMock.mockImplementation(async () => fail(403, 'FORBIDDEN'))
+
+    await expect(api('/api/habits')).rejects.toBeInstanceOf(ApiError)
+    expect(forbidden).toHaveBeenCalledTimes(1)
+    await expect(api('/api/admin/stats')).rejects.toBeInstanceOf(ApiError)
+    await expect(api('/api/auth/login', { method: 'POST' })).rejects.toBeInstanceOf(ApiError)
+    expect(forbidden).toHaveBeenCalledTimes(1)
+    setForbiddenHandler(() => {})
   })
 })

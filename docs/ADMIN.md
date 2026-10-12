@@ -99,4 +99,4 @@ list) · `ADMIN_TARGET_IS_ADMIN` (409, shouldn't happen when the buttons are hid
 | A.2 | Overview: cards, two charts, delivery panel | ✅ |
 | A.3 | Users list: search, sort, pages | ✅ |
 | A.4 | User page: counts, plan switch, suspend / lift, delete | ✅ |
-| A.5 | Admin UI separate from the user app: admins land on `/admin`, user routes redirect them there, own layout and account menu (change password, sign out), no user-only calls; drop the "Admin" user-menu entry | ⬜ |
+| A.5 | Admin UI separate from the user app: admins land on `/admin`, user routes redirect them there, own layout and account menu (change password, sign out), no user-only calls; drop the "Admin" user-menu entry | ✅ |

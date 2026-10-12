@@ -121,17 +121,12 @@ Screens, API and errors are in `docs/ADMIN.md`. Run `npm run gen:api` first.
 
 | # | Step | Status |
 |---|---|---|
-| A.0 | `AUTH_ACCOUNT_SUSPENDED` message on sign-in (password and Google) | ⬜ |
-| A.1 | `role` from `me`; Admin menu entry; guarded `/admin` layout (Overview / Users) | ⬜ |
-| A.2 | Overview: stat cards, sign-ups and check-ins charts, delivery panel | ⬜ |
-| A.3 | Users list: search by email, sort, pages | ⬜ |
-| A.4 | User page: counts, plan switch, suspend / lift, delete | ⬜ |
-| A.5 | Admin UI separate from the user app (`docs/ADMIN.md` "Admin UI is separate"): admins land on `/admin`, user routes redirect them, own layout and menu, no user-only API calls | ⬜ |
-
-## Phase A — admin screens (backend Phase 12) ✅
-
-Steps, API and decisions in `docs/ADMIN.md`: suspended-account message (A.0), admin area behind the
-role (A.1), overview (A.2), users list (A.3), one user with plan / suspend / delete (A.4).
+| A.0 | `AUTH_ACCOUNT_SUSPENDED` message on sign-in (password and Google) | ✅ |
+| A.1 | `role` from `me`; Admin menu entry; guarded `/admin` layout (Overview / Users) | ✅ |
+| A.2 | Overview: stat cards, sign-ups and check-ins charts, delivery panel | ✅ |
+| A.3 | Users list: search by email, sort, pages | ✅ |
+| A.4 | User page: counts, plan switch, suspend / lift, delete | ✅ |
+| A.5 | Admin UI separate from the user app (`docs/ADMIN.md` "Admin UI is separate"): admins land on `/admin`, user routes redirect them, own layout and menu, no user-only API calls | ✅ |
 
 ## Later — follows the backend milestones
 

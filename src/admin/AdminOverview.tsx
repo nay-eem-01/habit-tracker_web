@@ -138,7 +138,7 @@ function Delivery({ delivery }: { delivery: AdminStats['delivery'] }) {
   )
 }
 
-export default function AdminOverview() {
+function Numbers() {
   const stats = useQuery({ queryKey: ['admin', 'stats'], queryFn: getAdminStats })
 
   if (stats.isPending) {
@@ -185,5 +185,15 @@ export default function AdminOverview() {
         <Delivery delivery={stats.data.delivery} />
       </div>
     </div>
+  )
+}
+
+export default function AdminOverview() {
+  return (
+    <>
+      <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight">Overview</h1>
+      <p className="mt-1 text-ink-soft">How DevHabit is doing, across everyone.</p>
+      <Numbers />
+    </>
   )
 }

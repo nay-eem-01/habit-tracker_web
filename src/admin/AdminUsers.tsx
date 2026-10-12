@@ -85,6 +85,8 @@ export default function AdminUsers() {
 
   return (
     <section className="mt-6">
+      <h1 className="font-display text-4xl font-semibold tracking-tight">Users</h1>
+      <p className="mt-1 mb-6 text-ink-soft">Find someone by email; open them to change their plan or account.</p>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="relative sm:w-80">
           <label htmlFor="admin-search" className="sr-only">

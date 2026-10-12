@@ -5,6 +5,23 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-12 (A.5 — the admin app is its own)
+
+**Done** (`feat/admin-only-ui`)
+- Two apps in one build, chosen by `role`. `RequireUser` sends an admin from any user route
+  (`/`, `/today`, `/habits`, `/settings`, …) to `/admin`; signing in lands there too. `RequireAdmin`
+  still sends users home.
+- Admin shell (`admin/AdminLayout.tsx`): the brand with an "Admin" label, Overview / Users as the
+  header nav (where the user app has Home / Today / …), and the account menu with theme, Change
+  password (`/admin/password`, the same form) and Sign out. No bell, level, level-up, verification
+  banner or settings. `AdminPage` frames the three screens; they each have a heading now.
+- The user menu lost its "Admin" entry; `Brand` (the mark and name) is shared by both headers.
+- Sign-out skips the push unsubscribe for an admin. Backstop: a 403 from any app endpoint
+  (not `/api/admin`, not `/api/auth`) while signed in as an admin goes to `/admin`
+  (`setForbiddenHandler` in the API client, like the session-lost handler).
+- Tests: admin tests no longer stub the user app's calls, so any stray one fails. Checked live:
+  sign-in lands on `/admin`, `/habits` comes back to it, and no user endpoint is called.
+
 ## 2026-10-11 (A.4 — one user, for an admin)
 
 **Done** (`feat/admin-user`, on top of `feat/admin-users`)

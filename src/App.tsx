@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
-import { GuestOnly, RequireAdmin, RequireAuth } from './auth/guards'
+import { GuestOnly, RequireAdmin, RequireAuth, RequireUser } from './auth/guards'
+import AdminPage from './admin/AdminPage'
 import AppLayout from './pages/AppLayout'
 
 /** Each page is its own chunk, fetched the first time it's opened; the app frame loads with the first. */
@@ -41,28 +42,33 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route element={<RequireAuth />}>
-            <Route element={<AppLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="/today" element={<TodayPage />} />
-              <Route path="/habits" element={<HabitsPage />} />
-              <Route path="/habits/new" element={<HabitFormPage />} />
-              <Route path="/habits/:id" element={<HabitDetailPage />} />
-              <Route path="/habits/:id/edit" element={<HabitFormPage />} />
-              <Route path="/goals" element={<GoalsPage />} />
-              <Route path="/goals/new" element={<GoalFormPage />} />
-              <Route path="/goals/:id" element={<GoalDetailPage />} />
-              <Route path="/goals/:id/edit" element={<GoalFormPage />} />
-              <Route path="/resources" element={<LibraryPage />} />
-              <Route path="/resources/new" element={<ResourceFormPage />} />
-              <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
-              <Route path="/account/password" element={<ChangePasswordPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route element={<RequireAdmin />}>
-                <Route path="/admin" element={<AdminLayout />}>
+            <Route element={<RequireUser />}>
+              <Route element={<AppLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="/today" element={<TodayPage />} />
+                <Route path="/habits" element={<HabitsPage />} />
+                <Route path="/habits/new" element={<HabitFormPage />} />
+                <Route path="/habits/:id" element={<HabitDetailPage />} />
+                <Route path="/habits/:id/edit" element={<HabitFormPage />} />
+                <Route path="/goals" element={<GoalsPage />} />
+                <Route path="/goals/new" element={<GoalFormPage />} />
+                <Route path="/goals/:id" element={<GoalDetailPage />} />
+                <Route path="/goals/:id/edit" element={<GoalFormPage />} />
+                <Route path="/resources" element={<LibraryPage />} />
+                <Route path="/resources/new" element={<ResourceFormPage />} />
+                <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
+                <Route path="/account/password" element={<ChangePasswordPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Route>
+            </Route>
+            <Route element={<RequireAdmin />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route element={<AdminPage />}>
                   <Route index element={<AdminOverview />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="users/:id" element={<AdminUserPage />} />
                 </Route>
+                <Route path="password" element={<ChangePasswordPage />} />
               </Route>
             </Route>
           </Route>

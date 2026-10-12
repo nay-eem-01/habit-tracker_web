@@ -58,6 +58,13 @@ export function setSessionLostHandler(handler: () => void): void {
   onSessionLost = handler
 }
 
+let onForbidden: () => void = () => {}
+
+/** Called on a 403 from an app endpoint (not admin, not auth): for an admin it means "not your app". */
+export function setForbiddenHandler(handler: () => void): void {
+  onForbidden = handler
+}
+
 interface RequestOptions {
   method?: string
   body?: unknown
@@ -81,17 +88,18 @@ export function apiBlob(path: string): Promise<Blob> {
 }
 
 async function request<T>(path: string, options: RequestOptions, read: (response: Response) => Promise<T>): Promise<T> {
-  const first = await send(path, options)
-  if (first.status === 401 && !isAuthPath(path)) {
+  let response = await send(path, options)
+  if (response.status === 401 && !isAuthPath(path)) {
     try {
       await refreshSession()
     } catch {
       onSessionLost()
-      throw await toError(first)
+      throw await toError(response)
     }
-    return read(await send(path, options))
+    response = await send(path, options)
   }
-  return read(first)
+  if (response.status === 403 && !isAuthPath(path) && !path.startsWith('/api/admin')) onForbidden()
+  return read(response)
 }
 
 /**
