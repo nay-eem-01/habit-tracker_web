@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy · AveryDay</title>
+  <meta name="description" content="What AveryDay collects, why, who processes it, how long it is kept, and your rights.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <!-- A static page (no app code) so Google's consent screen and signed-out visitors can always load it. -->
+  <style>
+    :root {
+      --bg: #f9f9f9; --surface: #ffffff; --ink: #092634; --ink-soft: #4f6470;
+      --line: #d5dee3; --link: #004e72; --accent: #ff6e42;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #071c26; --surface: #0c2633; --ink: #e8eef1; --ink-soft: #a7b8c1;
+              --line: #1e3d4c; --link: #7cc4e6; --accent: #ff8a65; color-scheme: dark; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink);
+           font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    main { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+    header { border-bottom: 1px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+    .brand { font-weight: 700; font-size: 1.1rem; color: var(--ink); text-decoration: none; }
+    .brand span { color: var(--accent); }
+    h1 { font-size: 2rem; line-height: 1.2; margin: 1rem 0 .25rem; }
+    h2 { font-size: 1.2rem; margin: 2.25rem 0 .5rem; }
+    p, li { color: var(--ink); }
+    .meta, .note { color: var(--ink-soft); font-size: .95rem; }
+    a { color: var(--link); }
+    ul { padding-left: 1.25rem; }
+    li { margin: .3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: .55rem .6rem; border-bottom: 1px solid var(--line); }
+    th { color: var(--ink-soft); font-weight: 600; }
+    .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: .6rem; }
+    footer { margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="brand" href="/">Avery<span>Day</span></a>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective 13 October 2026 · AveryDay is in beta</p>
+  </header>
+
+  <p>AveryDay ("we") is a habit tracker run by an independent developer. This policy says what we collect,
+    why, who helps us process it, how long we keep it, and what you can do about it. We don't sell your
+    data, show ads, or use analytics or tracking tools.</p>
+
+  <h2>What we collect</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Data</th><th>Why</th></tr>
+    <tr><td><strong>Account:</strong> email address, name, password (stored only as a one-way hash), time zone,
+      whether your email is verified, your plan</td><td>To create and secure your account, and to decide what "today" is for your streaks and reminders</td></tr>
+    <tr><td><strong>Google sign-in</strong> (if you use it): your Google account ID, email and name</td><td>To sign you in. We never see your Google password.</td></tr>
+    <tr><td><strong>What you enter:</strong> habits, check-ins and notes, goals, resources (notes and links), reminder times, rest days</td><td>This is the service: tracking, streaks, levels, the dashboard</td></tr>
+    <tr><td><strong>Notifications:</strong> your in-app notifications and, if you turn on push, your browser's push subscription (an address at your browser's push service, plus keys)</td><td>To send the reminders you set</td></tr>
+    <tr><td><strong>Sign-in sessions:</strong> a session token (stored hashed) and its expiry</td><td>To keep you signed in, and to sign you out everywhere after a password change or reset</td></tr>
+    <tr><td><strong>Technical data:</strong> IP address and request details, in short-lived server logs and in memory for rate limits</td><td>Security (stopping password guessing and abuse) and fixing errors</td></tr>
+    <tr><td><strong>Email preference:</strong> whether you agreed to occasional product emails (off unless you turn it on)</td><td>To respect your choice. Account emails such as verification and password reset are always sent.</td></tr>
+  </table>
+  </div>
+  <p>We don't collect payment details: there are no payments in AveryDay today. Please don't put sensitive
+    information (health details, for example) in habit names or notes unless you're comfortable storing it with us.</p>
+
+  <h2>Our legal bases</h2>
+  <ul>
+    <li><strong>Contract:</strong> to provide the account and the service you signed up for.</li>
+    <li><strong>Consent:</strong> push notifications and product emails. You can withdraw consent at any time in
+      Settings or in your browser.</li>
+    <li><strong>Legitimate interest:</strong> keeping the service secure and working, such as rate limits, logs and backups.</li>
+  </ul>
+
+  <h2>Who processes data for us</h2>
+  <p>We use these providers to run AveryDay. Each handles data only to provide its service to us. Your data
+    may be stored or processed outside your country.</p>
+  <ul>
+    <li><strong>Vercel</strong> serves the web app and passes your requests to our server.</li>
+    <li><strong>Render</strong> runs our server.</li>
+    <li><strong>Supabase</strong> hosts our database.</li>
+    <li><strong>Google</strong> provides "Sign in with Google" (if you use it) and Gmail, which sends our emails.
+      Google sees the recipient address and the message.</li>
+    <li><strong>Your browser's push service</strong> (for example Google for Chrome, Mozilla for Firefox, Apple for Safari)
+      delivers push reminders. The reminder text is encrypted on our server, and only your browser can read it.</li>
+    <li><strong>GitHub</strong> stores our encrypted database backups (see below).</li>
+  </ul>
+
+  <h2>Cookies and storage in your browser</h2>
+  <p>We use one essential cookie: a secure, HttpOnly sign-in cookie that keeps you signed in for up to 7 days.
+    The app also stores a few preferences in your browser's local storage (your light or dark theme, and the last
+    level you saw). No advertising or analytics cookies. If you use "Sign in with Google", Google's sign-in
+    script loads from Google and is covered by Google's privacy policy.</p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li>Your account and everything in it: until you delete your account.</li>
+    <li>When you delete your account (Settings → Delete account), your account and all its data are removed
+      from our database right away.</li>
+    <li>Backups: we take an encrypted backup of the database every day and keep each one for 30 days, so
+      deleted data disappears from backups within 30 days.</li>
+    <li>Password-reset links expire after 30 minutes and email-verification links after 24 hours; expired ones are deleted within about two days. Sign-in
+      sessions expire after 7 days.</li>
+    <li>Server logs: kept by our hosting provider for a short period (days to weeks), then deleted.</li>
+  </ul>
+
+  <h2>Your rights</h2>
+  <ul>
+    <li><strong>Access and portability:</strong> Settings → Download my data gives you everything as a JSON file.</li>
+    <li><strong>Correction:</strong> edit your name, time zone and preferences in Settings, and your habits and goals in the app.</li>
+    <li><strong>Deletion:</strong> Settings → Delete account. It can't be undone.</li>
+    <li><strong>Objection and withdrawing consent:</strong> turn off push or product emails at any time.</li>
+    <li>You can contact us about any of these, and you may complain to your local data protection authority.</li>
+  </ul>
+
+  <h2>Security</h2>
+  <p>All traffic uses HTTPS. Passwords are hashed with BCrypt. Session and reset tokens are stored only as
+    hashes. Backups are encrypted. Access to the database is limited to the developer. We look at an
+    individual account's content only when you ask for help, or to investigate a fault or abuse.</p>
+
+  <h2>Children</h2>
+  <p>AveryDay is not meant for children under 13, or under the minimum age for digital consent where you live.
+    If you think a child has given us data, contact us and we'll delete it.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, we'll update the date at the top. If a change is significant, we'll tell you in the
+    app or by email before it takes effect.</p>
+
+  <h2>Contact</h2>
+  <p>Email <a href="mailto:averydayhabits@gmail.com">averydayhabits@gmail.com</a>.</p>
+
+  <footer class="note"><a href="/">← Back to AveryDay</a></footer>
+</main>
+</body>
+</html>
