@@ -139,7 +139,15 @@ Screens, API and errors are in `docs/ADMIN.md`. Run `npm run gen:api` first.
 | M6 AI insights | insights panel on the dashboard | ⏸ |
 | 2.3 Google sign-in | "Continue with Google" on sign in / register | ✅ Phase N (N.6) |
 
-## Before any shared deploy
+## Phase D — beta deploy (AveryDay)
 
-- Production build served from the same origin as the API (or `VITE_API_BASE_URL` for a split deploy).
-- Decide hosting; CORS origins in the backend `.env` must match.
+Plan: backend `docs/DEPLOY.md`. Web on Vercel (`https://averyday.vercel.app`), `/api` proxied to the API on
+Render, so it's one site and the `SameSite=Strict` cookie works. `staging` is the beta, `production` comes later.
+
+| # | Step | Status |
+|---|---|---|
+| D.0 | `public/privacy.html`: static privacy policy (Google's consent screen links it) | ✅ |
+| D.1 | Rename DevHabit → **AveryDay** ("A very Day"): page title, manifest `name`/`short_name`, service worker's default title, any visible text | ⬜ |
+| D.2 | Link "Privacy" (`/privacy.html`, a plain link, not a route) on sign-in/sign-up and in Settings | ⬜ |
+| D.3 | `vercel.json`: `/api/*` rewrite to the Render URL, SPA fallback, security headers (backend `docs/DEPLOY.md` §5) | ⬜ |
+| D.4 | CI (`npm ci`, lint, typecheck, test, build) on PRs, so `staging`/`production` can require it | ⬜ |
