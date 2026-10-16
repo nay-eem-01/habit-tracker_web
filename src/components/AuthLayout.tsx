@@ -41,6 +41,12 @@ export function AuthLayout({ title, intro, children }: { title: string; intro: s
             {intro}
           </p>
           <div className="mt-9">{children}</div>
+          {/* a plain link: privacy.html is a static page, not a route of the app */}
+          <p className="mt-10 text-sm text-ink-soft">
+            <a href="/privacy.html" className="underline underline-offset-2 hover:text-ink">
+              Privacy policy
+            </a>
+          </p>
         </div>
       </main>
     </div>
