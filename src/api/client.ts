@@ -25,6 +25,8 @@ export interface AuthUser {
   plan?: 'FREE' | 'PRO'
   /** ADMIN sees the /admin screens; the API checks it on every call. */
   role?: 'USER' | 'ADMIN'
+  /** When the profile picture last changed; absent or null means none, so initials show. */
+  avatarUpdatedAt?: string | null
 }
 
 export interface AuthSession {

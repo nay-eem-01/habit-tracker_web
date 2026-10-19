@@ -33,6 +33,12 @@ export function authErrorMessage(error: unknown): string {
         return "That isn't your current password."
       case 'AUTH_PASSWORD_NOT_SET':
         return 'This account has no password yet. Use “Forgot password” to set one.'
+      case 'USER_AVATAR_TOO_LARGE':
+        return 'That picture is over 5 MB. Choose a smaller one.'
+      case 'USER_AVATAR_INVALID':
+        return 'That file isn’t a picture we can use. Choose a JPEG, PNG or GIF.'
+      case 'USER_AVATAR_NOT_FOUND':
+        return 'There’s no profile picture to show.'
       case 'VALIDATION_FAILED':
         return 'Some details need fixing. Check the highlighted fields.'
       case 'RATE_LIMITED':

@@ -5,6 +5,14 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-19 (R.5 — profile picture)
+
+**Done** (`feat/avatar-photo`)
+- Settings → Photo: the browser crops a centre square, turns it upright and sends a JPEG
+  (`pages/picture.ts`), so HEIC and WebP from phones work although the server takes JPEG only.
+- `Avatar` in the account menu: fetched with the token, cached per `avatarUpdatedAt`, initials when
+  there is none or it won't load. Remove goes back to initials.
+
 ## 2026-10-19 (Phase R — AveryDay redesign, D.1 rename)
 
 **Done** (`feat/redesign`)
