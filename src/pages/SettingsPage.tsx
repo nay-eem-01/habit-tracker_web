@@ -10,9 +10,9 @@ import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
 import { SwitchField, TimezoneField } from '../components/pickers'
-import { SECONDARY, SURFACE } from '../components/styles'
 import { disablePush, enablePush, pushState } from '../push/push'
 import { saveBlob } from '../resources/resources'
+import { LEAD, PAGE, PAGE_TITLE, SECONDARY, SECTION_TITLE, TEXT_BUTTON } from '../components/styles'
 
 /** The browser's region name, the same kind the server accepts. */
 function browserTimezone(): string {
@@ -25,12 +25,15 @@ function timezones(current: string): string[] {
   return all.includes(current) ? all : [current, ...all]
 }
 
-function Section({ title, intro, children }: { title: string; intro?: string; children: ReactNode }) {
+/** One group of settings: what it is on the left, the controls on the right; stacked on a phone. */
+function Section({ title, intro, danger, children }: { title: string; intro?: string; danger?: boolean; children: ReactNode }) {
   return (
-    <section className={`${SURFACE} mt-6 p-5 sm:p-8`}>
-      <h2 className="font-display text-2xl font-semibold tracking-tight">{title}</h2>
-      {intro && <p className="mt-1 text-ink-soft">{intro}</p>}
-      <div className="mt-5">{children}</div>
+    <section className="grid gap-x-10 gap-y-4 border-t border-mist py-8 md:grid-cols-[14rem_1fr]">
+      <div>
+        <h2 className={`${SECTION_TITLE} ${danger ? 'text-alert' : ''}`}>{title}</h2>
+        {intro && <p className="mt-1.5 text-[0.9375rem] text-ink-soft">{intro}</p>}
+      </div>
+      <div className="min-w-0">{children}</div>
     </section>
   )
 }
@@ -54,7 +57,7 @@ function Profile({ user }: { user: AuthUser }) {
   return (
     <form onSubmit={submit} className="flex max-w-sm flex-col gap-5">
       {save.isSuccess && (
-        <p role="status" className="flex items-center gap-2 rounded-xl bg-lapis/10 px-4 py-3 font-medium text-link">
+        <p role="status" className="flex items-center gap-2 rounded-xl bg-sage px-4 py-3 font-medium text-sage-deep">
           <CheckCircle size={20} weight="fill" aria-hidden="true" />
           Saved.
         </p>
@@ -76,9 +79,9 @@ function Profile({ user }: { user: AuthUser }) {
           zones={timezones(timezone)}
         />
         {browser && browser !== timezone && (
-          <p className="mt-1.5 text-sm">
+          <p className="mt-1.5 text-[0.9375rem]">
             This device is on {browser.replaceAll('_', ' ')}.{' '}
-            <button type="button" onClick={() => setTimezone(browser)} className="font-medium text-link underline underline-offset-2">
+            <button type="button" onClick={() => setTimezone(browser)} className={TEXT_BUTTON}>
               Use it
             </button>
           </p>
@@ -91,7 +94,7 @@ function Profile({ user }: { user: AuthUser }) {
         onChange={setMarketing}
       />
       {save.isError && (
-        <p role="alert" className="text-sm text-alert">
+        <p role="alert" className="text-[0.9375rem] text-alert">
           {save.error instanceof ApiError && save.error.errorCode === 'USER_INVALID_TIMEZONE'
             ? 'Pick a timezone from the list.'
             : authErrorMessage(save.error)}
@@ -122,11 +125,11 @@ function Reminders() {
   if (state.isError) return <p className="text-ink-soft">Couldn’t check notifications right now.</p>
   const push = state.data
   if (!push.supported) {
-    return <p className="text-ink-soft">This browser can’t show reminders. On iPhone, add DevHabit to your Home Screen first, then open it from there.</p>
+    return <p className="text-ink-soft">This browser can’t show reminders. On iPhone, add AveryDay to your Home Screen first, then open it from there.</p>
   }
   if (!push.enabled) return <p className="text-ink-soft">Reminder notifications aren’t switched on yet. They’ll appear here when they are.</p>
   if (push.permission === 'denied') {
-    return <p className="text-ink-soft">Notifications are blocked for DevHabit. Allow them in your browser’s site settings, then come back.</p>
+    return <p className="text-ink-soft">Notifications are blocked for AveryDay. Allow them in your browser’s site settings, then come back.</p>
   }
 
   return (
@@ -139,7 +142,7 @@ function Reminders() {
         onChange={(on) => toggle.mutate(on)}
       />
       {toggle.isError && (
-        <p role="alert" className="mt-2 text-sm text-alert">
+        <p role="alert" className="mt-2 text-[0.9375rem] text-alert">
           {toggle.error.message === 'blocked' ? 'Notifications weren’t allowed, so nothing changed.' : authErrorMessage(toggle.error)}
         </p>
       )}
@@ -148,14 +151,14 @@ function Reminders() {
 }
 
 function ExportData() {
-  const download = useMutation({ mutationFn: exportData, onSuccess: (blob) => saveBlob(blob, 'devhabit-export.json') })
+  const download = useMutation({ mutationFn: exportData, onSuccess: (blob) => saveBlob(blob, 'averyday-export.json') })
   return (
     <>
       <button type="button" disabled={download.isPending} aria-busy={download.isPending || undefined} onClick={() => download.mutate()} className={SECONDARY}>
         {download.isPending ? 'Preparing…' : 'Download my data'}
       </button>
       {download.isError && (
-        <p role="alert" className="mt-2 text-sm text-alert">
+        <p role="alert" className="mt-2 text-[0.9375rem] text-alert">
           {authErrorMessage(download.error)}
         </p>
       )}
@@ -203,7 +206,7 @@ function DeleteAccount({ user }: { user: AuthUser }) {
         error={wrong ? authErrorMessage(remove.error) : undefined}
       />
       {remove.isError && !wrong && (
-        <p role="alert" className="text-sm text-alert">
+        <p role="alert" className="text-[0.9375rem] text-alert">
           {authErrorMessage(remove.error)}
         </p>
       )}
@@ -226,9 +229,9 @@ export default function SettingsPage() {
   const { user } = state
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">Settings</h1>
-      <p className="mt-1 text-ink-soft">{user.email}</p>
+    <main className={PAGE}>
+      <h1 className={PAGE_TITLE}>Settings</h1>
+      <p className={`${LEAD} mb-8`}>{user.email}</p>
 
       <Section title="Profile">
         <Profile user={user} />
@@ -243,14 +246,14 @@ export default function SettingsPage() {
       </Section>
       <Section title="Your data" intro="Everything in your account as one JSON file: habits, check-ins, goals and notes.">
         <ExportData />
-        <p className="mt-4 text-sm text-ink-soft">
+        <p className="mt-4 text-[0.9375rem] text-ink-soft">
           What we keep, why, and for how long:{' '}
-          <a href="/privacy.html" className="font-medium text-link underline underline-offset-2">
+          <a href="/privacy.html" className={TEXT_BUTTON}>
             Privacy policy
           </a>
         </p>
       </Section>
-      <Section title="Delete account">
+      <Section title="Delete account" intro="Removes the account and everything in it." danger>
         <DeleteAccount user={user} />
       </Section>
     </main>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { HeatmapDay } from '../api/dashboard'
-import { formatChange, hourLabel, levelOf, yearWeeks } from './dashboard'
+import { formatChange, greeting, hourLabel, levelOf, yearWeeks } from './dashboard'
 
 const day = (date: string, done: number, expected: number): HeatmapDay => ({
   date,
@@ -59,5 +59,15 @@ describe('formatChange', () => {
 describe('hourLabel', () => {
   it('names hours the way people say them', () => {
     expect([0, 7, 12, 13, 23].map(hourLabel)).toEqual(['midnight', '7 am', '12 pm', '1 pm', '11 pm'])
+  })
+})
+
+describe('greeting', () => {
+  it('follows the clock in the user’s timezone', () => {
+    // 06:30 UTC is 12:30 in Dhaka and 02:30 in New York
+    const now = new Date('2026-10-02T06:30:00Z')
+    expect(greeting('UTC', now)).toBe('Good morning')
+    expect(greeting('Asia/Dhaka', now)).toBe('Good afternoon')
+    expect(greeting('America/New_York', now)).toBe('Good evening')
   })
 })

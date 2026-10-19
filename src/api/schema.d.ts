@@ -53,6 +53,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My profile picture
+         * @description A JPEG. Send the bearer token: fetch it and show the blob, keyed by the user's avatarUpdatedAt — a plain <img src> can't carry the header.
+         */
+        get: operations["getAvatar"];
+        /**
+         * Set my profile picture
+         * @description Multipart, part "file": JPEG, PNG or GIF up to 5 MB. Stored as the centre square, 256 px, JPEG, with no metadata. Crop and shrink in the browser first: phone photos keep their rotation only in metadata, which is dropped.
+         */
+        put: operations["setAvatar"];
+        post?: never;
+        /**
+         * Remove my profile picture
+         * @description The app shows initials again.
+         */
+        delete: operations["deleteAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/habits/{id}": {
         parameters: {
             query?: never;
@@ -1250,6 +1278,8 @@ export interface components {
             plan?: "FREE" | "PRO";
             /** @enum {string} */
             role?: "USER" | "ADMIN";
+            /** Format: date-time */
+            avatarUpdatedAt?: string;
         };
         UnsubscribeRequest: {
             endpoint: string;
@@ -1431,6 +1461,98 @@ export interface operations {
             };
             /** @description Too many wrong passwords (RATE_LIMITED) */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The picture's bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+            /** @description No profile picture (USER_AVATAR_NOT_FOUND) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    setAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated user, with a new avatarUpdatedAt */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Over 5 MB (USER_AVATAR_TOO_LARGE) */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+            /** @description Not a JPEG, PNG or GIF picture (USER_AVATAR_INVALID) */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HttpResponse"];
+                };
+            };
+        };
+    };
+    deleteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed, or there was none */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

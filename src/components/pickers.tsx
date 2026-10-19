@@ -19,14 +19,14 @@ import { INPUT } from './Field'
 /** A button that reads like the app's text inputs: the closed state of every picker here. */
 const FIELD_BUTTON = cn(
   INPUT,
-  'flex h-12 w-full items-center gap-3 border-mist text-left font-normal [@media(hover:hover)]:hover:border-ink-soft data-popup-open:border-lapis',
+  'flex h-12 w-full items-center gap-3 border-mist text-left font-normal [@media(hover:hover)]:hover:border-line data-popup-open:border-lapis',
 )
 
 /** Label, control, then the hint or the error under it, the same rhythm as `Field`. */
 function Labelled({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: ReactNode }) {
   return (
     <div>
-      <label id={`${id}-label`} htmlFor={id} className="mb-1.5 block text-sm font-medium">
+      <label id={`${id}-label`} htmlFor={id} className="mb-1.5 block text-[0.9375rem] font-medium">
         {label}
       </label>
       {children}
@@ -102,7 +102,7 @@ export function DateField({ label, value, onChange, hint, error, placeholder = '
                       date.setMonth(date.getMonth() + months)
                       pick(toDay(date))
                     }}
-                    className="rounded-full bg-mist/45 py-1.5 text-sm font-medium transition-[background-color,transform] duration-150 ease-out active:scale-95 [@media(hover:hover)]:hover:bg-ember/20"
+                    className="rounded-full bg-wash py-1.5 text-sm font-medium transition-[background-color,transform] duration-150 ease-out active:scale-95 [@media(hover:hover)]:hover:bg-ember/20"
                   >
                     {short}
                   </button>

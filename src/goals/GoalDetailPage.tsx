@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle, Flag, LinkSimple, Trophy } from '@phosphor-icons/react'
+import { ArrowLeft, CalendarBlank, CheckCircle, Flag, LinkSimple, PencilSimple, Plus, Trophy, WarningCircle } from '@phosphor-icons/react'
 import { useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
@@ -20,7 +20,7 @@ import { Field } from '../components/Field'
 import { SelectField } from '../components/pickers'
 import { ProgressBar } from '../components/ProgressBar'
 import { Ring } from '../components/Ring'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { PAGE, PAGE_TITLE, SECONDARY, SECTION_TITLE, TEXT_BUTTON } from '../components/styles'
 import { ResourceCard } from '../resources/ResourceCard'
 import { useResourceActions } from '../resources/useResourceActions'
 import { useToday } from '../today/useToday'
@@ -41,12 +41,13 @@ function GoalResources({ goalId }: { goalId: number }) {
   const back = `/goals/${goalId}`
 
   return (
-    <section aria-labelledby="resources" className="mt-10">
-      <div className="flex items-end justify-between gap-4">
-        <h2 id="resources" className="font-display text-2xl font-semibold tracking-tight">
+    <section aria-labelledby="resources" className="mt-12 border-t border-mist pt-8">
+      <div className="flex items-center justify-between gap-4">
+        <h2 id="resources" className={SECTION_TITLE}>
           Notes, links and files
         </h2>
-        <Link to={`/resources/new?goalId=${goalId}&back=${encodeURIComponent(back)}`} className={`${BUTTON} shrink-0`}>
+        <Link to={`/resources/new?goalId=${goalId}&back=${encodeURIComponent(back)}`} className={`${BUTTON} h-10 shrink-0`}>
+          <Plus size={16} weight="bold" aria-hidden="true" />
           Add
         </Link>
       </div>
@@ -65,7 +66,7 @@ function GoalResources({ goalId }: { goalId: number }) {
           </button>
         </div>
       ) : !resources.data ? (
-        <div role="status" aria-label="Loading notes, links and files" className="mt-3 h-24 animate-pulse rounded-2xl bg-mist/45" />
+        <div role="status" aria-label="Loading notes, links and files" className="mt-3 h-24 animate-pulse rounded-2xl bg-wash" />
       ) : resources.data.content.length === 0 ? (
         <p className="mt-3 text-ink-soft">Keep the plan, a note to self, or a useful link here, next to the goal.</p>
       ) : (
@@ -85,7 +86,7 @@ function GoalResources({ goalId }: { goalId: number }) {
           {resources.data.totalElements > resources.data.content.length && (
             <Link
               to={`/resources?goalId=${goalId}`}
-              className="mt-3 inline-block font-medium text-link underline underline-offset-2"
+              className={`mt-3 ${TEXT_BUTTON}`}
             >
               See all {resources.data.totalElements} in the library
             </Link>
@@ -106,7 +107,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 function StatusBadge({ goal, timezone }: { goal: Goal; timezone: string }) {
   if (goal.status === 'ACHIEVED') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-lapis/15 px-3 py-1 text-sm font-medium text-link">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-sage px-3 py-1 text-[0.9375rem] font-medium text-sage-deep">
         <Trophy size={16} weight="fill" aria-hidden="true" />
         Achieved{goal.achievedAt ? ` ${formatInstant(goal.achievedAt, timezone)}` : ''}
       </span>
@@ -114,7 +115,7 @@ function StatusBadge({ goal, timezone }: { goal: Goal; timezone: string }) {
   }
   if (goal.status === 'ABANDONED') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-mist/60 px-3 py-1 text-sm font-medium text-ink-soft">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-wash px-3 py-1 text-[0.9375rem] font-medium text-ink-soft ring-1 ring-mist ring-inset">
         <Flag size={16} weight="fill" aria-hidden="true" />
         Abandoned
       </span>
@@ -167,10 +168,10 @@ function LinkedHabit({ habit, open, busy, onRetarget, onUnlink }: RowProps) {
   return (
     <li className="py-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <Link to={`/habits/${habit.habitId}`} className="font-medium hover:text-link hover:underline underline-offset-2">
+        <Link to={`/habits/${habit.habitId}`} className="font-display text-lg font-semibold tracking-tight underline-offset-[3px] hover:text-link hover:underline">
           {habit.name}
         </Link>
-        <span className={`text-sm ${reached ? 'font-medium text-link' : 'text-ink-soft'}`}>
+        <span className={`text-[0.9375rem] tabular-nums ${reached ? 'font-medium text-sage-deep' : 'text-ink-soft'}`}>
           {reached && <CheckCircle size={16} weight="fill" aria-hidden="true" className="mr-1 inline align-[-3px]" />}
           {habit.doneDays} of {plural(habit.goalTargetDays, 'done day')} · {habit.percent}%
         </span>
@@ -178,19 +179,19 @@ function LinkedHabit({ habit, open, busy, onRetarget, onUnlink }: RowProps) {
       <div className="mt-2">
         <ProgressBar percent={habit.percent} muted={habit.archived} />
       </div>
-      <p className="mt-1.5 text-sm text-ink-soft">
+      <p className="mt-1.5 text-[0.9375rem] text-ink-soft">
         Counting since {formatDate(habit.linkedOn)}
         {habit.archived && ' · Archived, so it no longer counts toward the goal'}
       </p>
 
       {open && !editing && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-1 flex gap-5">
           {!habit.archived && (
-            <button type="button" onClick={() => setEditing(true)} className={BUTTON} aria-label={`Change target for ${habit.name}`}>
+            <button type="button" onClick={() => setEditing(true)} className={TEXT_BUTTON} aria-label={`Change target for ${habit.name}`}>
               Change target
             </button>
           )}
-          <button type="button" disabled={busy} onClick={onUnlink} className={BUTTON} aria-label={`Unlink ${habit.name}`}>
+          <button type="button" disabled={busy} onClick={onUnlink} className={TEXT_BUTTON} aria-label={`Unlink ${habit.name}`}>
             Unlink
           </button>
         </div>
@@ -233,14 +234,15 @@ function LinkHabitForm({
   if (habits.length === 0) {
     return (
       <p className="text-ink-soft">
-        <Link to="/habits/new" className="font-medium text-link underline underline-offset-2">
-          Add a habit
-        </Link>{' '}
-        first, then link it here.
+        No habits yet.{' '}
+        <Link to={`/habits/new?goal=${goalId}`} className={TEXT_BUTTON}>
+          Add one for this goal
+        </Link>
+        .
       </p>
     )
   }
-  if (choices.length === 0) return <p className="text-ink-soft">Every active habit is already linked to this goal.</p>
+  if (choices.length === 0) return <p className="text-ink-soft">Every active habit is already linked to this goal. Add a new one with New habit.</p>
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -258,9 +260,9 @@ function LinkHabitForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start">
       <SelectField
-        className="max-w-sm"
+        className="sm:min-w-64 sm:flex-1"
         label="Habit"
         placeholder="Choose a habit"
         value={habitId}
@@ -273,11 +275,11 @@ function LinkHabitForm({
         hint={picked?.goalId ? 'Linking it here takes it off its other goal and starts its count again.' : undefined}
       />
       <TargetField value={target} onChange={setTarget} />
-      <div>
-        <Button type="submit" busy={busy}>
+      <div className="sm:w-full">
+        <button type="submit" disabled={busy} aria-busy={busy || undefined} className={`${BUTTON} border-lapis text-link`}>
           <LinkSimple size={18} weight="bold" aria-hidden="true" />
           Link habit
-        </Button>
+        </button>
       </div>
     </form>
   )
@@ -289,11 +291,11 @@ function CloseGoal({ busy, onClose }: { busy: boolean; onClose: (outcome: GoalSt
 
   if (asking) {
     return (
-      <div role="group" aria-label="Confirm" className="rounded-2xl border border-mist p-4">
+      <div role="group" aria-label="Confirm" className="rounded-2xl bg-wash p-4 sm:p-5">
         <p className="font-medium">
           {asking === 'ACHIEVED' ? 'Mark this goal achieved?' : 'Abandon this goal?'}
         </p>
-        <p className="mt-1 text-sm text-ink-soft">
+        <p className="mt-1 text-ink-soft">
           {asking === 'ACHIEVED'
             ? "Well done. It moves to Achieved and can't be reopened."
             : "It moves to Abandoned and can't be reopened. Its habits stay linked."}
@@ -375,7 +377,7 @@ export default function GoalDetailPage() {
 
   if (goal.isPending && goal.fetchStatus !== 'idle') {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className={PAGE}>
         <p role="status" className="text-ink-soft">
           Loading goal…
         </p>
@@ -384,11 +386,11 @@ export default function GoalDetailPage() {
   }
   if (!goal.data) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className={PAGE}>
         <p role="alert" className="text-alert">
           {goal.error ? goalErrorMessage(goal.error) : "This goal doesn't exist, or it isn't yours."}
         </p>
-        <Link to="/goals" className="mt-3 inline-block font-medium text-link underline underline-offset-2">
+        <Link to="/goals" className={`mt-3 ${TEXT_BUTTON}`}>
           Back to goals
         </Link>
       </main>
@@ -402,40 +404,45 @@ export default function GoalDetailPage() {
   const failure = link.error ?? unlink.error ?? close.error
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <Link to="/goals" className="text-sm font-medium text-link underline underline-offset-2">
+    <main className={PAGE}>
+      <Link to="/goals" className="inline-flex min-h-9 items-center gap-1.5 text-[0.9375rem] font-medium text-ink-soft hover:text-ink">
+        <ArrowLeft size={16} weight="bold" aria-hidden="true" />
         All goals
       </Link>
-      <div className="mt-3 flex items-start justify-between gap-4">
+      <div className="mt-2 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">{title}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-ink-soft">
+          <h1 className={`${PAGE_TITLE} break-words`}>{title}</h1>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-ink-soft">
             <StatusBadge goal={goal.data} timezone={timezone} />
             {due ? (
-              <span className={due.overdue ? 'font-medium text-alert' : undefined}>{due.text}</span>
+              <span className={`inline-flex items-center gap-1.5 ${due.overdue ? 'font-medium text-alert' : ''}`}>
+                {due.overdue ? <WarningCircle size={16} weight="bold" aria-hidden="true" /> : <CalendarBlank size={16} weight="bold" aria-hidden="true" />}
+                <span>{due.text}</span>
+              </span>
             ) : (
               active && <span>No deadline</span>
             )}
           </div>
-          {description && <p className="mt-3 max-w-2xl whitespace-pre-line">{description}</p>}
+          {description && <p className="mt-4 max-w-2xl text-[1.0625rem] leading-relaxed whitespace-pre-line">{description}</p>}
         </div>
         <Link to={`/goals/${id}/edit`} aria-label={`Edit ${title}`} className={`${BUTTON} shrink-0`}>
-          Edit
+          <PencilSimple size={18} aria-hidden="true" />
+          <span className="hidden sm:inline">Edit</span>
         </Link>
       </div>
 
       {failure && (
-        <p role="alert" className="mt-4 text-sm text-alert">
+        <p role="alert" className="mt-4 rounded-xl bg-alert/8 px-4 py-3 text-[0.9375rem] text-alert">
           {goalErrorMessage(failure)}
         </p>
       )}
 
-      <section aria-labelledby="progress" className="mt-8">
-        <h2 id="progress" className="font-display text-2xl font-semibold tracking-tight">
+      <section aria-labelledby="progress" className="mt-10">
+        <h2 id="progress" className="sr-only">
           Progress
         </h2>
         {progress.isError ? (
-          <div className="mt-3">
+          <div>
             <p role="alert" className="text-alert">
               {goalErrorMessage(progress.error)}
             </p>
@@ -444,12 +451,12 @@ export default function GoalDetailPage() {
             </button>
           </div>
         ) : !progress.data ? (
-          <div role="status" aria-label="Loading progress" className="mt-3 h-40 animate-pulse rounded-2xl bg-mist/45" />
+          <div role="status" aria-label="Loading progress" className="h-40 animate-pulse rounded-2xl bg-wash" />
         ) : (
-          <div className={`${SURFACE} mt-3 p-4 sm:p-6`}>
-            <div className="flex items-center gap-5">
+          <>
+            <div className="flex items-center gap-5 rounded-2xl bg-wash p-5 sm:p-6">
               <Ring rate={progress.data.percent / 100}>
-                <span className="font-display text-xl font-semibold text-link">{progress.data.percent}%</span>
+                <span className="font-display text-2xl font-semibold tabular-nums text-ink">{progress.data.percent}%</span>
               </Ring>
               <p className="text-ink-soft">
                 {counted === 0
@@ -460,29 +467,39 @@ export default function GoalDetailPage() {
               </p>
             </div>
             {linked.length > 0 && (
-              <ul aria-label="Linked habits" className="mt-4 divide-y divide-mist/70 border-t border-mist/70">
-                {linked.map((habit) => (
-                  <LinkedHabit
-                    key={`${habit.habitId}-${habit.goalTargetDays}`}
-                    habit={habit}
-                    open={active}
-                    busy={link.isPending || unlink.isPending}
-                    onRetarget={(days) => link.mutateAsync({ habitId: habit.habitId, days })}
-                    onUnlink={() => unlink.mutate(habit.habitId)}
-                  />
-                ))}
-              </ul>
+              <>
+                <h3 className={`mt-10 ${SECTION_TITLE}`}>Habits that get you there</h3>
+                <ul aria-label="Linked habits" className="mt-2 divide-y divide-mist border-t border-mist">
+                  {linked.map((habit) => (
+                    <LinkedHabit
+                      key={`${habit.habitId}-${habit.goalTargetDays}`}
+                      habit={habit}
+                      open={active}
+                      busy={link.isPending || unlink.isPending}
+                      onRetarget={(days) => link.mutateAsync({ habitId: habit.habitId, days })}
+                      onUnlink={() => unlink.mutate(habit.habitId)}
+                    />
+                  ))}
+                </ul>
+              </>
             )}
-          </div>
+          </>
         )}
       </section>
 
       {active && (
-        <section aria-labelledby="link" className="mt-10">
-          <h2 id="link" className="font-display text-2xl font-semibold tracking-tight">
-            Link a habit
-          </h2>
-          <div className={`${SURFACE} mt-3 p-4 sm:p-6`}>
+        <section aria-labelledby="link" className="mt-8 rounded-2xl border border-mist p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h2 id="link" className="font-display text-lg font-semibold tracking-tight">
+              Link a habit
+            </h2>
+            {/* a habit made from here comes back already linked, with its target */}
+            <Link to={`/habits/new?goal=${id}`} className={`${BUTTON} h-10`}>
+              <Plus size={16} weight="bold" aria-hidden="true" />
+              New habit
+            </Link>
+          </div>
+          <div className="mt-4">
             {habits.isError ? (
               <p role="alert" className="text-alert">
                 {goalErrorMessage(habits.error)}
@@ -506,8 +523,8 @@ export default function GoalDetailPage() {
       <GoalResources goalId={id} />
 
       {active && (
-        <section aria-labelledby="finish" className="mt-10">
-          <h2 id="finish" className="font-display text-2xl font-semibold tracking-tight">
+        <section aria-labelledby="finish" className="mt-12 border-t border-mist pt-8">
+          <h2 id="finish" className={SECTION_TITLE}>
             Finish
           </h2>
           <p className="mt-1 text-ink-soft">You decide when it’s done. Reaching 100% doesn’t close it for you.</p>

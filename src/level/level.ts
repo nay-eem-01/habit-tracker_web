@@ -9,6 +9,31 @@ export const TIERS: Record<Tier, { name: string; color: string; from: number }> 
   DIAMOND: { name: 'Diamond', color: '#5b8cff', from: 35 },
 }
 
+const TIER_ORDER: Tier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND']
+
+/** The tiers in order with the levels each covers: "Levels 1–4", the last one open-ended "Levels 35+". */
+export function tierLadder(): { tier: Tier; name: string; color: string; levels: string }[] {
+  return TIER_ORDER.map((tier, i) => {
+    const { name, color, from } = TIERS[tier]
+    const next = TIER_ORDER[i + 1]
+    return { tier, name, color, levels: next ? `Levels ${from}–${TIERS[next].from - 1}` : `Levels ${from}+` }
+  })
+}
+
+/** The tier after this one, and the level it starts at; null at the top. */
+export function nextTier(tier: Tier): { name: string; from: number } | null {
+  const next = TIER_ORDER[TIER_ORDER.indexOf(tier) + 1]
+  return next ? { name: TIERS[next].name, from: TIERS[next].from } : null
+}
+
+/** How XP is earned, as the server awards it. */
+export const EARNING = [
+  ['+10', 'each done day that counts for a streak'],
+  ['+5', 'more per day while a streak is a week or longer'],
+  ['+50 · +200 · +500 · +1,500', 'when a streak reaches 7, 30, 100 and 365 days (1, 4, 14, 52 weeks)'],
+  ['+500', 'for each goal you mark achieved'],
+] as const
+
 /** XP still needed for the next level. */
 export function xpToNext(level: Level): number {
   return Math.max(level.xpForNextLevel - level.xp, 0)

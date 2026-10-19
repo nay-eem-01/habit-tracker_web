@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Level } from '../api/level'
@@ -42,8 +42,33 @@ describe('level in the header', () => {
     stubApi({ ...signedIn, 'GET /api/me/level': () => ok(level(3)), 'GET /api/goals': () => ok(page([])) })
     renderApp('/goals')
 
-    const badge = await screen.findByRole('link', { name: 'Level 3, Bronze. 180 XP to level 4.' })
+    const badge = await screen.findByRole('button', { name: 'Level 3, Bronze. 180 XP to level 4.' })
     expect(badge.textContent).toBe('Lv 3')
+  })
+
+  it('opens the level up close: progress, the tiers, XP to spend and how XP is earned', async () => {
+    stubApi({
+      ...signedIn,
+      'GET /api/me/level': () => ok({ ...level(6, 'SILVER', 1500), spentXp: 100, xpBalance: 1400 }),
+      'GET /api/goals': () => ok(page([])),
+    })
+    renderApp('/goals')
+    const input = userEvent.setup()
+
+    await input.click(await screen.findByRole('button', { name: /^Level 6, Silver/ }))
+
+    const panel = await screen.findByRole('dialog', { name: 'Your level' })
+    expect(within(panel).getByRole('heading', { name: 'Level 6 · Silver' })).toBeTruthy()
+    expect(within(panel).getByRole('progressbar', { name: 'Progress to level 7' })).toBeTruthy()
+    expect(within(panel).getByText('Gold at level 10')).toBeTruthy()
+    const current = within(panel).getAllByRole('listitem').filter((item) => item.getAttribute('aria-current') === 'step')
+    expect(current.map((item) => item.textContent)).toEqual(['SilverLevels 5–9'])
+    expect(within(panel).getByText('1,400 XP')).toBeTruthy()
+    expect(within(panel).getByText(/100 XP spent so far/)).toBeTruthy()
+    expect(within(panel).getByText('How XP works')).toBeTruthy()
+
+    await input.keyboard('{Escape}')
+    await vi.waitFor(() => expect(screen.queryByRole('dialog', { name: 'Your level' })).toBeNull())
   })
 })
 
@@ -52,7 +77,7 @@ describe('level up', () => {
     stubApi({ ...signedIn, 'GET /api/me/level': () => ok(level(3)), 'GET /api/goals': () => ok(page([])) })
     renderApp('/goals')
 
-    await screen.findByRole('link', { name: /^Level 3,/ })
+    await screen.findByRole('button', { name: /^Level 3,/ })
     expect(screen.queryByText('Level up')).toBeNull()
     expect(localStorage.getItem(KEY)).toBe('3')
   })
@@ -85,11 +110,11 @@ describe('level up', () => {
     })
     renderApp('/today')
 
-    await screen.findByRole('link', { name: /^Level 3,/ })
+    await screen.findByRole('button', { name: /^Level 3,/ })
     await userEvent.click(await screen.findByRole('button', { name: 'Mark Read done' }))
 
     expect(await screen.findByText('Level 4')).toBeTruthy()
-    expect(screen.getByRole('link', { name: /^Level 4,/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^Level 4,/ })).toBeTruthy()
   })
 })
 

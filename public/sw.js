@@ -1,4 +1,4 @@
-// DevHabit's service worker: shows reminders sent by web push. No offline cache: the app needs the API anyway.
+// AveryDay's service worker: shows reminders sent by web push. No offline cache: the app needs the API anyway.
 
 self.addEventListener('push', (event) => {
   // the server sends {title, body, url}; anything else still shows something rather than nothing
@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
     message = { body: event.data ? event.data.text() : '' }
   }
   event.waitUntil(
-    self.registration.showNotification(message.title || 'DevHabit', {
+    self.registration.showNotification(message.title || 'AveryDay', {
       body: message.body || '',
       icon: '/icon-192.png',
       badge: '/icon-192.png',

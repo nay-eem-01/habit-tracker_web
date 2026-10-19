@@ -1,14 +1,15 @@
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQueries, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query'
-import { CalendarBlank, Plant } from '@phosphor-icons/react'
+import { CalendarBlank, Check, Plant } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { cancelRest, checkIn, listLogs, restDay, type HabitLog } from '../api/checkins'
 import { listHabits, type Habit, type Page } from '../api/habits'
 import { habitErrorMessage } from '../api/messages'
 import { useAuth } from '../auth/context'
+import { PAGE, PAGE_TITLE, SECONDARY, SECTION_TITLE, TEXT_BUTTON } from '../components/styles'
 import { useLevel } from '../level/useLevel'
 import { QuitRow, TodayRow } from './TodayRow'
-import { formatToday, todayStatus, weekStart, withTodayCount } from './today'
+import { formatToday, todayStatus, weekDays, weekStart, withTodayCount, type WeekDay } from './today'
 import { useToday } from './useToday'
 
 /** One request covers every active habit; a user with more than this many sees the first of them. */
@@ -16,15 +17,15 @@ const MAX_HABITS = 100
 
 const logsKey = (habitId: number, since: string): QueryKey => ['logs', habitId, since]
 
-/** One square per habit due today; each fills as it gets done, the way a day fills the sign-in chain. */
-function TodayChain({ done, total }: { done: number; total: number }) {
+/** One segment per habit due today; each fills as it gets done, the way a day fills the chain. */
+function Segments({ done, total, complete }: { done: number; total: number; complete: boolean }) {
   return (
-    <div aria-hidden="true" className="mt-5 flex flex-wrap gap-1.5">
+    <div aria-hidden="true" className="mt-5 flex gap-1">
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
-          className={`size-4 rounded-[5px] transition-[background-color,transform] duration-300 ease-out ${
-            i < done ? 'scale-100 bg-ember' : 'scale-90 bg-white/20'
+          className={`h-2 min-w-1 flex-1 rounded-full transition-colors duration-300 ease-out motion-reduce:transition-none ${
+            i < done ? (complete ? 'bg-sage-deep' : 'bg-lapis') : 'bg-mist'
           }`}
         />
       ))}
@@ -33,52 +34,84 @@ function TodayChain({ done, total }: { done: number; total: number }) {
 }
 
 function message(done: number, total: number): string {
-  if (done === 0) return 'Pick the easiest one and start the chain.'
-  if (done === total) return 'Chain extended. See you tomorrow.'
+  if (done === 0) return total === 1 ? 'One thing today. Start whenever you’re ready.' : 'Start with the easiest one.'
+  if (done === total) return 'Everything due today is done. See you tomorrow.'
   const left = total - done
-  return `${left} to go. You’re moving.`
+  return left === 1 ? 'One to go.' : `${left} to go. You’re moving.`
 }
 
-/** The day at a glance: how many are done, and one line of encouragement. */
+/** The day at a glance: how many are done, one line about it, a segmented bar; sage once it is all done. */
 function Progress({ done, total }: { done: number; total: number }) {
+  const complete = done >= total
   return (
-    <div className="grain relative isolate mt-6 overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(9_38_52/0.9)] sm:p-8">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(80%_90%_at_0%_0%,rgb(0_120_170/0.5),transparent),radial-gradient(60%_70%_at_100%_100%,rgb(255_110_66/0.22),transparent)]"
-      />
-      <p className="font-display text-5xl font-semibold tracking-tight">
-        {done} of {total} done
-      </p>
-      <p className="mt-1 text-white/75">{message(done, total)}</p>
-      <TodayChain done={done} total={total} />
-    </div>
+    <section
+      aria-label="Today’s progress"
+      className={`settle mt-6 rounded-2xl border p-5 sm:p-6 ${complete ? 'border-sage bg-sage' : 'border-mist bg-wash'}`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-display text-4xl leading-none font-semibold tracking-tight tabular-nums sm:text-5xl">
+            {done} of {total} done
+          </p>
+          <p className={`mt-2.5 ${complete ? 'text-sage-deep' : 'text-ink-soft'}`}>{message(done, total)}</p>
+        </div>
+        {complete && (
+          <span aria-hidden="true" className="check-pop grid size-11 shrink-0 place-items-center rounded-full bg-sage-deep text-chalk">
+            <Check size={22} weight="bold" />
+          </span>
+        )}
+      </div>
+      <Segments done={done} total={total} complete={complete} />
+    </section>
   )
 }
 
 function Skeleton() {
   return (
     <div role="status" aria-label="Loading today" className="mt-6 animate-pulse">
-      <div className="h-40 rounded-3xl bg-mist/60" />
-      <div className="mt-8 h-7 w-24 rounded-lg bg-mist/60" />
+      <div className="h-36 rounded-2xl bg-wash" />
+      <div className="mt-9 h-6 w-20 rounded-md bg-mist/70" />
       {[0, 1, 2].map((i) => (
-        <div key={i} className="mt-3 h-20 rounded-2xl bg-mist/45" />
+        <div key={i} className="mt-5 flex items-center gap-4">
+          <div className="size-12 rounded-xl bg-mist/60" />
+          <div className="h-5 flex-1 rounded-md bg-mist/60" />
+        </div>
       ))}
     </div>
   )
 }
 
-function Empty({ children }: { children: ReactNode }) {
+function Empty({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="mt-8 flex flex-col items-center rounded-3xl border border-dashed border-mist px-6 py-14 text-center text-ink-soft">
-      {children}
+    <div className="mt-8 flex flex-col items-start rounded-2xl bg-wash px-6 py-10 sm:items-center sm:px-10 sm:py-14 sm:text-center">
+      <span aria-hidden="true" className="grid size-12 place-items-center rounded-xl bg-surface text-link ring-1 ring-mist">
+        {icon}
+      </span>
+      <p className="mt-4 font-display text-2xl font-semibold tracking-tight text-ink">{title}</p>
+      <p className="mt-1.5 max-w-sm text-ink-soft">{children}</p>
     </div>
+  )
+}
+
+/** A titled run of rows, a hairline between each. */
+function Group({ id, title, count, children }: { id: string; title: string; count?: number; children: ReactNode }) {
+  return (
+    <section aria-labelledby={id} className="mt-9">
+      <div className="flex items-baseline gap-2 border-b border-mist pb-2">
+        <h2 id={id} className={SECTION_TITLE}>
+          {title}
+        </h2>
+        {count != null && <span className="text-ink-soft tabular-nums">{count}</span>}
+      </div>
+      <ul className="divide-y divide-mist">{children}</ul>
+    </section>
   )
 }
 
 interface Item {
   habit: Habit
   status: ReturnType<typeof todayStatus>
+  week: WeekDay[]
 }
 
 export default function TodayPage() {
@@ -149,7 +182,10 @@ export default function TodayPage() {
   const loading = habits.isPending || logs.some((result) => result.isPending)
   const failed = habits.error ?? logs.find((result) => result.error)?.error
 
-  const all: Item[] = list.map((habit, index) => ({ habit, status: todayStatus(habit, logs[index]?.data?.content ?? [], today) }))
+  const all: Item[] = list.map((habit, index) => {
+    const entries = logs[index]?.data?.content ?? []
+    return { habit, status: todayStatus(habit, entries, today), week: weekDays(entries, today) }
+  })
   // habits being quit are never "to do": they sit in their own list, clean until a slip
   const quitting = all.filter((item) => item.habit.kind === 'QUIT')
   const items = all.filter((item) => item.habit.kind !== 'QUIT' && item.status.due)
@@ -157,11 +193,12 @@ export default function TodayPage() {
   const todo = items.filter((item) => !item.status.done && !item.status.resting)
   const finished = items.filter((item) => item.status.done || item.status.resting)
 
-  const row = ({ habit, status }: Item) => (
+  const row = ({ habit, status, week }: Item) => (
     <TodayRow
       key={habit.id}
       habit={habit}
       status={status}
+      week={week}
       burst={habit.id === justDone}
       onSetCount={(count) => {
         if (!status.done && count >= status.target) setJustDone(habit.id)
@@ -175,17 +212,17 @@ export default function TodayPage() {
   )
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">Today</h1>
-      <p className="mt-1 text-ink-soft">{formatToday(timezone)}</p>
+    <main className={PAGE}>
+      <p className="font-medium text-ink-soft">{formatToday(timezone)}</p>
+      <h1 className={`mt-0.5 ${PAGE_TITLE}`}>Today</h1>
 
       {save.isError && (
-        <p role="alert" className="mt-4 text-sm text-alert">
+        <p role="alert" className="mt-4 rounded-xl bg-alert/8 px-4 py-3 text-[0.9375rem] text-alert">
           Couldn’t save that check-in. {habitErrorMessage(save.error)}
         </p>
       )}
       {rest.isError && (
-        <p role="alert" className="mt-4 text-sm text-alert">
+        <p role="alert" className="mt-4 rounded-xl bg-alert/8 px-4 py-3 text-[0.9375rem] text-alert">
           {habitErrorMessage(rest.error)}
         </p>
       )}
@@ -203,68 +240,49 @@ export default function TodayPage() {
               void habits.refetch()
               logs.forEach((result) => void result.refetch())
             }}
-            className="mt-3 h-10 rounded-xl border border-mist bg-surface px-4 text-sm font-medium transition-transform duration-150 ease-out active:scale-[0.97]"
+            className={`${SECONDARY} mt-3`}
           >
             Try again
           </button>
         </div>
       ) : list.length === 0 ? (
-        <Empty>
-          <Plant size={40} weight="duotone" className="text-link" aria-hidden="true" />
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">Nothing growing yet</p>
-          <p className="mt-1">
-            No habits yet.{' '}
-            <Link to="/habits/new" className="font-medium text-link underline underline-offset-2">
-              Add the first one you want to keep.
-            </Link>
-          </p>
+        <Empty icon={<Plant size={26} weight="duotone" />} title="Nothing growing yet">
+          No habits yet.{' '}
+          <Link to="/habits/new" className={TEXT_BUTTON}>
+            Add the first one you want to keep.
+          </Link>
         </Empty>
       ) : items.length === 0 && quitting.length === 0 ? (
-        <Empty>
-          <CalendarBlank size={40} weight="duotone" className="text-link" aria-hidden="true" />
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">A day off</p>
-          <p className="mt-1">
-            Nothing is scheduled for today.{' '}
-            <Link to="/habits" className="font-medium text-link underline underline-offset-2">
-              See all habits
-            </Link>
-          </p>
+        <Empty icon={<CalendarBlank size={26} weight="duotone" />} title="A day off">
+          Nothing is scheduled for today.{' '}
+          <Link to="/habits" className={TEXT_BUTTON}>
+            See all habits
+          </Link>
         </Empty>
       ) : (
         <>
           {items.length > 0 && <Progress done={finished.length} total={items.length} />}
           {todo.length > 0 && (
-            <section aria-labelledby="todo" className="mt-8">
-              <h2 id="todo" className="font-display text-2xl font-semibold tracking-tight">
-                To do
-              </h2>
-              <ul className="mt-3 flex flex-col gap-3">{todo.map(row)}</ul>
-            </section>
+            <Group id="todo" title="To do" count={todo.length}>
+              {todo.map(row)}
+            </Group>
           )}
           {finished.length > 0 && (
-            <section aria-labelledby="done" className="mt-8">
-              <h2 id="done" className="font-display text-2xl font-semibold tracking-tight">
-                {todo.length === 0 ? 'All done for today' : 'Done'}
-              </h2>
-              <ul className="mt-3 flex flex-col gap-3">{finished.map(row)}</ul>
-            </section>
+            <Group id="done" title={todo.length === 0 ? 'All done for today' : 'Done'} count={todo.length === 0 ? undefined : finished.length}>
+              {finished.map(row)}
+            </Group>
           )}
           {quitting.length > 0 && (
-            <section aria-labelledby="quitting" className="mt-8">
-              <h2 id="quitting" className="font-display text-2xl font-semibold tracking-tight">
-                Staying clean
-              </h2>
-              <ul className="mt-3 flex flex-col gap-3">
-                {quitting.map(({ habit, status }) => (
-                  <QuitRow
-                    key={habit.id}
-                    habit={habit}
-                    slipped={status.count > 0}
-                    onSetCount={(count) => save.mutate({ habit, count })}
-                  />
-                ))}
-              </ul>
-            </section>
+            <Group id="quitting" title="Staying clean">
+              {quitting.map(({ habit, status }) => (
+                <QuitRow
+                  key={habit.id}
+                  habit={habit}
+                  slipped={status.count > 0}
+                  onSetCount={(count) => save.mutate({ habit, count })}
+                />
+              ))}
+            </Group>
           )}
         </>
       )}

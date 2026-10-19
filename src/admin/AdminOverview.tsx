@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { getAdminStats, type AdminStats, type DayCount } from '../api/admin'
 import { habitErrorMessage } from '../api/messages'
 import { Card } from '../components/Card'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { LEAD, PAGE_TITLE, SECONDARY, SURFACE } from '../components/styles'
 
 const number = new Intl.NumberFormat('en-GB')
 
@@ -17,7 +17,7 @@ function shortDay(date: string): string {
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short' }).format(new Date(`${date}T00:00:00Z`))
 }
 
-/** Who uses the app: the total big on navy, the breakdown and who is active around it. */
+/** Who uses the app: the total big, who is active beside it, the breakdown under a hairline. */
 function Hero({ stats }: { stats: AdminStats }) {
   const { users, active } = stats
   const facts: { icon: ReactNode; label: string; value: string }[] = [
@@ -27,18 +27,14 @@ function Hero({ stats }: { stats: AdminStats }) {
     { icon: <Prohibit size={16} weight="bold" />, label: 'Suspended', value: number.format(users.suspended) },
   ]
   return (
-    <div className="grain relative isolate overflow-hidden rounded-3xl bg-lapis-deep p-6 text-white shadow-[0_24px_40px_-24px_rgb(9_38_52/0.9)] sm:col-span-2 sm:p-8">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(80%_90%_at_0%_0%,rgb(0_120_170/0.5),transparent),radial-gradient(60%_70%_at_100%_100%,rgb(255_110_66/0.22),transparent)]"
-      />
+    <section aria-label="Users" className="rounded-2xl border border-mist bg-wash p-5 sm:col-span-2 sm:p-7">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-sm text-white/75">Users</p>
-          <p className="font-display text-6xl font-semibold tracking-tight">{number.format(users.total)}</p>
+          <p className="text-ink-soft">Users</p>
+          <p className="font-display text-6xl leading-none font-semibold tracking-tight tabular-nums">{number.format(users.total)}</p>
         </div>
         <div>
-          <p className="text-sm text-white/75">Active users</p>
+          <p className="text-ink-soft">Active users</p>
           <dl className="mt-1 flex gap-6">
             {(
               [
@@ -48,48 +44,47 @@ function Hero({ stats }: { stats: AdminStats }) {
               ] as const
             ).map(([label, count]) => (
               <div key={label} className="flex flex-col-reverse">
-                <dt className="text-sm text-white/75">{label}</dt>
-                <dd className="font-display text-3xl font-semibold text-ember">{number.format(count)}</dd>
+                <dt className="text-[0.9375rem] text-ink-soft">{label}</dt>
+                <dd className="font-display text-3xl font-semibold tabular-nums text-link">{number.format(count)}</dd>
               </div>
             ))}
           </dl>
         </div>
       </div>
-      <dl className="mt-6 grid grid-cols-2 gap-2 border-t border-white/15 pt-5 sm:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-mist pt-5 sm:grid-cols-4">
         {facts.map((fact) => (
-          <div key={fact.label} className="rounded-2xl bg-white/8 px-3 py-2.5">
-            <dt className="flex items-center gap-1.5 text-sm text-white/75">
+          <div key={fact.label}>
+            <dt className="flex items-center gap-1.5 text-[0.9375rem] text-ink-soft">
               <span aria-hidden="true">{fact.icon}</span>
               {fact.label}
             </dt>
-            <dd className="mt-0.5 font-medium">{fact.value}</dd>
+            <dd className="mt-0.5 font-medium tabular-nums">{fact.value}</dd>
           </div>
         ))}
       </dl>
-    </div>
+    </section>
   )
 }
 
 function Tile({ icon, label, value, note, accent }: { icon: ReactNode; label: string; value: number; note?: string; accent?: boolean }) {
   return (
-    <div className={`${SURFACE} p-4 ${accent ? 'ring-2 ring-ember/60' : ''}`}>
-      <p className={`flex items-center gap-1.5 text-sm font-medium ${accent ? 'text-ember-deep' : 'text-ink-soft'}`}>
+    <div className={`${SURFACE} p-4 ${accent ? 'border-ember/70' : ''}`}>
+      <p className={`flex items-center gap-1.5 text-[0.9375rem] font-medium ${accent ? 'text-ember-deep' : 'text-ink-soft'}`}>
         <span aria-hidden="true">{icon}</span>
         {label}
       </p>
-      <p className="mt-1 font-display text-3xl font-semibold tracking-tight">{number.format(value)}</p>
-      {note && <p className="text-sm text-ink-soft">{note}</p>}
+      <p className="mt-1 font-display text-3xl font-semibold tracking-tight tabular-nums">{number.format(value)}</p>
+      {note && <p className="text-[0.9375rem] text-ink-soft">{note}</p>}
     </div>
   )
 }
 
 /** Thirty days of bars, today highlighted, in the dashboard's bar style. */
-function DailyBars({ title, days, noun, tone }: { title: string; days: DayCount[]; noun: string; tone: 'lapis' | 'ember' }) {
+function DailyBars({ title, days, noun }: { title: string; days: DayCount[]; noun: string }) {
   const top = Math.max(...days.map((day) => day.count), 1)
   const total = days.reduce((sum, day) => sum + day.count, 0)
-  const bar = tone === 'ember' ? ['bg-ember', 'bg-ember/45'] : ['bg-lapis', 'bg-lapis/45']
   return (
-    <Card title={title} action={<span className="text-sm text-ink-soft">{number.format(total)} in 30 days</span>}>
+    <Card title={title} action={<span className="text-[0.9375rem] text-ink-soft tabular-nums">{number.format(total)} in 30 days</span>}>
       {days.length === 0 ? (
         <p className="mt-4 text-ink-soft">Nothing yet.</p>
       ) : (
@@ -99,12 +94,12 @@ function DailyBars({ title, days, noun, tone }: { title: string; days: DayCount[
               <div
                 key={day.date}
                 title={`${shortDay(day.date)}: ${day.count} ${noun}`}
-                className={`flex-1 rounded-t-sm ${index === days.length - 1 ? bar[0] : bar[1]}`}
+                className={`flex-1 rounded-t-sm ${index === days.length - 1 ? 'bg-lapis' : 'bg-lapis/45'}`}
                 style={{ height: day.count === 0 ? '2px' : `${(day.count / top) * 100}%` }}
               />
             ))}
           </div>
-          <div aria-hidden="true" className="mt-1.5 flex justify-between text-xs text-ink-soft">
+          <div aria-hidden="true" className="mt-1.5 flex justify-between text-[0.8125rem] text-ink-soft">
             <span>{shortDay(days[0].date)}</span>
             <span>today</span>
           </div>
@@ -125,15 +120,15 @@ function Delivery({ delivery }: { delivery: AdminStats['delivery'] }) {
   ]
   return (
     <Card title="Delivery">
-      <dl className="mt-3 divide-y divide-mist/70">
+      <dl className="mt-3 divide-y divide-mist">
         {rows.map((row) => (
           <div key={row.label} className="flex items-baseline justify-between gap-4 py-2.5">
             <dt className="text-ink-soft">{row.label}</dt>
-            <dd className={`font-display text-xl font-semibold ${row.bad && row.value > 0 ? 'text-alert' : ''}`}>{number.format(row.value)}</dd>
+            <dd className={`font-display text-xl font-semibold tabular-nums ${row.bad && row.value > 0 ? 'text-alert' : ''}`}>{number.format(row.value)}</dd>
           </div>
         ))}
       </dl>
-      <p className="mt-2 text-xs text-ink-soft">Since {new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(delivery.since))}. These counts start again from zero when the server restarts.</p>
+      <p className="mt-2 text-[0.8125rem] text-ink-soft">Since {new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(delivery.since))}. These counts start again from zero when the server restarts.</p>
     </Card>
   )
 }
@@ -144,9 +139,9 @@ function Numbers() {
   if (stats.isPending) {
     return (
       <div role="status" aria-label="Loading the numbers" className="mt-6 grid animate-pulse gap-3 sm:grid-cols-2">
-        <div className="h-56 rounded-3xl bg-mist/60 sm:col-span-2" />
-        <div className="h-48 rounded-2xl bg-mist/45" />
-        <div className="h-48 rounded-2xl bg-mist/45" />
+        <div className="h-56 rounded-2xl bg-wash sm:col-span-2" />
+        <div className="h-48 rounded-2xl bg-wash" />
+        <div className="h-48 rounded-2xl bg-wash" />
       </div>
     )
   }
@@ -165,7 +160,7 @@ function Numbers() {
 
   const { usage, users } = stats.data
   return (
-    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+    <div className="mt-8 grid gap-4 sm:grid-cols-2">
       <Hero stats={stats.data} />
       <div className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-4">
         <Tile icon={<TrendUp size={16} weight="bold" />} label="Active habits" value={usage.activeHabits} />
@@ -179,8 +174,8 @@ function Numbers() {
           accent={usage.freeUsersAtLimit > 0}
         />
       </div>
-      <DailyBars title="Sign-ups" days={users.signUps} noun="sign-ups" tone="lapis" />
-      <DailyBars title="Check-ins" days={usage.checkIns} noun="check-ins" tone="ember" />
+      <DailyBars title="Sign-ups" days={users.signUps} noun="sign-ups" />
+      <DailyBars title="Check-ins" days={usage.checkIns} noun="check-ins" />
       <div className="sm:col-span-2">
         <Delivery delivery={stats.data.delivery} />
       </div>
@@ -191,8 +186,8 @@ function Numbers() {
 export default function AdminOverview() {
   return (
     <>
-      <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight">Overview</h1>
-      <p className="mt-1 text-ink-soft">How DevHabit is doing, across everyone.</p>
+      <h1 className={PAGE_TITLE}>Overview</h1>
+      <p className={LEAD}>How AveryDay is doing, across everyone.</p>
       <Numbers />
     </>
   )

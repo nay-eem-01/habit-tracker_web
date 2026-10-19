@@ -1,14 +1,14 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Books, MagnifyingGlass, X } from '@phosphor-icons/react'
+import { Books, MagnifyingGlass, Plus, X } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { listGoals } from '../api/goals'
 import { resourceErrorMessage } from '../api/messages'
 import { listResources, type ResourceType } from '../api/resources'
 import { INPUT } from '../components/Field'
-import { PRIMARY, SECONDARY } from '../components/styles'
 import { ResourceCard } from './ResourceCard'
 import { useResourceActions } from './useResourceActions'
+import { LEAD, PAGE, PAGE_TITLE, PRIMARY, SECONDARY, TABS as TAB_TRACK, tab as tabClass } from '../components/styles'
 
 const BUTTON = SECONDARY
 
@@ -61,31 +61,30 @@ export default function LibraryPage() {
   const back = `/resources${goalId ? `?goalId=${goalId}` : ''}`
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className={PAGE}>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Library</h1>
-          <p className="mt-1 text-ink-soft">Notes, links and files that help, on their own or next to a goal.</p>
+          <h1 className={PAGE_TITLE}>Library</h1>
+          <p className={`${LEAD} hidden sm:block`}>Notes, links and files that help, on their own or next to a goal.</p>
         </div>
         <Link
           to={`/resources/new${goalId ? `?goalId=${goalId}&back=${encodeURIComponent(back)}` : ''}`}
-          className={`${PRIMARY} h-11 shrink-0 px-5`}
+          className={`${PRIMARY} h-11 shrink-0 px-4 sm:px-5`}
         >
+          <Plus size={18} weight="bold" aria-hidden="true" />
           Add
         </Link>
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex gap-1 self-start rounded-full bg-mist/45 p-1">
+        <div className={`${TAB_TRACK} self-start`}>
           {TABS.map((tab) => (
             <button
               key={tab.label}
               type="button"
               onClick={() => setType(tab.type)}
               aria-current={type === tab.type ? 'true' : undefined}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-out sm:px-5 sm:text-base ${
-                type === tab.type ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
-              }`}
+              className={`${tabClass(type === tab.type)} px-3 sm:px-4`}
             >
               {tab.label}
             </button>
@@ -105,7 +104,7 @@ export default function LibraryPage() {
       </div>
 
       {goalId && (
-        <p className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <p className="mt-4 flex flex-wrap items-center gap-2 text-[0.9375rem]">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-lapis/12 py-1 pr-1 pl-3 font-medium text-link">
             Goal: {goalTitles.get(goalId) ?? '…'}
             <button
@@ -121,7 +120,7 @@ export default function LibraryPage() {
       )}
 
       {actions.error && (
-        <p role="alert" className="mt-4 text-sm text-alert">
+        <p role="alert" className="mt-4 text-[0.9375rem] text-alert">
           {resourceErrorMessage(actions.error)}
         </p>
       )}
@@ -129,7 +128,7 @@ export default function LibraryPage() {
       {resources.isPending ? (
         <div role="status" aria-label="Loading library" className="mt-6 flex animate-pulse flex-col gap-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-28 rounded-2xl bg-mist/45" />
+            <div key={i} className="h-28 rounded-2xl bg-wash" />
           ))}
         </div>
       ) : resources.isError ? (
@@ -142,9 +141,11 @@ export default function LibraryPage() {
           </button>
         </div>
       ) : resources.data.content.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center rounded-3xl border border-dashed border-mist px-6 py-14 text-center text-ink-soft">
-          <Books size={40} weight="duotone" className="text-link" aria-hidden="true" />
-          <p className="mt-3 max-w-sm">
+        <div className="mt-6 flex flex-col items-center rounded-2xl bg-wash px-6 py-12 text-center text-ink-soft">
+          <span aria-hidden="true" className="grid size-12 place-items-center rounded-xl bg-surface text-link ring-1 ring-mist">
+            <Books size={26} weight="duotone" />
+          </span>
+          <p className="mt-4 max-w-sm">
             {filtered
               ? 'Nothing matches. Try another word or filter.'
               : 'Nothing saved yet. Keep a plan, a note to self, a link worth coming back to, or a file.'}
@@ -169,7 +170,7 @@ export default function LibraryPage() {
             })}
           </ul>
           {resources.data.totalPages > 1 && (
-            <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-sm">
+            <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-[0.9375rem]">
               <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className={BUTTON}>
                 Previous
               </button>

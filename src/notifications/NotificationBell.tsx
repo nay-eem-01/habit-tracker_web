@@ -58,7 +58,7 @@ export function NotificationBell() {
         aria-controls="notifications-panel"
         aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
         onClick={() => setOpen(!open)}
-        className="relative grid size-10 place-items-center rounded-full bg-surface shadow-[0_1px_2px_rgb(9_38_52/0.12)] transition-transform duration-150 ease-out active:scale-95"
+        className="relative grid size-10 place-items-center rounded-full border border-mist bg-surface transition-[transform,border-color] hover:border-line duration-150 ease-out active:scale-95"
       >
         <Bell size={20} weight="bold" aria-hidden="true" />
         {count > 0 && (
@@ -77,7 +77,7 @@ export function NotificationBell() {
         <section
           id="notifications-panel"
           aria-label="Notifications"
-          className="fixed inset-x-4 top-28 z-10 pop rounded-2xl border border-mist bg-surface shadow-[0_18px_40px_-12px_rgb(9_38_52/0.28)] sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
+          className="fixed inset-x-4 top-[4.5rem] z-30 pop rounded-2xl border border-mist bg-surface shadow-[0_18px_40px_-12px_rgb(9_38_52/0.28)] sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
         >
           <div className="flex items-center justify-between gap-3 border-b border-mist px-4 py-3">
             <h2 className="font-display text-lg font-semibold tracking-tight">Notifications</h2>
@@ -125,7 +125,7 @@ export function NotificationBell() {
                         to={`/habits/${notification.habitId}`}
                         onClick={() => open_(notification)}
                         data-unread={unreadItem}
-                        className={`block px-4 py-3 hover:bg-chalk ${unreadItem ? 'border-l-4 border-lapis' : ''}`}
+                        className={`block px-4 py-3 hover:bg-wash ${unreadItem ? 'border-l-4 border-lapis' : ''}`}
                       >
                         {body}
                       </Link>
@@ -134,7 +134,7 @@ export function NotificationBell() {
                         type="button"
                         onClick={() => open_(notification)}
                         data-unread={unreadItem}
-                        className={`block w-full px-4 py-3 text-left hover:bg-chalk ${unreadItem ? 'border-l-4 border-lapis' : ''}`}
+                        className={`block w-full px-4 py-3 text-left hover:bg-wash ${unreadItem ? 'border-l-4 border-lapis' : ''}`}
                       >
                         {body}
                       </button>

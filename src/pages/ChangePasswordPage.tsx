@@ -8,9 +8,9 @@ import { authErrorMessage, fieldError } from '../api/messages'
 import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
-import { SURFACE } from '../components/styles'
 import { newPasswordProblem } from '../auth/password'
 import { NewPasswordFields } from './NewPasswordFields'
+import { PAGE, PAGE_TITLE, TEXT_BUTTON } from '../components/styles'
 
 /** Change the password while signed in. Every other device is signed out; this one stays. */
 export default function ChangePasswordPage() {
@@ -42,12 +42,12 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">Change password</h1>
+    <main className={PAGE}>
+      <h1 className={PAGE_TITLE}>Change password</h1>
       <p className="mt-1 text-ink-soft">
         {state.status === 'authenticated' ? state.user.email : ''} · other devices will be signed out.
       </p>
-      <div className={`${SURFACE} mt-6 p-5 sm:p-8`}>
+      <div className="mt-8">
         {mutation.isSuccess && (
           <p role="status" className="mb-6 flex items-center gap-2 rounded-xl bg-lapis/10 px-4 py-3 font-medium text-link">
             <CheckCircle size={20} weight="fill" aria-hidden="true" />
@@ -79,7 +79,7 @@ export default function ChangePasswordPage() {
               {code === 'AUTH_PASSWORD_NOT_SET' && (
                 <>
                   {' '}
-                  <Link to="/forgot-password" className="font-medium text-link underline underline-offset-2">
+                  <Link to="/forgot-password" className={TEXT_BUTTON}>
                     Set one by email
                   </Link>
                 </>

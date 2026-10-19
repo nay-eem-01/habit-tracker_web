@@ -6,8 +6,8 @@ import { fieldError, goalErrorMessage } from '../api/messages'
 import { Button } from '../components/Button'
 import { Field, TextAreaField } from '../components/Field'
 import { DateField } from '../components/pickers'
-import { SURFACE } from '../components/styles'
 import { EMPTY_GOAL, toGoalRequest, valuesFromGoal, type GoalFormValues } from './goals'
+import { PAGE, PAGE_TITLE, TEXT_BUTTON } from '../components/styles'
 
 interface GoalFormProps {
   initial: GoalFormValues
@@ -66,7 +66,7 @@ function GoalForm({ initial, submitLabel, pendingLabel, pending, error, cancelTo
         <Button type="submit" busy={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>
-        <Link to={cancelTo} className="font-medium text-link underline underline-offset-2">
+        <Link to={cancelTo} className={TEXT_BUTTON}>
           Cancel
         </Link>
       </div>
@@ -101,9 +101,9 @@ export default function GoalFormPage() {
   const editing = goalId !== null
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">{editing ? 'Edit goal' : 'New goal'}</h1>
-      <div className={`${SURFACE} mt-6 p-5 sm:p-8`}>
+    <main className={PAGE}>
+      <h1 className={PAGE_TITLE}>{editing ? 'Edit goal' : 'New goal'}</h1>
+      <div className="mt-8">
         {editing && existing.isPending ? (
           <p role="status" className="text-ink-soft">
             Loading goal…
@@ -113,7 +113,7 @@ export default function GoalFormPage() {
             <p role="alert" className="text-alert">
               {goalErrorMessage(existing.error)}
             </p>
-            <Link to="/goals" className="mt-3 inline-block font-medium text-link underline underline-offset-2">
+            <Link to="/goals" className={`mt-3 ${TEXT_BUTTON}`}>
               Back to goals
             </Link>
           </div>

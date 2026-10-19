@@ -8,6 +8,9 @@ import { SECONDARY, SURFACE } from '../components/styles'
 import { formatBytes, hostOf, isImage, safeHref, saveBlob } from './resources'
 
 const BUTTON = SECONDARY
+/** Edit and delete are housekeeping: quiet until a pointer or focus finds them. */
+const QUIET =
+  'inline-flex h-10 items-center gap-1.5 rounded-lg px-3 text-[0.9375rem] font-medium text-ink-soft transition-colors hover:bg-wash hover:text-ink'
 
 /** Fetched the first time a card has text to show; until then the text shows as it was typed. */
 const Markdown = lazy(() => import('../components/Markdown'))
@@ -43,9 +46,9 @@ function ImagePreview({ resource }: { resource: Resource }) {
 
   if (blob.isError) return null
   return blob.data ? (
-    <img ref={image} alt={resource.title} className="max-h-72 max-w-full rounded-xl border border-mist/70 object-contain" />
+    <img ref={image} alt={resource.title} className="max-h-72 max-w-full rounded-xl border border-mist object-contain" />
   ) : (
-    <div role="status" aria-label="Loading image" className="h-40 w-full max-w-sm animate-pulse rounded-xl bg-mist/45" />
+    <div role="status" aria-label="Loading image" className="h-40 w-full max-w-sm animate-pulse rounded-xl bg-wash" />
   )
 }
 
@@ -76,9 +79,11 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
   return (
     <li className={`${SURFACE} p-4 sm:p-5`}>
       <div className="flex items-start gap-3">
-        <Icon size={22} weight="duotone" className="mt-0.5 shrink-0 text-link" aria-label={label} />
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-wash text-link ring-1 ring-mist ring-inset">
+          <Icon size={22} weight="duotone" aria-label={label} />
+        </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-display text-lg font-semibold tracking-tight break-words">
+          <h2 className="pt-1.5 font-display text-lg leading-snug font-semibold tracking-tight break-words sm:text-xl">
             {href ? (
               <a href={href} target="_blank" rel="noopener noreferrer" className="hover:text-link hover:underline underline-offset-2">
                 {resource.title}
@@ -89,7 +94,7 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
             )}
           </h2>
           {(resource.type !== 'NOTE' || goal || resource.pinned) && (
-            <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-ink-soft">
+            <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.9375rem] text-ink-soft">
               {resource.type === 'LINK' && resource.url && <span className="truncate">{hostOf(resource.url)}</span>}
               {file && (
                 <span className="min-w-0 break-all">
@@ -97,7 +102,7 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
                 </span>
               )}
               {goal && (
-                <Link to={`/goals/${goal.id}`} className="hover:text-link hover:underline underline-offset-2">
+                <Link to={`/goals/${goal.id}`} className="font-medium text-link underline-offset-[3px] hover:underline">
                   Goal: {goal.title}
                 </Link>
               )}
@@ -113,7 +118,7 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
           title={resource.pinned ? 'Unpin' : 'Pin to the top'}
           onClick={() => onPin(!resource.pinned)}
           className={`grid size-10 shrink-0 place-items-center rounded-xl transition-[transform,background-color,color] duration-150 ease-out active:scale-95 ${
-            resource.pinned ? 'bg-ember/15 text-ember-deep' : 'text-ink-soft hover:bg-mist/50 hover:text-ink'
+            resource.pinned ? 'bg-ember/15 text-ember-deep' : 'text-ink-soft hover:bg-wash hover:text-ink'
           }`}
         >
           <PushPin size={20} weight={resource.pinned ? 'fill' : 'regular'} aria-hidden="true" />
@@ -121,13 +126,13 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
       </div>
 
       {file && isImage(file.contentType) && (
-        <div className="mt-3 sm:pl-[34px]">
+        <div className="mt-3 sm:pl-[52px]">
           <ImagePreview resource={resource} />
         </div>
       )}
 
       {body && (
-        <div className="mt-3 sm:pl-[34px]">
+        <div className="mt-3 sm:pl-[52px]">
           <div className={`relative break-words ${open ? '' : 'max-h-40 overflow-hidden'}`}>
             <Suspense fallback={<p className="whitespace-pre-line">{body}</p>}>
               <Markdown text={body} />
@@ -139,7 +144,7 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
               type="button"
               aria-expanded={open}
               onClick={() => setOpen((value) => !value)}
-              className="mt-1 text-sm font-medium text-link underline underline-offset-2"
+              className="mt-1 min-h-9 text-[0.9375rem] font-medium text-link underline decoration-link/40 underline-offset-[3px]"
             >
               {open ? 'Show less' : 'Show all'}
             </button>
@@ -147,10 +152,10 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
         </div>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 sm:pl-[34px]">
+      <div className="mt-3 -ml-3 flex flex-wrap items-center gap-1 sm:ml-[40px]">
         {confirming ? (
           <>
-            <span className="text-sm">Delete for good?</span>
+            <span className="ml-3 mr-1">Delete for good?</span>
             <button type="button" disabled={busy} onClick={onDelete} className={`${BUTTON} text-alert`}>
               Yes, delete
             </button>
@@ -167,7 +172,7 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
                 aria-busy={download.isPending || undefined}
                 onClick={() => download.mutate()}
                 aria-label={`Download ${file.name}`}
-                className={`${BUTTON} gap-1.5`}
+                className={`${BUTTON} ml-3 mr-1 h-10`}
               >
                 <DownloadSimple size={16} weight="bold" aria-hidden="true" />
                 {download.isPending ? 'Downloading…' : 'Download'}
@@ -176,18 +181,18 @@ export function ResourceCard({ resource, goal, back, busy, onPin, onDelete }: Re
             <Link
               to={`/resources/${resource.id}/edit?back=${encodeURIComponent(back)}`}
               aria-label={`Edit ${resource.title}`}
-              className={BUTTON}
+              className={QUIET}
             >
               Edit
             </Link>
-            <button type="button" onClick={() => setConfirming(true)} aria-label={`Delete ${resource.title}`} className={BUTTON}>
+            <button type="button" onClick={() => setConfirming(true)} aria-label={`Delete ${resource.title}`} className={`${QUIET} hover:text-alert`}>
               Delete
             </button>
           </>
         )}
       </div>
       {download.error && (
-        <p role="alert" className="mt-2 text-sm text-alert sm:pl-[34px]">
+        <p role="alert" className="mt-2 text-[0.9375rem] text-alert sm:pl-[52px]">
           {resourceErrorMessage(download.error)}
         </p>
       )}

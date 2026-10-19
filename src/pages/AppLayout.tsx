@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react'
+import { BookOpenText, CalendarCheck, House, Repeat, Target, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { LevelBadge } from '../level/LevelBadge'
@@ -15,6 +16,14 @@ function prefersReducedMotion(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+const NAV: { to: string; label: string; end: boolean; Icon: PhosphorIcon }[] = [
+  { to: '/', label: 'Home', end: true, Icon: House },
+  { to: '/today', label: 'Today', end: false, Icon: CalendarCheck },
+  { to: '/habits', label: 'Habits', end: false, Icon: Repeat },
+  { to: '/goals', label: 'Goals', end: false, Icon: Target },
+  { to: '/resources', label: 'Library', end: false, Icon: BookOpenText },
+]
+
 /** The frame around every signed-in page. */
 export default function AppLayout() {
   const { state, signOut } = useAuth()
@@ -30,35 +39,39 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-10 border-b border-mist/70 bg-chalk/85 backdrop-blur-md">
-        {/* Below md the links drop to their own row, so the bell and avatar always fit, even at 320px. */}
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
+    // on a phone the tab bar is fixed to the bottom, so the page leaves room for it and the home indicator
+    <div className="min-h-dvh pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:pb-0">
+      {/* No backdrop blur: it would make the header the containing block of the fixed tab bar inside it. */}
+      <header className="sticky top-0 z-20 border-b border-mist bg-chalk/95 pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <Brand to="/" />
+          {/* One nav: a tab bar along the bottom on a phone, a row in the header from md up. */}
           <nav
             aria-label="Main"
-            className="order-last flex w-full gap-0.5 rounded-full bg-mist/45 p-1 text-sm font-medium sm:text-base md:order-none md:w-auto"
+            className="fixed inset-x-0 bottom-0 z-20 border-t border-mist bg-chalk/95 pb-[env(safe-area-inset-bottom)] md:static md:border-0 md:bg-transparent md:pb-0"
           >
-            {[
-              { to: '/', label: 'Home', end: true },
-              { to: '/today', label: 'Today', end: false },
-              { to: '/habits', label: 'Habits', end: false },
-              { to: '/goals', label: 'Goals', end: false },
-              { to: '/resources', label: 'Library', end: false },
-            ].map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `flex-1 rounded-full px-1.5 py-1.5 text-center transition-[background-color,color,box-shadow] duration-200 ease-out md:flex-none md:px-4 ${
-                    isActive ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
+            <ul className="mx-auto grid max-w-lg grid-cols-5 md:flex md:max-w-none md:gap-1">
+              {NAV.map(({ to, label, end, Icon }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={end}
+                    className={({ isActive }) =>
+                      `flex min-h-[3.75rem] flex-col items-center justify-center gap-0.5 text-[0.8125rem] font-medium transition-colors duration-200 ease-out md:min-h-10 md:flex-row md:gap-2 md:rounded-full md:px-3.5 md:text-[0.9375rem] ${
+                        isActive ? 'text-link md:bg-lapis/8' : 'text-ink-soft hover:text-ink'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon size={24} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" className="md:hidden" />
+                        {label}
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <LevelBadge />
@@ -71,7 +84,7 @@ export default function AppLayout() {
       {/* the header stays put while a page's code arrives */}
       <Suspense
         fallback={
-          <p role="status" className="mx-auto max-w-4xl px-4 py-10 text-ink-soft sm:px-6">
+          <p role="status" className="mx-auto max-w-3xl px-4 py-10 text-ink-soft sm:px-6">
             Loading…
           </p>
         }

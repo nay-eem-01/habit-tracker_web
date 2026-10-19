@@ -96,7 +96,8 @@ describe('archiving', () => {
     renderApp('/habits')
     const input = userEvent.setup()
 
-    await input.click(await screen.findByRole('button', { name: 'Archive Read 20 pages' }))
+    await input.click(await screen.findByRole('button', { name: 'More for Read 20 pages' }))
+    await input.click(await screen.findByRole('menuitem', { name: 'Archive' }))
     expect((await screen.findByRole('status')).textContent).toContain('Archived “Read 20 pages”.')
     await screen.findByText(/Add the first habit/)
 

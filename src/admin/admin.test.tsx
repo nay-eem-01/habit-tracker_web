@@ -46,7 +46,7 @@ describe('admin overview', () => {
     })
     renderApp('/admin')
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: /^Good (morning|afternoon|evening)/ })).toBeTruthy()
     expect(calls.some((c) => c.path.startsWith('/api/admin'))).toBe(false)
   })
 })
