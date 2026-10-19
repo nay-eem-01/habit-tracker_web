@@ -67,3 +67,11 @@ export function hourLabel(hour: number): string {
   if (hour === 12) return '12 pm'
   return hour < 12 ? `${hour} am` : `${hour - 12} pm`
 }
+
+/** "Good morning" before noon, "Good afternoon" until 6 pm, then "Good evening", on the user's clock. */
+export function greeting(timezone: string, now: Date = new Date()): string {
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', hourCycle: 'h23' }).format(now))
+  if (hour >= 5 && hour < 12) return 'Good morning'
+  if (hour >= 12 && hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}

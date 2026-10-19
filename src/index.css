@@ -18,62 +18,84 @@
   --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-chalk: #f9f9f9;
-  --color-ink: #092634;
-  --color-ink-soft: #4f6470;
-  --color-mist: #d5dee3;
-  --color-lapis: #004e72;
-  --color-lapis-deep: #092634;
-  --color-ember: #ff6e42;
+  /* AveryDay: a white page, teal for structure, coral for the moments that matter, sage for done. */
+  --color-chalk: #ffffff;
+  /* quiet sections and hovered rows sit on the wash, a breath off white */
+  --color-wash: #f7f9f8;
+  --color-ink: #17313b;
+  /* 4.9:1 on white, so metadata stays readable */
+  --color-ink-soft: #5e727b;
+  /* hairlines between rows and around surfaces */
+  --color-mist: #e1e8e8;
+  /* the edge of a control a person has to find (an empty check box): 3:1 on white */
+  --color-line: #8fa3a8;
+  --color-lapis: #07566a;
+  --color-lapis-deep: #0b3a48;
+  --color-ember: #ff7048;
   /* ember as text: the plain one is 2.6:1 on white */
   --color-ember-deep: #b4441f;
+  /* done: a soft sage field with a deep green mark, never colour alone */
+  --color-sage: #e3f0e9;
+  --color-sage-deep: #2c6a4e;
   --color-alert: #b3261e;
-  /* surfaces and links get their own names so dark mode can move them independently of the brand blue */
+  /* surfaces and links get their own names so dark mode can move them independently of the brand teal */
   --color-surface: #ffffff;
   --color-pill: #ffffff;
-  --color-link: #004e72;
-  /* text on orange is always navy, in both themes: white on orange is 2.6:1 */
-  --color-navy: #092634;
+  --color-link: #07566a;
+  /* text on coral is always deep navy, in both themes: white on coral is 2.6:1 */
+  --color-navy: #0f2a33;
 }
 
-/* Dark palette: the navy page, blue lifted so it reads on it. Chosen by the OS, or by the switch in the account menu. */
+/* Dark palette: a deep teal-navy page, teal lifted so it reads on it. Chosen by the OS, or by the switch in the account menu. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-chalk: #092634;
-  --color-ink: #f9f9f9;
-  --color-ink-soft: #9fb3bf;
-  --color-mist: #234a62;
-  /* the brand blue is 1.7:1 on navy, so dark mode lifts it */
-  --color-lapis: #1c77a6;
-  --color-lapis-deep: #0a3a56;
+  --color-chalk: #0d2630;
+  --color-wash: #10303c;
+  --color-ink: #f2f6f5;
+  --color-ink-soft: #a3b8bf;
+  --color-mist: #22434f;
+  --color-line: #5b7c87;
+  /* the brand teal is 1.8:1 on the dark page, so dark mode lifts it */
+  --color-lapis: #2f97b0;
+  --color-lapis-deep: #0a3a48;
   --color-ember-deep: #ff8a63;
+  --color-sage: #173f33;
+  --color-sage-deep: #94d6b4;
   --color-alert: #ff8f86;
-  --color-surface: #0e3047;
-  --color-pill: #1a4560;
-  --color-link: #5cb8e4;
+  --color-surface: #112f3b;
+  --color-pill: #1b4352;
+  --color-link: #6cc3d8;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --color-chalk: #092634;
-    --color-ink: #f9f9f9;
-    --color-ink-soft: #9fb3bf;
-    --color-mist: #234a62;
-    /* the brand blue is 1.7:1 on navy, so dark mode lifts it */
-    --color-lapis: #1c77a6;
-    --color-lapis-deep: #0a3a56;
+    --color-chalk: #0d2630;
+    --color-wash: #10303c;
+    --color-ink: #f2f6f5;
+    --color-ink-soft: #a3b8bf;
+    --color-mist: #22434f;
+    --color-line: #5b7c87;
+    /* the brand teal is 1.8:1 on the dark page, so dark mode lifts it */
+    --color-lapis: #2f97b0;
+    --color-lapis-deep: #0a3a48;
     --color-ember-deep: #ff8a63;
+    --color-sage: #173f33;
+    --color-sage-deep: #94d6b4;
     --color-alert: #ff8f86;
-    --color-surface: #0e3047;
-    --color-pill: #1a4560;
-    --color-link: #5cb8e4;
+    --color-surface: #112f3b;
+    --color-pill: #1b4352;
+    --color-link: #6cc3d8;
   }
 }
 
 @layer base {
   html {
     color-scheme: light;
+    /* focus and in-page jumps stop clear of the sticky header and, on a phone, the tab bar */
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color: transparent;
     background: var(--color-chalk);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -302,6 +324,39 @@
 .check-ring {
   opacity: 0;
   animation: check-ring 520ms var(--ease-out);
+}
+
+/* Done: the box gives a small, springy nod as the check lands. */
+@keyframes check-pop {
+  0% {
+    transform: scale(0.86);
+  }
+  55% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.check-pop {
+  animation: check-pop 360ms var(--ease-out);
+}
+
+/* The day's summary settles into its finished colour rather than switching. */
+.settle {
+  transition:
+    background-color 420ms var(--ease-out),
+    border-color 420ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .check-pop {
+    animation: none;
+  }
+  .settle {
+    transition: none;
+  }
 }
 
 /* A streak of a week or more: the flame breathes, slowly, from its base. */

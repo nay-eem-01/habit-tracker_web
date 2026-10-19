@@ -16,7 +16,7 @@ import {
 import { Button } from '../components/Button'
 import { Field, TextAreaField } from '../components/Field'
 import { SelectField, SwitchField } from '../components/pickers'
-import { SURFACE } from '../components/styles'
+import { PAGE, PAGE_TITLE, TEXT_BUTTON } from '../components/styles'
 import {
   backPath,
   emptyResource,
@@ -90,7 +90,7 @@ function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pend
       {kinds.length > 1 && (
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium">Kind</legend>
-          <div className="inline-flex gap-1 rounded-full bg-mist/45 p-1">
+          <div className="inline-flex gap-1 rounded-full bg-wash p-1">
             {kinds.map(({ type, label, icon: Icon }) => (
               <label
                 key={type}
@@ -223,7 +223,7 @@ function ResourceForm({ initial, editing, goals, submitLabel, pendingLabel, pend
         <Button type="submit" busy={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>
-        <Link to={cancelTo} className="font-medium text-link underline underline-offset-2">
+        <Link to={cancelTo} className={TEXT_BUTTON}>
           Cancel
         </Link>
       </div>
@@ -289,11 +289,11 @@ export default function ResourceFormPage() {
   )
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">
+    <main className={PAGE}>
+      <h1 className={PAGE_TITLE}>
         {editing ? 'Edit' : 'Add to the library'}
       </h1>
-      <div className={`${SURFACE} mt-6 p-5 sm:p-8`}>
+      <div className="mt-8">
         {(editing && existing.isPending) || goals.isPending ? (
           <p role="status" className="text-ink-soft">
             Loading…
@@ -303,7 +303,7 @@ export default function ResourceFormPage() {
             <p role="alert" className="text-alert">
               {resourceErrorMessage(existing.error)}
             </p>
-            <Link to={back} className="mt-3 inline-block font-medium text-link underline underline-offset-2">
+            <Link to={back} className={`mt-3 ${TEXT_BUTTON}`}>
               Go back
             </Link>
           </div>

@@ -6,7 +6,7 @@ import { listAdminUsers, type AdminUser, type UserQuery } from '../api/admin'
 import { habitErrorMessage } from '../api/messages'
 import { INPUT } from '../components/Field'
 import { SelectField } from '../components/pickers'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { LEAD, PAGE_TITLE, SECONDARY, SURFACE } from '../components/styles'
 import { Badges } from './Badges'
 import { joined } from './format'
 
@@ -24,17 +24,17 @@ function Row({ user }: { user: AdminUser }) {
     <li>
       <Link
         to={`/admin/users/${user.id}`}
-        className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-4 py-3.5 transition-colors hover:bg-mist/25 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_6rem_6rem_1rem]"
+        className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-4 py-3.5 transition-colors hover:bg-wash sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_6rem_6rem_1rem]"
       >
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="truncate font-medium">{user.email}</span>
             <Badges user={user} />
           </span>
-          <span className="block truncate text-sm text-ink-soft">{user.name}</span>
+          <span className="block truncate text-[0.9375rem] text-ink-soft">{user.name}</span>
         </span>
         <CaretRight size={16} className="row-span-2 text-ink-soft sm:hidden" aria-hidden="true" />
-        <span className="flex items-center gap-3 text-sm text-ink-soft sm:contents">
+        <span className="flex items-center gap-3 text-[0.9375rem] text-ink-soft sm:contents">
           <span className="flex items-center gap-1.5">
             {user.authProvider === 'GOOGLE' ? (
               <>
@@ -44,7 +44,7 @@ function Row({ user }: { user: AdminUser }) {
               'Password'
             )}
           </span>
-          <span className={`flex items-center gap-1 ${user.emailVerified ? 'text-link' : ''}`}>
+          <span className={`flex items-center gap-1 ${user.emailVerified ? 'text-sage-deep' : ''}`}>
             {user.emailVerified ? (
               <>
                 <CheckCircle size={16} weight="fill" aria-hidden="true" /> Verified
@@ -84,9 +84,9 @@ export default function AdminUsers() {
   })
 
   return (
-    <section className="mt-6">
-      <h1 className="font-display text-4xl font-semibold tracking-tight">Users</h1>
-      <p className="mt-1 mb-6 text-ink-soft">Find someone by email; open them to change their plan or account.</p>
+    <section>
+      <h1 className={PAGE_TITLE}>Users</h1>
+      <p className={`${LEAD} mb-6`}>Find someone by email; open them to change their plan or account.</p>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="relative sm:w-80">
           <label htmlFor="admin-search" className="sr-only">
@@ -125,19 +125,19 @@ export default function AdminUsers() {
           </button>
         </div>
       ) : !users.data ? (
-        <div role="status" aria-label="Loading users" className="mt-4 h-72 animate-pulse rounded-2xl bg-mist/45" />
+        <div role="status" aria-label="Loading users" className="mt-4 h-72 animate-pulse rounded-2xl bg-wash" />
       ) : users.data.content.length === 0 ? (
-        <p className="mt-8 text-center text-ink-soft">{q ? `No email contains “${q}”.` : 'No users yet.'}</p>
+        <p className="mt-6 rounded-2xl bg-wash px-6 py-10 text-center text-ink-soft">{q ? `No email contains “${q}”.` : 'No users yet.'}</p>
       ) : (
         <>
-          <p className="mt-4 text-sm text-ink-soft">
+          <p className="mt-4 text-[0.9375rem] text-ink-soft tabular-nums">
             {users.data.totalElements} {users.data.totalElements === 1 ? 'user' : 'users'}
             {q && ` matching “${q}”`}
           </p>
           <div className={`${SURFACE} mt-2 overflow-hidden`}>
             <div
               aria-hidden="true"
-              className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_6rem_6rem_1rem] gap-x-4 border-b border-mist/70 px-4 py-2.5 text-xs font-semibold tracking-wide text-ink-soft uppercase sm:grid"
+              className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_6rem_6rem_1rem] gap-x-4 border-b border-mist bg-wash px-4 py-2.5 text-[0.8125rem] font-medium text-ink-soft sm:grid"
             >
               <span>User</span>
               <span>Sign-in</span>
@@ -145,14 +145,14 @@ export default function AdminUsers() {
               <span>Joined</span>
               <span />
             </div>
-            <ul className={`divide-y divide-mist/70 transition-opacity ${users.isPlaceholderData ? 'opacity-60' : ''}`}>
+            <ul className={`divide-y divide-mist transition-opacity ${users.isPlaceholderData ? 'opacity-60' : ''}`}>
               {users.data.content.map((user) => (
                 <Row key={user.id} user={user} />
               ))}
             </ul>
           </div>
           {users.data.totalPages > 1 && (
-            <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-sm">
+            <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-[0.9375rem]">
               <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className={SECONDARY}>
                 Previous
               </button>

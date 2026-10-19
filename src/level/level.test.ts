@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Level } from '../api/level'
-import { formatXp, levelUp, xpToNext } from './level'
+import { formatXp, levelUp, nextTier, tierLadder, xpToNext } from './level'
 
 const at = (level: number, tier: Level['tier'] = 'BRONZE'): Level => ({
   xp: 420,
@@ -31,5 +31,23 @@ describe('xp', () => {
   it('counts what is left to the next level, and groups thousands', () => {
     expect(xpToNext(at(3))).toBe(180)
     expect(formatXp(4500)).toBe('4,500 XP')
+  })
+})
+
+describe('tiers', () => {
+  it('lists each tier with the levels it covers, the last one open-ended', () => {
+    expect(tierLadder().map((step) => `${step.name}: ${step.levels}`)).toEqual([
+      'Bronze: Levels 1–4',
+      'Silver: Levels 5–9',
+      'Gold: Levels 10–19',
+      'Platinum: Levels 20–34',
+      'Diamond: Levels 35+',
+    ])
+  })
+
+  it('names the next tier and where it starts, and nothing after Diamond', () => {
+    expect(nextTier('BRONZE')).toEqual({ name: 'Silver', from: 5 })
+    expect(nextTier('PLATINUM')).toEqual({ name: 'Diamond', from: 35 })
+    expect(nextTier('DIAMOND')).toBeNull()
   })
 })

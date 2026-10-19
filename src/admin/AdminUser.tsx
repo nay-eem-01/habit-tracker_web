@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle, Crown, GoogleLogo, Prohibit, Trash, WarningCircle } from '@phosphor-icons/react'
+import { ArrowLeft, CheckCircle, Crown, GoogleLogo, Prohibit, Trash, WarningCircle } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { changePlan, deleteUser, getAdminUser, suspendUser, type AdminUser, type AdminUserDetail, type Plan } from '../api/admin'
 import { ApiError } from '../api/errors'
 import { habitErrorMessage } from '../api/messages'
-import { Card } from '../components/Card'
 import { Field } from '../components/Field'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { PAGE_TITLE, SECONDARY, SECTION_TITLE, TABS, tab } from '../components/styles'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -74,7 +73,7 @@ function Confirm({
           if (!next) setText('')
         }}
       >
-        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-5 rounded-3xl p-6 sm:max-w-md">
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] gap-5 rounded-2xl p-6 sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display text-2xl font-semibold tracking-tight">{title}</AlertDialogTitle>
             <AlertDialogDescription className="text-base text-ink-soft">{description}</AlertDialogDescription>
@@ -89,11 +88,11 @@ function Confirm({
             />
           )}
           {error != null && (
-            <p role="alert" className="text-sm text-alert">
+            <p role="alert" className="text-[0.9375rem] text-alert">
               {messageFor(error)}
             </p>
           )}
-          <AlertDialogFooter className="-mx-6 -mb-6 rounded-b-3xl px-6">
+          <AlertDialogFooter className="-mx-6 -mb-6 rounded-b-2xl bg-wash px-6">
             <AlertDialogCancel render={<button type="button" className={SECONDARY} />}>Cancel</AlertDialogCancel>
             <button
               type="button"
@@ -118,12 +117,23 @@ function Confirm({
   )
 }
 
+/** One count about the account; the grid around it draws the hairlines. */
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className={`${SURFACE} p-4`}>
-      <dt className="text-sm text-ink-soft">{label}</dt>
-      <dd className="mt-0.5 font-display text-2xl font-semibold tracking-tight">{value}</dd>
+    <div className="border-t border-mist py-4 pr-4">
+      <dt className="text-[0.9375rem] text-ink-soft">{label}</dt>
+      <dd className="mt-0.5 font-display text-2xl font-semibold tracking-tight tabular-nums">{value}</dd>
     </div>
+  )
+}
+
+/** A group of actions, as in Settings: what it is on the left, the controls on the right. */
+function Group({ title, danger, children }: { title: string; danger?: boolean; children: ReactNode }) {
+  return (
+    <section className="grid gap-x-10 gap-y-4 border-t border-mist py-7 md:grid-cols-[12rem_1fr]">
+      <h2 className={`${SECTION_TITLE} ${danger ? 'text-alert' : ''}`}>{title}</h2>
+      <div className="min-w-0">{children}</div>
+    </section>
   )
 }
 
@@ -149,39 +159,34 @@ function Actions({ user }: { user: AdminUser }) {
   const suspended = Boolean(user.suspendedAt)
 
   return (
-    <Card title="Actions">
-      <div className="mt-4 flex flex-col gap-5">
-        <div>
-          <p id="plan-label" className="mb-2 text-sm font-medium">
-            Plan
-          </p>
-          <div role="radiogroup" aria-labelledby="plan-label" className="inline-flex gap-1 rounded-full bg-mist/45 p-1">
-            {(['FREE', 'PRO'] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={user.plan === value}
-                disabled={plan.isPending}
-                onClick={() => user.plan !== value && plan.mutate(value)}
-                className={`flex items-center gap-1.5 rounded-full px-5 py-1.5 font-medium transition-[background-color,color,box-shadow] duration-200 ease-out ${
-                  user.plan === value ? 'bg-pill text-ink shadow-[0_1px_3px_rgb(9_38_52/0.14)]' : 'text-ink-soft hover:text-ink'
-                }`}
-              >
-                {value === 'PRO' && <Crown size={16} weight={user.plan === 'PRO' ? 'fill' : 'regular'} className="text-ember-deep" aria-hidden="true" />}
-                {value === 'FREE' ? 'Free' : 'Pro'}
-              </button>
-            ))}
-          </div>
-          <p className="mt-1.5 text-sm text-ink-soft">Free keeps 7 active habits and 2 active goals. Pro has no limits.</p>
-          {plan.isError && (
-            <p role="alert" className="mt-1.5 text-sm text-alert">
-              {messageFor(plan.error)}
-            </p>
-          )}
+    <>
+      <Group title="Plan">
+        <div role="radiogroup" aria-label="Plan" className={TABS}>
+          {(['FREE', 'PRO'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={user.plan === value}
+              disabled={plan.isPending}
+              onClick={() => user.plan !== value && plan.mutate(value)}
+              className={`${tab(user.plan === value)} flex items-center gap-1.5 px-5`}
+            >
+              {value === 'PRO' && <Crown size={16} weight={user.plan === 'PRO' ? 'fill' : 'regular'} className="text-ember-deep" aria-hidden="true" />}
+              {value === 'FREE' ? 'Free' : 'Pro'}
+            </button>
+          ))}
         </div>
+        <p className="mt-2 text-[0.9375rem] text-ink-soft">Free keeps 7 active habits and 2 active goals. Pro has no limits.</p>
+        {plan.isError && (
+          <p role="alert" className="mt-1.5 text-[0.9375rem] text-alert">
+            {messageFor(plan.error)}
+          </p>
+        )}
+      </Group>
 
-        <div className="flex flex-wrap gap-3 border-t border-mist/70 pt-5">
+      <Group title="Account" danger>
+        <div className="flex flex-wrap gap-3">
           {/* keys: the two confirms sit in one place, and must not share a dialog's open state */}
           {suspended ? (
             <Confirm
@@ -227,8 +232,9 @@ function Actions({ user }: { user: AdminUser }) {
             onConfirm={() => remove.mutateAsync()}
           />
         </div>
-      </div>
-    </Card>
+        <p className="mt-2 text-[0.9375rem] text-ink-soft">Suspending keeps everything; deleting can’t be undone.</p>
+      </Group>
+    </>
   )
 }
 
@@ -237,11 +243,11 @@ export default function AdminUserPage() {
   const navigate = useNavigate()
   const detail = useQuery({ queryKey: ['admin', 'user', id], queryFn: () => getAdminUser(id), enabled: Number.isInteger(id), retry: false })
 
-  if (detail.isPending) return <div role="status" aria-label="Loading the user" className="mt-6 h-64 animate-pulse rounded-3xl bg-mist/45" />
+  if (detail.isPending) return <div role="status" aria-label="Loading the user" className="h-64 animate-pulse rounded-2xl bg-wash" />
   if (detail.isError) {
     const gone = detail.error instanceof ApiError && detail.error.errorCode === 'USER_NOT_FOUND'
     return (
-      <div className="mt-6">
+      <div>
         <p role="alert" className="text-alert">
           {gone ? 'This user doesn’t exist any more.' : habitErrorMessage(detail.error)}
         </p>
@@ -254,21 +260,22 @@ export default function AdminUserPage() {
 
   const { user } = detail.data
   return (
-    <div className="mt-6">
-      <Link to="/admin/users" className="text-sm font-medium text-link underline underline-offset-2">
+    <div>
+      <Link to="/admin/users" className="inline-flex min-h-9 items-center gap-1.5 text-[0.9375rem] font-medium text-ink-soft hover:text-ink">
+        <ArrowLeft size={16} weight="bold" aria-hidden="true" />
         All users
       </Link>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <h1 className="min-w-0 font-display text-3xl font-semibold tracking-tight break-words sm:text-4xl">{user.email}</h1>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <h1 className={`min-w-0 break-words ${PAGE_TITLE}`}>{user.email}</h1>
         <Badges user={user} />
       </div>
-      <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-ink-soft">
+      <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-ink-soft">
         <span>{user.name}</span>
         <span className="flex items-center gap-1">
           {user.authProvider === 'GOOGLE' ? <GoogleLogo size={16} weight="bold" aria-hidden="true" /> : null}
           {user.authProvider === 'GOOGLE' ? 'Google' : 'Password'}
         </span>
-        <span className={`flex items-center gap-1 ${user.emailVerified ? 'text-link' : ''}`}>
+        <span className={`flex items-center gap-1 ${user.emailVerified ? 'text-sage-deep' : ''}`}>
           {user.emailVerified ? <CheckCircle size={16} weight="fill" aria-hidden="true" /> : null}
           {user.emailVerified ? 'Verified' : 'Unverified'}
         </span>
@@ -281,7 +288,7 @@ export default function AdminUserPage() {
         </p>
       )}
 
-      <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <dl className="mt-8 grid grid-cols-2 sm:grid-cols-3">
         <Stat label="Active habits" value={detail.data.activeHabits} />
         <Stat label="Archived habits" value={detail.data.archivedHabits} />
         <Stat label="Days checked in" value={detail.data.checkIns} />
@@ -289,11 +296,11 @@ export default function AdminUserPage() {
         <Stat label="Push browsers" value={detail.data.pushSubscriptions} />
         <Stat label="Last active" value={lastActive(detail.data.lastActiveAt)} />
       </dl>
-      <p className="mt-2 text-xs text-ink-soft">Counts only. What people track and write stays private.</p>
+      <p className="mt-1 text-[0.8125rem] text-ink-soft">Counts only. What people track and write stays private.</p>
 
-      <div className="mt-6">
+      <div className="mt-10">
         {user.role === 'ADMIN' ? (
-          <p className="text-ink-soft">This is an admin. Admins can’t be changed from here.</p>
+          <p className="border-t border-mist pt-7 text-ink-soft">This is an admin. Admins can’t be changed from here.</p>
         ) : (
           <Actions user={user} />
         )}

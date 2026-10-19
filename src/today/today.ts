@@ -59,7 +59,7 @@ export interface TodayStatus {
 }
 
 /** The 1st, 2nd and 3rd rest day of a habit's Monday–Sunday week; there is no 4th. Mirrors the server. */
-const REST_COST = [0, 100, 200]
+export const REST_COST = [0, 100, 200]
 
 /** What today looks like for one habit, from its logs since the start of the week. */
 export function todayStatus(habit: Habit, logs: HabitLog[], today: string): TodayStatus {
@@ -94,4 +94,35 @@ export function todayStatus(habit: Habit, logs: HabitLog[], today: string): Toda
 export function withTodayCount(logs: HabitLog[], today: string, count: number, target: number): HabitLog[] {
   const rest = logs.filter((log) => log.date !== today)
   return [{ id: -1, date: today, completedCount: count, done: count >= target }, ...rest]
+}
+
+export type WeekDayState = 'done' | 'rest' | 'open' | 'future'
+
+export interface WeekDay {
+  date: string
+  state: WeekDayState
+  today: boolean
+}
+
+/** Monday to Sunday of today's week, each day as the logs have it: done, rested, open, or still to come. */
+export function weekDays(logs: HabitLog[], today: string): WeekDay[] {
+  const start = weekStart(today)
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = shiftDays(start, i)
+    const log = logs.find((entry) => entry.date === date)
+    const state: WeekDayState = date > today ? 'future' : log?.done ? 'done' : log?.rest ? 'rest' : 'open'
+    return { date, state, today: date === today }
+  })
+}
+
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+/** "This week: done Monday and Tuesday, rested Wednesday." Nothing done yet says so. */
+export function describeWeek(days: WeekDay[]): string {
+  const named = (state: WeekDay['state']) => days.flatMap((day, i) => (day.state === state ? [DAY_NAMES[i]] : []))
+  const list = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0])
+  const done = named('done')
+  const rest = named('rest')
+  const parts = [done.length ? `done ${list(done)}` : 'nothing done yet', ...(rest.length ? [`rested ${list(rest)}`] : [])]
+  return `This week: ${parts.join(', ')}.`
 }

@@ -83,7 +83,7 @@ describe('reset password', () => {
     await input.type(screen.getByLabelText('Confirm new password'), 'short-enough')
     await input.click(screen.getByRole('button', { name: 'Save and sign in' }))
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: /^Good (morning|afternoon|evening)/ })).toBeTruthy()
     expect(calls.find((c) => c.path === '/api/auth/password/reset')!.body).toEqual({
       token: 'abc123',
       newPassword: 'short-enough',

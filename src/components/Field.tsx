@@ -11,8 +11,8 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
 /** The text-input look, for inputs and selects outside `Field`. */
 export const INPUT =
   'w-full rounded-xl border bg-surface px-4 text-base text-ink placeholder:text-ink-soft/70 ' +
-  'shadow-[0_1px_2px_rgb(9_38_52/0.05)] transition-[border-color,box-shadow] duration-150 ease-out ' +
-  'focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(0_120_170/0.2)] focus-visible:outline-none'
+  'transition-[border-color,box-shadow] duration-150 ease-out ' +
+  'hover:border-line focus-visible:border-lapis focus-visible:shadow-[0_0_0_4px_rgb(7_86_106/0.16)] focus-visible:outline-none'
 
 export function Field({ label, hint, error, narrow, type, className = '', ...input }: FieldProps) {
   const id = useId()
@@ -22,7 +22,7 @@ export function Field({ label, hint, error, narrow, type, className = '', ...inp
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+      <label htmlFor={id} className="mb-1.5 block text-[0.9375rem] font-medium">
         {label}
       </label>
       <div className={`relative ${narrow ? 'w-40' : ''}`}>
@@ -69,7 +69,7 @@ export function TextAreaField({ label, hint, error, className = '', ...textarea 
   const id = useId()
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+      <label htmlFor={id} className="mb-1.5 block text-[0.9375rem] font-medium">
         {label}
       </label>
       <textarea

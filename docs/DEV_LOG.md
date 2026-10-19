@@ -5,6 +5,15 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-19 (Phase R — AveryDay redesign, D.1 rename)
+
+**Done** (`feat/redesign`)
+- AveryDay everywhere: title, manifest, service worker, brand, screens, export file name. The storage
+  keys (`devhabit-theme`, `devhabit.level.*`) keep their names so saved choices survive.
+- The white-first look (R.0–R.4, R.6, R.7 in the roadmap): tokens, Today with week strips, habits and
+  goals as divided rows with a row menu, new habit straight from a goal, the level popover, admin.
+- The profile picture (R.5) comes in its own PR next.
+
 ## 2026-10-13 (D.2 — privacy policy links)
 
 **Done** (`feat/privacy-links`)

@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Target } from '@phosphor-icons/react'
+import { ArrowLeft, BellSimple, CalendarBlank, Fire, PencilSimple, Tag, Target } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getStats, getStreak, listLogs, type HabitLog, type Streak, type WindowStats } from '../api/checkins'
@@ -9,9 +9,10 @@ import { habitErrorMessage } from '../api/messages'
 import { DayGrid, DayGridLegend } from '../components/DayGrid'
 import { ProgressBar } from '../components/ProgressBar'
 import { Ring } from '../components/Ring'
-import { SECONDARY, SURFACE } from '../components/styles'
+import { LEAD, PAGE_WIDE, PAGE_TITLE, SECONDARY, SECTION_TITLE, SURFACE, TEXT_BUTTON } from '../components/styles'
+import { WeekStrip } from '../components/WeekStrip'
 import { useAuth } from '../auth/context'
-import { formatDay, shiftDays } from '../today/today'
+import { formatDay, shiftDays, weekDays } from '../today/today'
 import { useToday } from '../today/useToday'
 import { doneOf, HEATMAP_WEEKS, habitHeatmap, heatmapStart, weeklyGoal, weeklyTotals, type WeekTotal } from './detail'
 import { describeSchedule } from './form'
@@ -42,13 +43,13 @@ async function allLogs(habitId: number, from: string): Promise<HabitLog[]> {
 
 function Window({ label, stats }: { label: string; stats: WindowStats }) {
   return (
-    <div className={`${SURFACE} flex items-center gap-4 p-4`}>
+    <div className="flex items-center gap-4">
       <Ring rate={stats.rate}>
-        <span className="font-display text-xl font-semibold text-link">{percent(stats.rate)}</span>
+        <span className="font-display text-xl font-semibold text-link tabular-nums">{percent(stats.rate)}</span>
       </Ring>
       <div>
-        <dt className="text-sm text-ink-soft">{label}</dt>
-        <dd className="mt-1 font-medium">
+        <dt className="text-ink-soft">{label}</dt>
+        <dd className="mt-0.5 font-medium">
           {stats.rate === null ? 'Nothing was due yet' : doneOf(stats.done, stats.expected)}
         </dd>
       </div>
@@ -56,29 +57,32 @@ function Window({ label, stats }: { label: string; stats: WindowStats }) {
   )
 }
 
-/** The current run against the best one, as a bar: how close this streak is to a new record. */
+/** The current run against the best one: the big number is now, the bar is how close it is to a record. */
 function StreakBar({ streak, plural }: { streak: Streak; plural: (n: number) => string }) {
   const record = streak.current > 0 && streak.current >= streak.longest
   const share = streak.longest > 0 ? Math.min(streak.current / streak.longest, 1) : 0
   return (
-    <div className="rounded-2xl bg-ember/15 p-4 sm:col-span-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <div>
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
         <div>
-          <dt className="text-sm text-ink-soft">Current streak</dt>
-          <dd className="mt-1 font-display text-3xl font-semibold text-ember-deep">{plural(streak.current)}</dd>
+          <dt className="text-ink-soft">Current streak</dt>
+          <dd className="mt-1 flex items-center gap-2 font-display text-5xl leading-none font-semibold tracking-tight tabular-nums sm:text-6xl">
+            <Fire size={34} weight={streak.current > 0 ? 'fill' : 'regular'} className="text-ember" aria-hidden="true" />
+            {plural(streak.current)}
+          </dd>
         </div>
-        <div className="text-right">
-          <dt className="text-sm text-ink-soft">Longest streak</dt>
-          <dd className="mt-1 font-display text-3xl font-semibold">{plural(streak.longest)}</dd>
+        <div className="sm:text-right">
+          <dt className="text-ink-soft">Longest streak</dt>
+          <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">{plural(streak.longest)}</dd>
         </div>
       </div>
-      <div aria-hidden="true" className="mt-4 h-2.5 overflow-hidden rounded-full bg-ember/20">
+      <div aria-hidden="true" className="mt-5 h-2 overflow-hidden rounded-full bg-mist">
         <div
           className="h-full rounded-full bg-ember transition-[width] duration-500 ease-out motion-reduce:transition-none"
           style={{ width: `${share * 100}%` }}
         />
       </div>
-      <dd className="mt-2 text-sm text-ink-soft">
+      <dd className={`mt-2.5 ${record ? 'font-medium text-ember-deep' : 'text-ink-soft'}`}>
         {record
           ? 'This is your best run yet.'
           : streak.longest === 0
@@ -121,11 +125,11 @@ function WeeklyBars({ totals, goal }: { totals: WeekTotal[]; goal: number }) {
           />
         ))}
       </div>
-      <div aria-hidden="true" className="mt-2 flex justify-between text-xs text-ink-soft">
+      <div aria-hidden="true" className="mt-2 flex justify-between text-[0.8125rem] text-ink-soft">
         <span>{shortDate(totals[0].start)}</span>
         <span>This week</span>
       </div>
-      <p className="mt-3 text-sm text-ink-soft">
+      <p className="mt-3 text-[0.9375rem] text-ink-soft">
         {goal > 0
           ? `Goal met in ${met} of the last ${totals.length - 1} full weeks. The dashed line is the goal: ${goal} a week.`
           : 'Days done each week.'}
@@ -143,7 +147,7 @@ function GoalLink({ habitId, goalId }: { habitId: number; goalId: number }) {
   return (
     <Link
       to={`/goals/${goalId}`}
-      className={`${SURFACE} mt-6 flex items-center gap-4 p-4 transition-transform duration-150 ease-out active:scale-[0.99] sm:p-5`}
+      className={`${SURFACE} mt-6 flex items-center gap-4 p-4 transition-[transform,border-color] duration-150 ease-out hover:border-line active:scale-[0.99] sm:p-5`}
     >
       <Target size={28} weight="duotone" className="shrink-0 text-link" aria-hidden="true" />
       <div className="min-w-0 flex-1">
@@ -169,22 +173,22 @@ function Charts({ habit, logs, today }: { habit: Habit; logs: HabitLog[]; today:
   const days = weeks.flat().filter((day) => !day.blank)
   const done = days.filter((day) => day.level === 4).length
   return (
-    <div className="mt-3 grid gap-3 lg:grid-cols-[3fr_2fr]">
-      <div className={`${SURFACE} p-4 sm:p-5`}>
-        <h3 className="font-medium">Last {HEATMAP_WEEKS} weeks</h3>
-        <div className="mt-3">
+    <div className="grid gap-x-10 gap-y-10 lg:grid-cols-[3fr_2fr]">
+      <div className="min-w-0">
+        <h3 className={SECTION_TITLE}>Last {HEATMAP_WEEKS} weeks</h3>
+        <div className="mt-4">
           <DayGrid weeks={weeks} label={`Done on ${done} of the last ${days.length} days`} />
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-ink-soft">
+          <p className="text-[0.9375rem] text-ink-soft">
             Done on {done} of {days.length} days
           </p>
           <DayGridLegend />
         </div>
       </div>
-      <div className={`${SURFACE} p-4 sm:p-5`}>
-        <h3 className="font-medium">Week by week</h3>
-        <div className="mt-3">
+      <div className="min-w-0">
+        <h3 className={SECTION_TITLE}>Week by week</h3>
+        <div className="mt-4">
           <WeeklyBars totals={weeklyTotals(logs, today)} goal={weeklyGoal(habit)} />
         </div>
       </div>
@@ -215,10 +219,10 @@ function DeleteHabit({ habit }: { habit: Habit }) {
     },
   })
   return (
-    <section aria-label="Delete" className="mt-10 border-t border-mist/70 pt-6">
+    <section aria-label="Delete" className="mt-14 border-t border-mist pt-6">
       {confirming ? (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="w-full text-sm sm:w-auto">
+          <p className="w-full sm:w-auto">
             Delete {habit.name} and every check-in? The XP and goal progress they earned go too.
           </p>
           <button type="button" disabled={remove.isPending} onClick={() => remove.mutate()} className={`${BUTTON} text-alert`}>
@@ -268,7 +272,7 @@ export default function HabitDetailPage() {
 
   if (habit.isPending && habit.fetchStatus !== 'idle') {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className={PAGE_WIDE}>
         <p role="status" className="text-ink-soft">
           Loading habit…
         </p>
@@ -277,11 +281,11 @@ export default function HabitDetailPage() {
   }
   if (!habit.data) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <main className={PAGE_WIDE}>
         <p role="alert" className="text-alert">
           {habit.error ? habitErrorMessage(habit.error) : NOT_FOUND}
         </p>
-        <Link to="/habits" className="mt-3 inline-block font-medium text-link underline underline-offset-2">
+        <Link to="/habits" className={`mt-3 ${TEXT_BUTTON}`}>
           Back to habits
         </Link>
       </main>
@@ -295,70 +299,99 @@ export default function HabitDetailPage() {
   const plural = (n: number) => `${n} ${unit}${n === 1 ? '' : 's'}`
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <Link to="/habits" className="text-sm font-medium text-link underline underline-offset-2">
+    <main className={PAGE_WIDE}>
+      <Link to="/habits" className="inline-flex min-h-9 items-center gap-1.5 text-[0.9375rem] font-medium text-ink-soft hover:text-ink">
+        <ArrowLeft size={16} weight="bold" aria-hidden="true" />
         All habits
       </Link>
-      <div className="mt-3 flex items-start justify-between gap-4">
+      <div className="mt-2 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">{name}</h1>
-          <p className="mt-1 flex flex-wrap gap-x-4 text-ink-soft">
-            {category && <span>{category}</span>}
-            <span>{quit ? 'Quitting: a check-in is a slip' : describeSchedule(habit.data)}</span>
+          <h1 className={`${PAGE_TITLE} break-words`}>{name}</h1>
+          <p className={`${LEAD} flex flex-wrap gap-x-4 gap-y-1`}>
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarBlank size={16} weight="bold" aria-hidden="true" />
+              <span>{quit ? 'Quitting: a check-in is a slip' : describeSchedule(habit.data)}</span>
+            </span>
             {targetCount > 1 && (
               <span>
                 {targetCount}
                 {counted} a day
               </span>
             )}
-            {reminderTime && <span>Reminder at {reminderTime}</span>}
-            {archived && <span>Archived</span>}
+            {reminderTime && (
+              <span className="inline-flex items-center gap-1.5">
+                <BellSimple size={16} weight="bold" aria-hidden="true" />
+                <span>Reminder at {reminderTime}</span>
+              </span>
+            )}
+            {category && (
+              <span className="inline-flex items-center gap-1.5">
+                <Tag size={16} weight="bold" aria-hidden="true" />
+                <span>{category}</span>
+              </span>
+            )}
+            {archived && <span className="rounded-md bg-wash px-2 text-ink">Archived</span>}
           </p>
         </div>
         <Link to={`/habits/${id}/edit`} aria-label={`Edit ${name}`} className={`${BUTTON} shrink-0`}>
-          Edit
+          <PencilSimple size={18} aria-hidden="true" />
+          <span className="hidden sm:inline">Edit</span>
         </Link>
       </div>
 
       {habit.data.goalId != null && <GoalLink habitId={id} goalId={habit.data.goalId} />}
 
-      <section aria-labelledby="progress" className="mt-8">
-        <h2 id="progress" className="font-display text-2xl font-semibold tracking-tight">
+      <section aria-labelledby="progress" className="mt-10">
+        <h2 id="progress" className="sr-only">
           Progress
         </h2>
         {streak.isError || stats.isError ? (
-          <p role="alert" className="mt-3 text-alert">
+          <p role="alert" className="text-alert">
             {habitErrorMessage(streak.error ?? stats.error)}
           </p>
         ) : !streak.data || !stats.data ? (
-          <p role="status" className="mt-3 text-ink-soft">
+          <p role="status" className="text-ink-soft">
             Loading progress…
           </p>
         ) : (
-          <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-            <StreakBar streak={streak.data} plural={plural} />
-            <Window label="Last 7 days" stats={stats.data.last7Days} />
-            <Window label="Last 30 days" stats={stats.data.last30Days} />
-          </dl>
-        )}
-        {heatmap.isError ? (
-          <div className="mt-3">
-            <p role="alert" className="text-alert">
-              {habitErrorMessage(heatmap.error)}
-            </p>
-            <button type="button" onClick={() => heatmap.refetch()} className={`${BUTTON} mt-3`}>
-              Try again
-            </button>
+          <div className="grid gap-x-12 gap-y-10 lg:grid-cols-[3fr_2fr]">
+            <dl>
+              <StreakBar streak={streak.data} plural={plural} />
+            </dl>
+            {!quit && heatmap.data && (
+              <div>
+                <h3 className="text-ink-soft">This week</h3>
+                <div className="mt-3">
+                  <WeekStrip days={weekDays(heatmap.data, today)} />
+                </div>
+              </div>
+            )}
+            <dl className="grid gap-6 border-t border-mist pt-8 sm:grid-cols-2 lg:col-span-2">
+              <Window label="Last 7 days" stats={stats.data.last7Days} />
+              <Window label="Last 30 days" stats={stats.data.last30Days} />
+            </dl>
           </div>
-        ) : !heatmap.data ? (
-          <div role="status" aria-label="Loading charts" className="mt-3 h-56 animate-pulse rounded-2xl bg-mist/45" />
-        ) : (
-          <Charts habit={habit.data} logs={heatmap.data} today={today} />
         )}
+        <div className="mt-10 border-t border-mist pt-8">
+          {heatmap.isError ? (
+            <div>
+              <p role="alert" className="text-alert">
+                {habitErrorMessage(heatmap.error)}
+              </p>
+              <button type="button" onClick={() => heatmap.refetch()} className={`${BUTTON} mt-3`}>
+                Try again
+              </button>
+            </div>
+          ) : !heatmap.data ? (
+            <div role="status" aria-label="Loading charts" className="h-56 animate-pulse rounded-2xl bg-wash" />
+          ) : (
+            <Charts habit={habit.data} logs={heatmap.data} today={today} />
+          )}
+        </div>
       </section>
 
-      <section aria-labelledby="history" className="mt-10">
-        <h2 id="history" className="font-display text-2xl font-semibold tracking-tight">
+      <section aria-labelledby="history" className="mt-12 border-t border-mist pt-8">
+        <h2 id="history" className={SECTION_TITLE}>
           History
         </h2>
         {logs.isError ? (
@@ -378,19 +411,19 @@ export default function HabitDetailPage() {
           <p className="mt-3 text-ink-soft">No check-ins in the last {HISTORY_DAYS} days.</p>
         ) : (
           <>
-            <ul className={`${SURFACE} mt-3 divide-y divide-mist/70 px-4`}>
+            <ul className="mt-3 divide-y divide-mist lg:max-w-2xl">
               {logs.data.content.map((log) => (
                 <li key={log.date} className="flex items-baseline justify-between gap-4 py-3">
                   <span className="font-medium">{formatDay(log.date)}</span>
                   <span className={log.done && !quit ? 'font-medium text-link' : 'text-ink-soft'}>
                     {logLabel(log, habit.data)}
                   </span>
-                  {log.note && <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{log.note}</span>}
+                  {log.note && <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-ink-soft">{log.note}</span>}
                 </li>
               ))}
             </ul>
             {logs.data.totalPages > 1 && (
-              <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-sm">
+              <nav aria-label="Pages" className="mt-6 flex items-center gap-4 text-[0.9375rem]">
                 <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className={BUTTON}>
                   Previous
                 </button>

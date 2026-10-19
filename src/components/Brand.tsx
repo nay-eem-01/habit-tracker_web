@@ -11,7 +11,7 @@ export function Brand({ to, children }: { to: string; children?: ReactNode }) {
         <span className="size-[7px] rounded-[2px] bg-lapis" />
         <span className="size-[7px] rounded-[2px] bg-ember" />
       </span>
-      DevHabit
+      AveryDay
       {children}
     </Link>
   )

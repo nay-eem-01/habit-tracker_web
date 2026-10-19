@@ -6,6 +6,7 @@ import { useAuth } from '../auth/context'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
 import { Stepper, SwitchField, TimeField } from '../components/pickers'
+import { TEXT_BUTTON } from '../components/styles'
 import { EMPTY_HABIT, WEEK, type HabitFormValues } from './form'
 import type { DayOfWeek, FrequencyType, HabitKind } from '../api/habits'
 
@@ -23,6 +24,12 @@ interface HabitFormProps {
   onSubmit: (values: HabitFormValues) => void
   /** The kind is chosen once, when the habit is created. */
   editing?: boolean
+  /** Only a habit being built: one made for a goal can't be one you're quitting. */
+  buildOnly?: boolean
+  /** Where Cancel goes. */
+  cancelTo?: string
+  /** More fields, after the habit's own and before the buttons (the goal's target, when made for a goal). */
+  children?: ReactNode
 }
 
 /** A schedule option as a card; the radio stays for keyboards and screen readers. */
@@ -39,22 +46,24 @@ function Choice({
 }) {
   return (
     <label
-      className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-3 text-sm font-medium transition-[border-color,background-color] duration-150 ease-out has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-lapis ${
-        checked ? 'border-ember bg-ember/10' : 'border-mist bg-surface hover:border-ink-soft'
+      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 p-3 sm:flex-col sm:items-start sm:gap-2 text-[0.9375rem] leading-snug font-medium transition-[border-color,background-color] duration-150 ease-out has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-lapis ${
+        checked ? 'border-lapis bg-lapis/6' : 'border-mist bg-surface hover:border-line'
       }`}
     >
       <input type="radio" name="frequencyType" checked={checked} onChange={onSelect} className="sr-only" />
-      <Icon size={22} weight={checked ? 'fill' : 'regular'} className={checked ? 'text-ember-deep' : 'text-ink-soft'} aria-hidden="true" />
+      <Icon size={22} weight={checked ? 'fill' : 'regular'} className={checked ? 'text-link' : 'text-ink-soft'} aria-hidden="true" />
       {children}
     </label>
   )
 }
 
-export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pending, error, onSubmit, editing }: HabitFormProps) {
+export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pending, error, onSubmit, editing, buildOnly, cancelTo = '/habits', children }: HabitFormProps) {
   const { state } = useAuth()
   const timezone = state.status === 'authenticated' ? state.user.timezone : undefined
   const [values, setValues] = useState<HabitFormValues>(initial)
   const [daysMissing, setDaysMissing] = useState(false)
+  // a count and a unit are for habits like water; most habits are once a day, so the fields wait until asked for
+  const [counting, setCounting] = useState(Number(initial.targetCount) > 1 || initial.unit !== '')
 
   const set = <K extends keyof HabitFormValues>(key: K, value: HabitFormValues[K]) =>
     setValues((current) => ({ ...current, [key]: value }))
@@ -84,15 +93,15 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
     <form onSubmit={submit} className="flex max-w-xl flex-col gap-6">
       {editing ? (
         quit && <p className="text-ink-soft">You’re quitting this one: check in only if you slip. That can’t change.</p>
-      ) : (
+      ) : buildOnly ? null : (
         <fieldset>
-          <legend className="mb-2 text-sm font-medium">What kind</legend>
+          <legend className="mb-2 text-[0.9375rem] font-medium">What kind</legend>
           <div className="grid grid-cols-2 gap-2">
             {KINDS.map(({ kind, label, hint }) => (
               <label
                 key={kind}
                 className={`cursor-pointer rounded-xl border-2 p-3 transition-[border-color,background-color] duration-150 ease-out has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-lapis ${
-                  values.kind === kind ? 'border-ember bg-ember/10' : 'border-mist bg-surface hover:border-ink-soft'
+                  values.kind === kind ? 'border-lapis bg-lapis/6' : 'border-mist bg-surface hover:border-line'
                 }`}
               >
                 <input type="radio" name="kind" checked={values.kind === kind} onChange={() => set('kind', kind)} className="sr-only" />
@@ -123,9 +132,10 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
 
       {!quit && (
         <>
+          <div className="border-t border-mist pt-6">
           <fieldset>
-            <legend className="mb-2 text-sm font-medium">How often</legend>
-            <div className="grid grid-cols-3 gap-2">
+            <legend className="mb-2 text-[0.9375rem] font-medium">How often</legend>
+            <div className="grid gap-2 sm:grid-cols-3">
               <Choice icon={Repeat} checked={values.frequencyType === 'DAILY'} onSelect={() => pick('DAILY')}>
                 Every day
               </Choice>
@@ -148,8 +158,8 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
                         aria-pressed={on}
                         aria-label={long}
                         onClick={() => toggleDay(day)}
-                        className={`h-10 min-w-12 rounded-xl border px-3 transition-[transform,background-color,border-color] duration-150 ease-out active:scale-95 text-sm font-medium ${
-                          on ? 'border-lapis bg-lapis text-white' : 'border-mist bg-surface hover:border-ink-soft'
+                        className={`h-11 min-w-12 rounded-xl border px-3 text-[0.9375rem] font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-95 ${
+                          on ? 'border-lapis bg-lapis text-chalk' : 'border-mist bg-surface hover:border-line'
                         }`}
                       >
                         {short}
@@ -158,7 +168,7 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
                   })}
                 </div>
                 {daysMissing && (
-                  <p role="alert" className="mt-1.5 text-sm text-alert">
+                  <p role="alert" className="mt-2 text-[0.9375rem] text-alert">
                     Pick at least one day.
                   </p>
                 )}
@@ -177,28 +187,37 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
               </div>
             )}
           </fieldset>
+          </div>
 
-          <Stepper
-            label="Times a day"
-            min={1}
-            max={100}
-            hint="How many check-ins make a day done, like 8 for glasses of water."
-            value={values.targetCount}
-            onChange={(value) => set('targetCount', value)}
-            error={fieldError(error, 'targetCount', 'Times a day')}
-          />
-          <Field
-            narrow
-            label="Unit (optional)"
-            maxLength={20}
-            placeholder="glasses"
-            hint="What is counted, shown with the target: “8 glasses”."
-            value={values.unit}
-            onChange={(event) => set('unit', event.target.value)}
-            error={fieldError(error, 'unit', 'Unit')}
-          />
+          {counting ? (
+            <div className="flex flex-col gap-6">
+              <Stepper
+              label="Times a day"
+              min={1}
+              max={100}
+              hint="How many check-ins make a day done, like 8 for glasses of water."
+              value={values.targetCount}
+              onChange={(value) => set('targetCount', value)}
+              error={fieldError(error, 'targetCount', 'Times a day')}
+            />
+            <Field
+              narrow
+              label="Unit (optional)"
+              maxLength={20}
+              placeholder="glasses"
+              hint="What is counted, shown with the target: “8 glasses”."
+              value={values.unit}
+              onChange={(event) => set('unit', event.target.value)}
+              error={fieldError(error, 'unit', 'Unit')}
+            />
+            </div>
+          ) : (
+            <button type="button" onClick={() => setCounting(true)} className={`${TEXT_BUTTON} self-start`}>
+              Count it more than once a day
+            </button>
+          )}
 
-          <div>
+          <div className="border-t border-mist pt-6">
             <SwitchField
               label="Remind me"
               description="A notification at the time you pick, if it isn’t done yet."
@@ -220,16 +239,18 @@ export function HabitForm({ initial = EMPTY_HABIT, submitLabel, pendingLabel, pe
         </>
       )}
 
+      {children}
+
       {error != null && (
         <p role="alert" className="text-sm text-alert">
           {habitErrorMessage(error)}
         </p>
       )}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5 border-t border-mist pt-6">
         <Button type="submit" busy={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>
-        <Link to="/habits" className="font-medium text-link underline underline-offset-2">
+        <Link to={cancelTo} className={TEXT_BUTTON}>
           Cancel
         </Link>
       </div>

@@ -128,6 +128,29 @@ Screens, API and errors are in `docs/ADMIN.md`. Run `npm run gen:api` first.
 | A.4 | User page: counts, plan switch, suspend / lift, delete | ✅ |
 | A.5 | Admin UI separate from the user app (`docs/ADMIN.md` "Admin UI is separate"): admins land on `/admin`, user routes redirect them, own layout and menu, no user-only API calls | ✅ |
 
+## Now — Phase R: AveryDay redesign (2026-10-16)
+
+The app is **AveryDay** in every screen, the manifest and the service worker (the theme's storage key
+stays `devhabit-theme` so saved choices survive). Function and API are unchanged; this is the look.
+
+**Design direction:** white-first. Tokens in `index.css` keep their names and move:
+`chalk` is now the white page, `wash` `#F7F9F8` is the quiet section, `lapis` is teal `#07566A`
+(structure, progress, selected), `ember` is coral `#FF7048` (the one primary action, today, streaks,
+milestones), and the new `sage` `#E3F0E9` / `sage-deep` `#2C6A4E` mean done. `line` `#8FA3A8` is the
+3:1 edge of a control you have to find. Bricolage Grotesque + Instrument Sans stay. Hairlines replace
+shadows; lists are divided rows, not stacks of cards; metadata is 15px.
+
+| # | Step | Status |
+|---|---|---|
+| R.0 | **System**: tokens (light + dark), `styles.ts` (`PAGE`, `PAGE_TITLE`, `SECTION_TITLE`, `TEXT_BUTTON`, `TABS`), phone tab bar (fixed, safe-area padded) / header nav from `md`, scroll padding so focus clears both | ✅ |
+| R.1 | **Today**: light progress panel that turns sage when all done, divided rows, sage check with a short pop, a week strip per habit (`WeekStrip`, Mon–Sun from the week's logs, today ringed coral) | ✅ |
+| R.2 | **Habits / detail / form**: edit and archive behind a row menu (`RowMenu`, shadcn dropdown-menu), streak-first detail with the week strip, teal heatmap; count and unit fields wait behind "Count it more than once a day" | ✅ |
+| R.3 | **Goals, Dashboard, Library, Settings, auth**: progress rings on goals, light dashboard hero with a greeting and XP last, quieter resource actions, two-column settings, the chain grid hidden on phones at sign-in | ✅ |
+| R.4 | **Admin**: same header and phone tab bar (Overview, Users), light Overview hero with teal charts, sentence-case users table, user page with hairline counts and Plan / Account groups as in Settings | ✅ |
+| R.5 | **Profile picture** (backend 8.6): Settings → Photo uploads a centre-square, upright JPEG made in the browser (`pages/picture.ts`; HEIC/WebP open fine, the server takes JPEG); `Avatar` shows it in the account menu, fetched with the token and cached per `avatarUpdatedAt`, initials when there is none; remove goes back to initials | ⬜ |
+| R.6 | **New habit from a goal**: "New habit" in the goal's Link a habit panel opens `/habits/new?goal={id}`; the form names the goal, asks for the target days, hides Quit, links after creating and returns to the goal. A failed link says the habit was added and points back, without adding it twice; a closed goal makes it an ordinary new habit | ✅ |
+| R.7 | **Level panel**: the header's level badge opens a popover (was a plain link home): level and tier, progress to the next level, the tier ladder with the current one marked and the next named, XP to spend on rest days and what rests cost, how XP is earned. `LevelCard` is split into `LevelHeader` / `LevelBar` / `XpRules`, shared with the dashboard | ✅ |
+
 ## Later — follows the backend milestones
 
 | Backend | Frontend screens | Status |
@@ -147,7 +170,7 @@ Render, so it's one site and the `SameSite=Strict` cookie works. `staging` is th
 | # | Step | Status |
 |---|---|---|
 | D.0 | `public/privacy.html`: static privacy policy (Google's consent screen links it) | ✅ |
-| D.1 | Rename DevHabit → **AveryDay** ("A very Day"): page title, manifest `name`/`short_name`, service worker's default title, any visible text | ⬜ |
+| D.1 | Rename DevHabit → **AveryDay** ("A very Day"): page title, manifest `name`/`short_name`, service worker's default title, any visible text | ✅ |
 | D.2 | Link "Privacy" (`/privacy.html`, a plain link, not a route) on sign-in/sign-up and in Settings | ✅ |
 | D.3 | `vercel.json`: `/api/*` rewrite to the Render URL, SPA fallback, security headers (backend `docs/DEPLOY.md` §5) | ⬜ |
 | D.4 | CI (`npm ci`, lint, typecheck, test, build) on PRs, so `staging`/`production` can require it | ⬜ |

@@ -44,9 +44,11 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
         aria-controls="user-menu"
         aria-label={`Account, ${user.name}`}
         onClick={() => setOpen(!open)}
-        className="grid size-10 place-items-center rounded-full bg-lapis text-sm font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] transition-transform duration-150 ease-out active:scale-95"
+        className="rounded-full transition-transform duration-150 ease-out active:scale-95"
       >
-        {initials(user.name)}
+        <span aria-hidden="true" className="grid size-10 place-items-center rounded-full bg-lapis text-sm font-semibold text-chalk">
+          {initials(user.name)}
+        </span>
       </button>
       {open && (
         <section
@@ -58,7 +60,7 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
             <p className="truncate font-display text-lg font-semibold tracking-tight">{user.name}</p>
             <p className="truncate text-sm text-ink-soft">{user.email}</p>
           </div>
-          <div role="group" aria-label="Theme" className="mx-1 mb-2 flex gap-1 rounded-full bg-mist/45 p-1">
+          <div role="group" aria-label="Theme" className="mx-1 mb-2 flex gap-1 rounded-full bg-wash p-1 ring-1 ring-mist ring-inset">
             {THEMES.map(({ value, label, Icon }) => (
               <button
                 key={value}
@@ -82,7 +84,7 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
             <Link
               to="/settings"
               onClick={() => setOpen(false)}
-              className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
+              className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-wash"
             >
               <GearSix size={20} weight="bold" aria-hidden="true" />
               Settings
@@ -91,7 +93,7 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
           <Link
             to={admin ? '/admin/password' : '/account/password'}
             onClick={() => setOpen(false)}
-            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
+            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-wash"
           >
             <Key size={20} weight="bold" aria-hidden="true" />
             Change password
@@ -99,7 +101,7 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
           <button
             type="button"
             onClick={onSignOut}
-            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 text-left font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-chalk"
+            className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 text-left font-medium transition-[background-color,transform] duration-150 ease-out active:scale-[0.98] [@media(hover:hover)]:hover:bg-wash"
           >
             <SignOut size={20} weight="bold" aria-hidden="true" />
             Sign out

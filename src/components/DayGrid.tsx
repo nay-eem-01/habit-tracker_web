@@ -9,11 +9,11 @@ export interface GridDay {
 }
 
 const SHADES: Record<GridDay['level'], string> = {
-  0: 'bg-mist/45',
-  1: 'bg-ember/25',
-  2: 'bg-ember/50',
-  3: 'bg-ember/75',
-  4: 'bg-ember',
+  0: 'bg-mist',
+  1: 'bg-lapis/25',
+  2: 'bg-lapis/50',
+  3: 'bg-lapis/75',
+  4: 'bg-lapis',
 }
 
 /** A calendar heatmap: weeks as columns, Monday at the top, darker for more done. Described by `label`. */
@@ -44,7 +44,7 @@ export function DayGrid({ weeks, label }: { weeks: GridDay[][]; label: string })
 /** The key under a grid: "Less ▢▢▢▢▢ More". */
 export function DayGridLegend() {
   return (
-    <div aria-hidden="true" className="flex items-center gap-1 text-xs text-ink-soft">
+    <div aria-hidden="true" className="flex items-center gap-1 text-[0.8125rem] text-ink-soft">
       Less
       {([0, 1, 2, 3, 4] as const).map((level) => (
         <span key={level} className={`size-3 rounded-[3px] ${SHADES[level]}`} />

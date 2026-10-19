@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
 
   const next = signedIn ? (
     <Link to="/" className={`${PRIMARY} h-12 px-6`}>
-      Open DevHabit
+      Open AveryDay
     </Link>
   ) : (
     <Link to="/signin" className={`${PRIMARY} h-12 px-6`}>

@@ -4,8 +4,9 @@ import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { getStreak } from '../api/checkins'
 import type { Habit } from '../api/habits'
-import { SECONDARY } from '../components/styles'
-import type { TodayStatus } from './today'
+import { TEXT_BUTTON } from '../components/styles'
+import { WeekStrip } from '../components/WeekStrip'
+import type { TodayStatus, WeekDay } from './today'
 
 const PRESS = 'transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-90'
 
@@ -19,7 +20,7 @@ const BURST = Array.from({ length: 6 }, (_, i) => {
 function CheckBurst() {
   return (
     <span aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <span className="check-ring absolute inset-0 rounded-xl border-2 border-ember" />
+      <span className="check-ring absolute inset-0 rounded-xl border-2 border-sage-deep" />
       {BURST.map((piece, i) => (
         <span
           key={i}
@@ -33,22 +34,19 @@ function CheckBurst() {
 
 function StreakBadge({ habitId }: { habitId: number }) {
   const streak = useQuery({ queryKey: ['streak', habitId], queryFn: () => getStreak(habitId) })
-  if (!streak.data) return <div className="w-28" />
+  if (!streak.data) return <div className="w-14 shrink-0" />
   const { current, unit } = streak.data
-  if (current === 0) return <p className="w-28 text-right text-sm text-ink-soft">No streak yet</p>
+  if (current === 0) return <p className="shrink-0 text-right text-sm text-ink-soft">No streak yet</p>
   const noun = unit === 'WEEKS' ? 'week' : 'day'
-  // the flame grows with the run and stops growing at a month; from a week on it flickers
-  const flame = 16 + Math.min(current, 30) / 2
+  // a week or more of days (or a month of weeks) earns the filled flame; before that it is only outlined
+  const lit = current >= (unit === 'WEEKS' ? 4 : 7)
   return (
-    <p className="w-28 text-right" aria-label={`${current} ${noun} streak`}>
-      <Fire
-        size={flame}
-        weight="fill"
-        className={`mr-1 inline -translate-y-1 text-ember ${current >= 7 ? 'flame-live' : ''}`}
-        aria-hidden="true"
-      />
-      <span className="font-display text-3xl font-semibold text-ember-deep">{current}</span>
-      <span className="ml-1 text-sm text-ink-soft">
+    <p className="flex shrink-0 flex-col items-end leading-none" aria-label={`${current} ${noun} streak`}>
+      <span className="flex items-center gap-1">
+        <Fire size={18} weight={lit ? 'fill' : 'regular'} className={lit ? 'text-ember' : 'text-ember-deep'} aria-hidden="true" />
+        <span className="font-display text-2xl font-semibold tabular-nums text-ink">{current}</span>
+      </span>
+      <span className="mt-1 text-[0.8125rem] text-ink-soft">
         {noun}
         {current === 1 ? '' : 's'}
       </span>
@@ -56,13 +54,14 @@ function StreakBadge({ habitId }: { habitId: number }) {
   )
 }
 
-const CARD = 'flex items-center gap-4 rounded-2xl bg-surface p-4 shadow-[0_1px_2px_rgb(9_38_52/0.06),0_8px_20px_-14px_rgb(9_38_52/0.25)]'
-const TEXT_BUTTON = 'text-sm font-medium text-link underline underline-offset-2 disabled:opacity-60'
+/** A row of the day's list: no card, a hairline between rows (drawn by the list) does the separating. */
+const ROW = 'flex items-start gap-3.5 py-4 sm:gap-4'
+const MARK = 'grid size-12 shrink-0 place-items-center rounded-xl'
 
 function HabitName({ habit, muted }: { habit: Habit; muted?: boolean }) {
   return (
-    <h3 className={`font-display text-xl font-semibold tracking-tight transition-colors duration-200 ${muted ? 'text-ink-soft' : ''}`}>
-      <Link to={`/habits/${habit.id}`} className="hover:text-link hover:underline underline-offset-2">
+    <h3 className={`font-display text-lg leading-snug font-semibold tracking-tight transition-colors duration-200 sm:text-xl ${muted ? 'text-ink-soft' : ''}`}>
+      <Link to={`/habits/${habit.id}`} className="underline-offset-[3px] hover:text-link hover:underline">
         {habit.name}
       </Link>
     </h3>
@@ -87,7 +86,7 @@ function RestControl({ name, cost, balance, busy, onRest }: { name: string; cost
   }
   const short = balance != null && balance < cost
   return (
-    <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+    <span className="flex flex-wrap items-center gap-x-3 text-[0.9375rem]">
       <span>
         {short ? `A rest costs ${cost} XP; you have ${balance}.` : `Rest for ${cost} XP?${balance != null ? ` You have ${balance}.` : ''}`}
       </span>
@@ -106,6 +105,8 @@ function RestControl({ name, cost, balance, busy, onRest }: { name: string; cost
 interface TodayRowProps {
   habit: Habit
   status: TodayStatus
+  /** Monday to Sunday for this habit, from the week's logs. */
+  week?: WeekDay[]
   /** Sets today's total for the habit (0 undoes). */
   onSetCount: (count: number) => void
   /** This row was just finished by a tap: play the burst as it lands in Done. */
@@ -117,26 +118,40 @@ interface TodayRowProps {
   restBusy?: boolean
 }
 
-export function TodayRow({ habit, status, onSetCount, burst, onRest, onCancelRest, xpBalance, restBusy }: TodayRowProps) {
+/** The name, one line of what today means for it, then the week; actions trail underneath. */
+function Body({ habit, muted, meta, week, children }: { habit: Habit; muted?: boolean; meta?: string | null; week?: WeekDay[]; children?: React.ReactNode }) {
+  return (
+    <div className="min-w-0 flex-1 pt-0.5">
+      <HabitName habit={habit} muted={muted} />
+      {meta && <p className="mt-0.5 text-[0.9375rem] text-ink-soft">{meta}</p>}
+      {week && (
+        <div className="mt-2">
+          <WeekStrip days={week} small />
+        </div>
+      )}
+      {children}
+    </div>
+  )
+}
+
+export function TodayRow({ habit, status, week: days, onSetCount, burst, onRest, onCancelRest, xpBalance, restBusy }: TodayRowProps) {
   const { count, target, done, week, resting, restCost } = status
   const single = target === 1
   const unit = habit.unit ? ` ${habit.unit}` : ''
 
   if (resting) {
     return (
-      <li className={CARD}>
-        <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-xl bg-lapis/12 text-link">
+      <li className={ROW}>
+        <span aria-hidden="true" className={`${MARK} bg-lapis/10 text-link`}>
           <Moon size={22} weight="fill" />
         </span>
-        <div className="min-w-0 flex-1">
-          <HabitName habit={habit} muted />
-          <p className="mt-0.5 text-sm text-ink-soft">Resting today. The streak holds.</p>
+        <Body habit={habit} muted meta="Resting today. The streak holds." week={days}>
           {onCancelRest && (
-            <button type="button" disabled={restBusy} onClick={onCancelRest} aria-label={`Take back the rest for ${habit.name}`} className={`mt-1 ${TEXT_BUTTON}`}>
+            <button type="button" disabled={restBusy} onClick={onCancelRest} aria-label={`Take back the rest for ${habit.name}`} className={TEXT_BUTTON}>
               Take it back
             </button>
           )}
-        </div>
+        </Body>
         <StreakBadge habitId={habit.id} />
       </li>
     )
@@ -145,25 +160,25 @@ export function TodayRow({ habit, status, onSetCount, burst, onRest, onCancelRes
   const progress = single
     ? week
       ? `${week.done} of ${week.goal} this week`
-      : null
+      : habit.category
     : `${count} of ${target}${unit} today${week ? `, ${week.done} of ${week.goal} days this week` : ''}`
 
   return (
-    <li className={CARD}>
+    <li className={ROW}>
       {single || done ? (
         <button
           type="button"
           aria-pressed={done}
           aria-label={done ? `Undo ${habit.name}` : `Mark ${habit.name} done`}
           onClick={() => onSetCount(done ? (single ? 0 : target - 1) : 1)}
-          className={`${PRESS} relative grid size-12 shrink-0 place-items-center rounded-xl border-2 ${
+          className={`${PRESS} ${MARK} relative border-2 ${
             done
-              ? 'border-ember bg-ember text-navy'
-              : 'border-mist bg-surface text-transparent [@media(hover:hover)]:hover:border-ember'
+              ? `border-sage-deep bg-sage-deep text-chalk ${burst ? 'check-pop' : ''}`
+              : 'border-line bg-surface text-transparent [@media(hover:hover)]:hover:border-lapis [@media(hover:hover)]:hover:bg-lapis/5'
           }`}
         >
           <Check
-            size={22}
+            size={24}
             weight="bold"
             aria-hidden="true"
             className={`transition-[transform,opacity] duration-200 ease-out ${done ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}
@@ -175,30 +190,36 @@ export function TodayRow({ habit, status, onSetCount, burst, onRest, onCancelRes
           type="button"
           aria-label={`Add one for ${habit.name}`}
           onClick={() => onSetCount(count + 1)}
-          className={`${PRESS} size-12 shrink-0 rounded-xl border-2 border-mist bg-surface text-sm font-semibold text-link [@media(hover:hover)]:hover:border-lapis`}
+          className={`${PRESS} ${MARK} relative overflow-hidden border-2 border-line bg-surface font-display text-base font-semibold text-link [@media(hover:hover)]:hover:border-lapis`}
         >
-          +1
+          {/* the box fills from the bottom as the count climbs, so a half-done habit looks half done */}
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 bg-lapis/12 transition-[height] duration-300 ease-out motion-reduce:transition-none"
+            style={{ height: `${Math.min(count / target, 1) * 100}%` }}
+          />
+          <span className="relative">+1</span>
         </button>
       )}
-      <div className="min-w-0 flex-1">
-        <HabitName habit={habit} muted={done} />
-        {progress && <p className="mt-0.5 text-sm text-ink-soft">{progress}</p>}
-        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 empty:hidden">
-          {!single && count > 0 && !done && (
-            <button
-              type="button"
-              aria-label={`Take one away from ${habit.name}`}
-              onClick={() => onSetCount(count - 1)}
-              className={TEXT_BUTTON}
-            >
-              Undo
-            </button>
-          )}
-          {onRest && restCost != null && count === 0 && (
-            <RestControl name={habit.name} cost={restCost} balance={xpBalance} busy={restBusy} onRest={onRest} />
-          )}
-        </div>
-      </div>
+      <Body habit={habit} muted={done} meta={progress} week={days}>
+        {((!single && count > 0 && !done) || (onRest && restCost != null && count === 0)) && (
+          <div className="mt-1 flex flex-wrap gap-x-4">
+            {!single && count > 0 && !done && (
+              <button
+                type="button"
+                aria-label={`Take one away from ${habit.name}`}
+                onClick={() => onSetCount(count - 1)}
+                className={TEXT_BUTTON}
+              >
+                Undo
+              </button>
+            )}
+            {onRest && restCost != null && count === 0 && (
+              <RestControl name={habit.name} cost={restCost} balance={xpBalance} busy={restBusy} onRest={onRest} />
+            )}
+          </div>
+        )}
+      </Body>
       <StreakBadge habitId={habit.id} />
     </li>
   )
@@ -207,25 +228,20 @@ export function TodayRow({ habit, status, onSetCount, burst, onRest, onCancelRes
 /** A habit being quit: clean unless a slip is logged today. A check-in is the slip. */
 export function QuitRow({ habit, slipped, onSetCount }: { habit: Habit; slipped: boolean; onSetCount: (count: number) => void }) {
   return (
-    <li className={CARD}>
-      <span
-        aria-hidden="true"
-        className={`grid size-12 shrink-0 place-items-center rounded-xl ${slipped ? 'bg-alert/12 text-alert' : 'bg-ember/15 text-ember-deep'}`}
-      >
+    <li className={ROW}>
+      <span aria-hidden="true" className={`${MARK} ${slipped ? 'bg-alert/10 text-alert' : 'bg-sage text-sage-deep'}`}>
         {slipped ? <X size={22} weight="bold" /> : <Leaf size={22} weight="fill" />}
       </span>
-      <div className="min-w-0 flex-1">
-        <HabitName habit={habit} />
-        <p className="mt-0.5 text-sm text-ink-soft">{slipped ? 'Slipped today. Tomorrow starts clean.' : 'Clean today'}</p>
+      <Body habit={habit} meta={slipped ? 'Slipped today. Tomorrow starts clean.' : 'Clean today'}>
         <button
           type="button"
           aria-label={slipped ? `Undo the slip for ${habit.name}` : `I slipped on ${habit.name}`}
           onClick={() => onSetCount(slipped ? 0 : 1)}
-          className={`${SECONDARY} mt-2`}
+          className={TEXT_BUTTON}
         >
           {slipped ? 'Undo' : 'I slipped'}
         </button>
-      </div>
+      </Body>
       <StreakBadge habitId={habit.id} />
     </li>
   )

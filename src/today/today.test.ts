@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { HabitLog } from '../api/checkins'
 import type { Habit } from '../api/habits'
-import { formatToday, todayIn, todayStatus, weekdayOf, weekStart, withTodayCount } from './today'
+import { describeWeek, formatToday, todayIn, todayStatus, weekDays, weekdayOf, weekStart, withTodayCount } from './today'
 
 const base: Habit = {
   id: 1,
@@ -89,5 +89,31 @@ describe('withTodayCount', () => {
 
   it('adds today when there is no entry yet', () => {
     expect(withTodayCount([], '2026-10-02', 1, 1)).toEqual([{ id: -1, date: '2026-10-02', completedCount: 1, done: true }])
+  })
+})
+
+describe('weekDays', () => {
+  it('lays out Monday to Sunday from the logs, with the days after today still to come', () => {
+    // Friday 2 October 2026: the week starts Monday 28 September
+    const days = weekDays([log('2026-09-28', 1), { ...log('2026-09-30', 0), rest: true }, log('2026-10-01', 0)], '2026-10-02')
+    expect(days.map((day) => day.date)).toEqual([
+      '2026-09-28',
+      '2026-09-29',
+      '2026-09-30',
+      '2026-10-01',
+      '2026-10-02',
+      '2026-10-03',
+      '2026-10-04',
+    ])
+    expect(days.map((day) => day.state)).toEqual(['done', 'open', 'rest', 'open', 'open', 'future', 'future'])
+    expect(days.filter((day) => day.today).map((day) => day.date)).toEqual(['2026-10-02'])
+  })
+})
+
+describe('describeWeek', () => {
+  it('reads the week out for a screen reader', () => {
+    const days = weekDays([log('2026-09-28', 1), log('2026-09-29', 1), { ...log('2026-09-30', 0), rest: true }], '2026-10-02')
+    expect(describeWeek(days)).toBe('This week: done Monday and Tuesday, rested Wednesday.')
+    expect(describeWeek(weekDays([], '2026-10-02'))).toBe('This week: nothing done yet.')
   })
 })

@@ -256,3 +256,78 @@ describe('habit detail', () => {
     expect(await within(card).findByText('30 of 60 done days')).toBeTruthy()
   })
 })
+
+describe('a new habit made for a goal', () => {
+  it('opens from the goal, asks for the target, links the habit once it exists and comes back', async () => {
+    let linkedHabits: HabitGoalProgress[] = []
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/goals/1': () => ok(marathon),
+      'GET /api/goals/1/progress': () => ok(progress(0, linkedHabits)),
+      'GET /api/habits': () => ok(page([run])),
+      'POST /api/habits': (call) => ok({ ...stretch, ...(call.body as object) }),
+      'PUT /api/habits/12/goal': () => {
+        linkedHabits = [linked(12, 'Stretch', 0, 30)]
+        return ok({ ...stretch, goalId: 1, goalTargetDays: 30 })
+      },
+    })
+    renderApp('/goals/1')
+    const input = userEvent.setup()
+
+    await input.click(await screen.findByRole('link', { name: 'New habit' }))
+    expect((await screen.findByText(/^For the goal/)).textContent).toContain('Run a half marathon')
+    // a habit for a goal is one being built: no choice of quitting
+    expect(screen.queryByText('Quit a habit')).toBeNull()
+
+    await input.type(await screen.findByLabelText('Name'), 'Stretch')
+    const target = screen.getByLabelText('Target, in done days')
+    await input.clear(target)
+    await input.type(target, '30')
+    await input.click(screen.getByRole('button', { name: 'Add habit' }))
+
+    expect(await screen.findByRole('heading', { name: 'Run a half marathon' })).toBeTruthy()
+    expect(await screen.findByText(/0 of 30 done days/)).toBeTruthy()
+    const link = calls.find((c) => c.method === 'PUT' && c.path === '/api/habits/12/goal')!
+    expect(link.body).toEqual({ goalId: 1, goalTargetDays: 30 })
+    expect(calls.findIndex((c) => c.method === 'POST' && c.path === '/api/habits')).toBeLessThan(calls.indexOf(link))
+  })
+
+  it('says so when the habit was added but the link failed, without adding it again', async () => {
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/goals/1': () => ok(marathon),
+      'POST /api/habits': (call) => ok({ ...stretch, ...(call.body as object) }),
+      'PUT /api/habits/12/goal': () => fail(409, 'GOAL_NOT_ACTIVE'),
+    })
+    renderApp('/habits/new?goal=1')
+    const input = userEvent.setup()
+
+    await input.type(await screen.findByLabelText('Name'), 'Stretch')
+    await screen.findByLabelText('Target, in done days')
+    await input.click(screen.getByRole('button', { name: 'Add habit' }))
+
+    expect((await screen.findByRole('alert')).textContent).toContain('“Stretch” was added, but it couldn’t be linked')
+    expect(screen.getByRole('link', { name: 'Back to the goal to link it there' }).getAttribute('href')).toBe('/goals/1')
+    expect(screen.queryByRole('button', { name: 'Add habit' })).toBeNull()
+    expect(calls.filter((c) => c.method === 'POST' && c.path === '/api/habits')).toHaveLength(1)
+  })
+
+  it('is an ordinary new habit when the goal is closed', async () => {
+    const calls = stubApi({
+      ...signedIn,
+      'GET /api/goals/1': () => ok({ ...marathon, status: 'ACHIEVED' }),
+      'GET /api/habits': () => ok(page([])),
+      'POST /api/habits': (call) => ok({ ...stretch, ...(call.body as object) }),
+    })
+    renderApp('/habits/new?goal=1')
+    const input = userEvent.setup()
+
+    expect(await screen.findByText(/won’t be linked/)).toBeTruthy()
+    expect(screen.queryByLabelText('Target, in done days')).toBeNull()
+    await input.type(screen.getByLabelText('Name'), 'Stretch')
+    await input.click(screen.getByRole('button', { name: 'Add habit' }))
+
+    expect(await screen.findByRole('heading', { name: 'Habits' })).toBeTruthy()
+    expect(calls.some((c) => c.path.endsWith('/goal'))).toBe(false)
+  })
+})
