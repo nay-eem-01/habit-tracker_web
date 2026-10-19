@@ -1,17 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle } from '@phosphor-icons/react'
+import { CheckCircle, UploadSimple } from '@phosphor-icons/react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { deleteAccount, exportData, updateProfile } from '../api/account'
+import { deleteAccount, deleteAvatar, exportData, setAvatar, updateProfile } from '../api/account'
 import type { AuthUser } from '../api/client'
 import { ApiError } from '../api/errors'
 import { authErrorMessage, fieldError } from '../api/messages'
 import { useAuth } from '../auth/context'
+import { Avatar } from '../components/Avatar'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
 import { SwitchField, TimezoneField } from '../components/pickers'
 import { disablePush, enablePush, pushState } from '../push/push'
 import { saveBlob } from '../resources/resources'
+import { squareJpeg } from './picture'
 import { LEAD, PAGE, PAGE_TITLE, SECONDARY, SECTION_TITLE, TEXT_BUTTON } from '../components/styles'
 
 /** The browser's region name, the same kind the server accepts. */
@@ -35,6 +37,96 @@ function Section({ title, intro, danger, children }: { title: string; intro?: st
       </div>
       <div className="min-w-0">{children}</div>
     </section>
+  )
+}
+
+/** The browser couldn't open the file as a picture; the server never saw it. */
+class Unreadable extends Error {}
+
+/** The profile picture: pick one (cropped square and made upright here, first), or go back to initials. */
+function Picture({ user }: { user: AuthUser }) {
+  const { updateUser } = useAuth()
+  const queryClient = useQueryClient()
+  const [done, setDone] = useState<'set' | 'removed' | null>(null)
+  const upload = useMutation({
+    mutationFn: async (file: File) => {
+      let picture: Blob
+      try {
+        picture = await squareJpeg(file)
+      } catch {
+        throw new Unreadable()
+      }
+      return setAvatar(picture)
+    },
+    onSuccess: (next) => {
+      updateUser(next)
+      setDone('set')
+    },
+  })
+  const remove = useMutation({
+    mutationFn: deleteAvatar,
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['avatar', user.id] })
+      updateUser({ ...user, avatarUpdatedAt: null })
+      setDone('removed')
+    },
+  })
+  const busy = upload.isPending || remove.isPending
+  const error = upload.error ?? remove.error
+
+  return (
+    <div className="flex items-center gap-5">
+      <Avatar user={user} size="lg" />
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* the input is the real control; the label is its visible, focusable face */}
+          <label className={`${SECONDARY} cursor-pointer has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-lapis ${busy ? 'pointer-events-none opacity-60' : ''}`}>
+            <UploadSimple size={18} weight="bold" aria-hidden="true" />
+            {upload.isPending ? 'Uploading…' : user.avatarUpdatedAt ? 'Change photo' : 'Upload photo'}
+            <input
+              type="file"
+              accept="image/*"
+              disabled={busy}
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                event.target.value = ''
+                if (!file) return
+                setDone(null)
+                remove.reset()
+                upload.mutate(file)
+              }}
+            />
+          </label>
+          {user.avatarUpdatedAt && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setDone(null)
+                upload.reset()
+                remove.mutate()
+              }}
+              className={TEXT_BUTTON}
+            >
+              {remove.isPending ? 'Removing…' : 'Remove photo'}
+            </button>
+          )}
+        </div>
+        {error ? (
+          <p role="alert" className="mt-2 text-[0.9375rem] text-alert">
+            {error instanceof Unreadable ? 'That file couldn’t be opened as a picture. Try a JPEG or PNG.' : authErrorMessage(error)}
+          </p>
+        ) : done ? (
+          <p role="status" className="mt-2 flex items-center gap-1.5 text-[0.9375rem] font-medium text-sage-deep">
+            <CheckCircle size={18} weight="fill" aria-hidden="true" />
+            {done === 'set' ? 'Photo updated.' : 'Photo removed.'}
+          </p>
+        ) : (
+          <p className="mt-2 text-[0.9375rem] text-ink-soft">A square from the middle of the picture is used.</p>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -233,6 +325,9 @@ export default function SettingsPage() {
       <h1 className={PAGE_TITLE}>Settings</h1>
       <p className={`${LEAD} mb-8`}>{user.email}</p>
 
+      <Section title="Photo" intro="Shown on your account menu.">
+        <Picture user={user} />
+      </Section>
       <Section title="Profile">
         <Profile user={user} />
       </Section>

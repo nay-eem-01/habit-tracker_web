@@ -2,6 +2,7 @@ import { Desktop, GearSix, Key, Moon, SignOut, Sun } from '@phosphor-icons/react
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { AuthUser } from '../api/client'
+import { Avatar } from '../components/Avatar'
 import { getTheme, setTheme, type Theme } from '../theme'
 
 const THEMES = [
@@ -9,12 +10,6 @@ const THEMES = [
   { value: 'system', label: 'System', Icon: Desktop },
   { value: 'dark', label: 'Dark', Icon: Moon },
 ] as const
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const letters = parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0] ?? '?').slice(0, 2)
-  return letters.toUpperCase()
-}
 
 /** The person's avatar; opens a small card with who is signed in and the way out. An admin's has no settings. */
 export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut: () => void; admin?: boolean }) {
@@ -46,9 +41,7 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
         onClick={() => setOpen(!open)}
         className="rounded-full transition-transform duration-150 ease-out active:scale-95"
       >
-        <span aria-hidden="true" className="grid size-10 place-items-center rounded-full bg-lapis text-sm font-semibold text-chalk">
-          {initials(user.name)}
-        </span>
+        <Avatar user={user} />
       </button>
       {open && (
         <section
@@ -56,9 +49,12 @@ export function UserMenu({ user, onSignOut, admin }: { user: AuthUser; onSignOut
           aria-label="Account"
           className="pop absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-mist bg-surface p-2 shadow-[0_18px_40px_-12px_rgb(9_38_52/0.28)]"
         >
-          <div className="px-3 pt-2 pb-3">
-            <p className="truncate font-display text-lg font-semibold tracking-tight">{user.name}</p>
-            <p className="truncate text-sm text-ink-soft">{user.email}</p>
+          <div className="flex items-center gap-3 px-3 pt-2 pb-3">
+            <Avatar user={user} />
+            <div className="min-w-0">
+              <p className="truncate font-display text-lg font-semibold tracking-tight">{user.name}</p>
+              <p className="truncate text-sm text-ink-soft">{user.email}</p>
+            </div>
           </div>
           <div role="group" aria-label="Theme" className="mx-1 mb-2 flex gap-1 rounded-full bg-wash p-1 ring-1 ring-mist ring-inset">
             {THEMES.map(({ value, label, Icon }) => (
