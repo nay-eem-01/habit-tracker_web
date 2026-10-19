@@ -172,5 +172,5 @@ Render, so it's one site and the `SameSite=Strict` cookie works. `staging` is th
 | D.0 | `public/privacy.html`: static privacy policy (Google's consent screen links it) | ✅ |
 | D.1 | Rename DevHabit → **AveryDay** ("A very Day"): page title, manifest `name`/`short_name`, service worker's default title, any visible text | ✅ |
 | D.2 | Link "Privacy" (`/privacy.html`, a plain link, not a route) on sign-in/sign-up and in Settings | ✅ |
-| D.3 | `vercel.json`: `/api/*` rewrite to the Render URL, SPA fallback, security headers (backend `docs/DEPLOY.md` §5) | ⬜ |
-| D.4 | CI (`npm ci`, lint, typecheck, test, build) on PRs, so `staging`/`production` can require it | ⬜ |
+| D.3 | `vercel.json`: `/api/*` rewrite to the Render URL, SPA fallback, security headers (backend `docs/DEPLOY.md` §5) | ✅ |
+| D.4 | CI (`npm ci`, lint, typecheck, test, build) on PRs, so `staging`/`production` can require it | ✅ |
