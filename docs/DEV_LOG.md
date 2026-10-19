@@ -5,6 +5,15 @@ The backend's own log is in the backend repo; note there only what the frontend 
 
 ---
 
+## 2026-10-19 (D.3–D.4 — Vercel config and CI)
+
+**Done** (`feat/deploy-config`)
+- `vercel.json`: `/api/*` goes to the API on Render (`https://averydayb.onrender.com`), so the browser
+  sees one site and the `SameSite=Strict` sign-in cookie works; everything else falls back to
+  `index.html`; basic security headers. Files in `public/` (`sw.js`, `privacy.html`) are served first.
+- CI on every PR and on pushes to `staging`/`production`: `npm ci`, lint, test, build (typecheck
+  included). The ruleset can now require `test` here too.
+
 ## 2026-10-19 (R.5 — profile picture)
 
 **Done** (`feat/avatar-photo`)
